@@ -59,7 +59,7 @@ Item {
             ctx.stroke()
 
             ctx.fillStyle = theme.secondaryText
-            ctx.font = "10px sans-serif"
+            ctx.font = "10px 'Stack Sans Headline', sans-serif"
             ctx.textAlign = "left"
             ctx.textBaseline = "alphabetic"
             ctx.fillText("|z|=1", cx + r + 4, cy - 4)

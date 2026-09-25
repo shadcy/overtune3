@@ -154,28 +154,44 @@ app/FilterDesigner/qml/pages/SettingsPage.qml: /home/shreyash/Desktop/Anti-gravi
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating FilterDesigner/qml/pages/SettingsPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/SettingsPage.qml
 
+app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Regular.ttf
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating FilterDesigner/fonts/StackSansHeadline-Regular.ttf"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Regular.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf
+
+app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Medium.ttf
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating FilterDesigner/fonts/StackSansHeadline-Medium.ttf"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Medium.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf
+
+app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-SemiBold.ttf
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-SemiBold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf
+
+app/FilterDesigner/fonts/StackSansHeadline-Bold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Bold.ttf
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating FilterDesigner/fonts/StackSansHeadline-Bold.ttf"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Bold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-Bold.ttf
+
 app/FilterDesigner/fonts/Inter-Regular.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating FilterDesigner/fonts/Inter-Regular.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating FilterDesigner/fonts/Inter-Regular.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-Regular.ttf
 
 app/FilterDesigner/fonts/Inter-Medium.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating FilterDesigner/fonts/Inter-Medium.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating FilterDesigner/fonts/Inter-Medium.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-Medium.ttf
 
 app/FilterDesigner/fonts/Inter-SemiBold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating FilterDesigner/fonts/Inter-SemiBold.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Generating FilterDesigner/fonts/Inter-SemiBold.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-SemiBold.ttf
 
 app/FilterDesigner/fonts/Inter-Bold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating FilterDesigner/fonts/Inter-Bold.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Generating FilterDesigner/fonts/Inter-Bold.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-Bold.ttf
 
 app/FilterDesigner/fonts/codicon.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating FilterDesigner/fonts/codicon.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Generating FilterDesigner/fonts/codicon.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/codicon.ttf
 
 app/FilterDesigner/fonts/NOTICE: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating FilterDesigner/fonts/NOTICE"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Generating FilterDesigner/fonts/NOTICE"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/NOTICE
 
 FilterDesigner_tooling: app/FilterDesigner/fonts/Inter-Bold.ttf
@@ -183,6 +199,10 @@ FilterDesigner_tooling: app/FilterDesigner/fonts/Inter-Medium.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/Inter-Regular.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/Inter-SemiBold.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/NOTICE
+FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-Bold.ttf
+FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf
+FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf
+FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/codicon.ttf
 FilterDesigner_tooling: app/FilterDesigner/qml/Main.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/CodeViewer.qml

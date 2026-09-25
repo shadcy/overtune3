@@ -42,6 +42,10 @@ qt_add_qml_module(FilterDesigner
         qml/pages/DocsPage.qml
         qml/pages/SettingsPage.qml
     RESOURCES
+        fonts/StackSansHeadline-Regular.ttf
+        fonts/StackSansHeadline-Medium.ttf
+        fonts/StackSansHeadline-SemiBold.ttf
+        fonts/StackSansHeadline-Bold.ttf
         fonts/Inter-Regular.ttf
         fonts/Inter-Medium.ttf
         fonts/Inter-SemiBold.ttf

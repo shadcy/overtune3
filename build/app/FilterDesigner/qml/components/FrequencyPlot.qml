@@ -21,16 +21,40 @@ Item {
     readonly property real plotW: Math.max(1, width  - marginLeft - marginRight)
     readonly property real plotH: Math.max(1, height - marginTop  - marginBottom)
 
-    property real yMin: displayMode === 0 ? -100 : (displayMode === 1 ? -200 : -2)
-    property real yMax: displayMode === 0 ?   10 : (displayMode === 1 ?  200 :  50)
+    property real yMin: -100
+    property real yMax: 10
 
     function refreshPoints() {
-        if (displayMode === 0)
+        if (displayMode === 0) {
             points = filterEngine.magnitudeData
-        else if (displayMode === 1)
+            yMin = -100
+            yMax = 10
+        } else if (displayMode === 1) {
             points = filterEngine.phaseData
-        else
+            let minP = 0, maxP = 0
+            if (points && points.length > 0) {
+                minP = Number(points[0]["y"])
+                maxP = minP
+                for (let i = 1; i < points.length; ++i) {
+                    const y = Number(points[i]["y"])
+                    if (y < minP) minP = y
+                    if (y > maxP) maxP = y
+                }
+            }
+            yMin = Math.min(-90, Math.floor((minP - 15) / 45) * 45)
+            yMax = Math.max(0,   Math.ceil((maxP + 15) / 45) * 45)
+        } else {
             points = filterEngine.groupDelayData
+            let maxGd = 10
+            if (points && points.length > 0) {
+                for (let i = 0; i < points.length; ++i) {
+                    const y = Number(points[i]["y"])
+                    if (y > maxGd) maxGd = y
+                }
+            }
+            yMin = 0
+            yMax = Math.max(5, Math.ceil(maxGd * 1.25 / 5) * 5)
+        }
     }
 
     function schedulePaint() {
@@ -153,7 +177,7 @@ Item {
 
                 const val = yMax - frac * yRange
                 ctx.fillStyle = theme.secondaryText
-                ctx.font = "11px sans-serif"
+                ctx.font = "11px 'Stack Sans Headline', sans-serif"
                 ctx.textAlign = "right"
                 ctx.textBaseline = "middle"
                 ctx.fillText(val.toFixed(0), mL - 8, y)
@@ -177,7 +201,7 @@ Item {
             }
 
             ctx.fillStyle = theme.secondaryText
-            ctx.font = "11px sans-serif"
+            ctx.font = "11px 'Stack Sans Headline', sans-serif"
             ctx.fillText("Frequency (Hz)", mL + pW / 2, mT + pH + 24)
 
             ctx.save()
@@ -199,7 +223,7 @@ Item {
                     ctx.lineWidth = 1
                     strokeDash(mL, y3, mL + pW, y3, 4, 4)
                     ctx.fillStyle = "#FF9F0A"
-                    ctx.font = "10px sans-serif"
+                    ctx.font = "10px 'Stack Sans Headline', sans-serif"
                     ctx.textAlign = "left"
                     ctx.textBaseline = "bottom"
                     ctx.fillText("-3 dB", mL + 4, y3 - 2)

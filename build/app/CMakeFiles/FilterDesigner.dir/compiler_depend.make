@@ -13740,10 +13740,12 @@ app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o: /home/shreyash/Desktop/Anti-gr
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qversionnumber.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QFont \
+  /usr/include/x86_64-linux-gnu/qt6/QtGui/QFontDatabase \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QGuiApplication \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QIcon \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qcolor.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qfont.h \
+  /usr/include/x86_64-linux-gnu/qt6/QtGui/qfontdatabase.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication_platform.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/qicon.h \
@@ -13807,6 +13809,8 @@ app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o: /home/shreyash/Desktop/Anti-gr
 /usr/include/x86_64-linux-gnu/qt6/QtGui/qicon.h:
 
 /usr/include/x86_64-linux-gnu/qt6/QtGui/QIcon:
+
+/usr/include/x86_64-linux-gnu/qt6/QtGui/QFontDatabase:
 
 /usr/include/x86_64-linux-gnu/qt6/QtGui/qtransform.h:
 
@@ -14527,6 +14531,8 @@ app/FilterDesigner_autogen/mocs_compilation.cpp:
 /usr/include/features-time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
+
+/usr/include/x86_64-linux-gnu/qt6/QtGui/qfontdatabase.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 

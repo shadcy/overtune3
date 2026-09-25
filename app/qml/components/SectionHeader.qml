@@ -3,7 +3,7 @@ import QtQuick
 // SectionHeader.qml — uppercase section label
 Text {
     id: root
-    font.family: "Inter"
+    font.family: "Stack Sans Headline"
     font.pixelSize: 11
     font.weight: Font.DemiBold
     font.letterSpacing: 0.8

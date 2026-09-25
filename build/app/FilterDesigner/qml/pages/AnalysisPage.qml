@@ -52,7 +52,7 @@ Item {
                     spacing: 6
                     Text {
                         text: "Magnitude (dB)"
-                        font.family: "Inter"
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         color: theme.primaryText
@@ -81,7 +81,7 @@ Item {
                     spacing: 6
                     Text {
                         text: "Phase (°)"
-                        font.family: "Inter"
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         color: theme.primaryText
@@ -110,7 +110,7 @@ Item {
                     spacing: 6
                     Text {
                         text: "Group Delay (samples)"
-                        font.family: "Inter"
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         color: theme.primaryText
@@ -140,7 +140,7 @@ Item {
 
                     Text {
                         text: "Time / Pole-Zero"
-                        font.family: "Inter"
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         font.weight: Font.DemiBold
                         color: theme.primaryText

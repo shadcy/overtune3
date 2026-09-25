@@ -25,7 +25,7 @@ Item {
             top: parent.top
         }
         color: theme.secondaryText
-        font.family: "Inter"
+        font.family: "Stack Sans Headline"
         font.pixelSize: 12
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight

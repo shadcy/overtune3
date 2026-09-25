@@ -7,7 +7,7 @@ ComboBox {
     implicitHeight: 28
     implicitWidth: 120
     width: parent ? parent.width : implicitWidth
-    font.family: "Inter"
+    font.family: "Stack Sans Headline"
     font.pixelSize: 13
     clip: true
 
@@ -74,7 +74,7 @@ ComboBox {
         height: 30
         contentItem: Text {
             text: modelData
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 13
             color: highlighted ? theme.accent : theme.primaryText
             verticalAlignment: Text.AlignVCenter

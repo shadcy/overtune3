@@ -22,6 +22,10 @@
     <file alias="qml/pages/ExportPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/ExportPage.qml</file>
     <file alias="qml/pages/DocsPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DocsPage.qml</file>
     <file alias="qml/pages/SettingsPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml</file>
+    <file alias="fonts/StackSansHeadline-Regular.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Regular.ttf</file>
+    <file alias="fonts/StackSansHeadline-Medium.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Medium.ttf</file>
+    <file alias="fonts/StackSansHeadline-SemiBold.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-SemiBold.ttf</file>
+    <file alias="fonts/StackSansHeadline-Bold.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Bold.ttf</file>
     <file alias="fonts/Inter-Regular.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf</file>
     <file alias="fonts/Inter-Medium.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf</file>
     <file alias="fonts/Inter-SemiBold.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf</file>

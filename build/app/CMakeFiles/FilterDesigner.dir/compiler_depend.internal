@@ -13772,10 +13772,12 @@ app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qversionnumber.h
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h
  /usr/include/x86_64-linux-gnu/qt6/QtGui/QFont
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/QFontDatabase
  /usr/include/x86_64-linux-gnu/qt6/QtGui/QGuiApplication
  /usr/include/x86_64-linux-gnu/qt6/QtGui/QIcon
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qcolor.h
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qfont.h
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qfontdatabase.h
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication.h
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication_platform.h
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qicon.h

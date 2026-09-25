@@ -6,7 +6,7 @@ Button {
     id: root
     implicitHeight: 30
     implicitWidth: 100
-    font.family: "Inter"
+    font.family: "Stack Sans Headline"
     font.pixelSize: 13
     padding: 8
     leftPadding: 10

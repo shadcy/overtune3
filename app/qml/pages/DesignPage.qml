@@ -59,8 +59,8 @@ Item {
                     right: parent.right
                     rightMargin: 14
                 }
-                text: "FILTER"
-                font.family: "Inter"
+                text: "OVERTUNE 3"
+                font.family: "Stack Sans Headline"
                 font.pixelSize: 11
                 font.weight: Font.DemiBold
                 font.letterSpacing: 0.6
@@ -106,7 +106,7 @@ Item {
                 Text {
                     width: parent.width
                     text: "Filter Configuration"
-                    font.family: "Inter"
+                    font.family: "Stack Sans Headline"
                     font.pixelSize: 15
                     font.weight: Font.DemiBold
                     color: theme.primaryText
@@ -248,7 +248,7 @@ Item {
                 Text {
                     width: parent.width
                     text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName()
-                    font.family: "Inter"
+                    font.family: "Stack Sans Headline"
                     font.pixelSize: 13
                     font.weight: Font.DemiBold
                     color: theme.primaryText
@@ -258,7 +258,7 @@ Item {
                     width: parent.width
                     text: "Order " + filterEngine.order + "  ·  Fs = " +
                           Number(filterEngine.sampleRate).toLocaleString(Qt.locale(), "f", 0) + " Hz"
-                    font.family: "Inter"
+                    font.family: "Stack Sans Headline"
                     font.pixelSize: 12
                     color: theme.secondaryText
                     wrapMode: Text.WordWrap

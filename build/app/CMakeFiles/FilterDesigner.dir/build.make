@@ -346,6 +346,10 @@ app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/o
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/ExportPage.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DocsPage.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Regular.ttf
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Medium.ttf
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-SemiBold.ttf
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Bold.ttf
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf

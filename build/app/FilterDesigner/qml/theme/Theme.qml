@@ -10,8 +10,10 @@ QtObject {
     readonly property int fontSizeXL:  20
     readonly property int fontSizeXXL: 28
 
-    // Bundled Inter (OFL) — see fonts/NOTICE
-    readonly property string fontFamily: "Inter"
+    // Stack Sans Headline font family across the entire application
+    readonly property string fontFamily: "Stack Sans Headline"
+    readonly property string headlineFont: "Stack Sans Headline"
+    readonly property string bodyFont: "Stack Sans Headline"
     readonly property string iconFontFamily: "codicon"
 
     readonly property int spaceXS:  4

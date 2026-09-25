@@ -1407,8 +1407,8 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 QObject *r7_1;
-bool r2_2;
 QObject *r2_1;
+bool r2_2;
 // if (canvas.available)
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(7, &r2_1)) {

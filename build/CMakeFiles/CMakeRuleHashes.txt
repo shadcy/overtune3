@@ -38,6 +38,10 @@ fa80d3b1e0bc3f4916e49a1a75883c39 app/FilterDesigner/fonts/Inter-Bold.ttf
 b6da6d750230ecc79249576394d26610 app/FilterDesigner/fonts/Inter-Regular.ttf
 99ba54da42edebb1d32c262797769b2e app/FilterDesigner/fonts/Inter-SemiBold.ttf
 72d31dab8435df2954cabff634afc735 app/FilterDesigner/fonts/NOTICE
+a6d260506b69014d77618b124ff23e6f app/FilterDesigner/fonts/StackSansHeadline-Bold.ttf
+652d9d1d332f1b2d5a86ddecfebdc6e9 app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf
+3ef52f7fd98f81194957be2c65dca187 app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf
+57dff2e9b2dc89f8f610399b5beae00a app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf
 f4e27c126d712b92c765002c18cb061a app/FilterDesigner/fonts/codicon.ttf
 421e1b7b60651524b0e0a50f64266d57 app/FilterDesigner/icons/analysis-alt-b.svg
 2768f4033b8af7be2d8612d87304ef94 app/FilterDesigner/icons/analysis-alt-w.svg

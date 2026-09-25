@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QIcon>
 #include <QFont>
+#include <QFontDatabase>
 #include "FilterEngine.h"
 #include "SimulationModel.h"
 #include "ExportModel.h"
@@ -20,7 +21,18 @@ int main(int argc, char* argv[]) {
     QGuiApplication::setApplicationVersion("3.0.0");
 
     QGuiApplication app(argc, argv);
-    app.setFont(QFont(QStringLiteral("Inter")));
+
+    // Register bundled fonts
+    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-Regular.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-Medium.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-Bold.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/Inter-Regular.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/codicon.ttf"));
+
+    QFont defaultFont(QStringLiteral("Stack Sans Headline"));
+    defaultFont.setStyleHint(QFont::SansSerif);
+    app.setFont(defaultFont);
 
     // Instantiate backend objects
     FilterEngine    engine;

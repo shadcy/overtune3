@@ -67,11 +67,11 @@ include app/CMakeFiles/FilterDesigner_autogen_timestamp_deps.dir/compiler_depend
 include app/CMakeFiles/FilterDesigner_autogen_timestamp_deps.dir/progress.make
 
 app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: app/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp
+app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Multimedia.so.6.4.2
 app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.4.2
 app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/qt6/libexec/moc
-app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6QuickControls2.so.6.4.2
-app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Multimedia.so.6.4.2
 app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Quick.so.6.4.2
+app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6QuickControls2.so.6.4.2
 app/CMakeFiles/FilterDesigner_autogen_timestamp_deps: lib/libdsp.a
 
 app/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp: /usr/lib/qt6/libexec/qmlcachegen

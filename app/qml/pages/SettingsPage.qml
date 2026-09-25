@@ -33,7 +33,7 @@ Item {
         Text {
             id: lab
             text: rowRoot.label
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 13
             color: theme.secondaryText
             width: rowRoot.stack ? rowRoot.width : Math.min(130, rowRoot.width * 0.34)
@@ -42,7 +42,7 @@ Item {
         Text {
             id: val
             text: rowRoot.value
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 13
             color: theme.primaryText
             wrapMode: Text.WordWrap
@@ -77,7 +77,7 @@ Item {
             Text {
                 width: parent.width
                 text: "Settings"
-                font.family: "Inter"
+                font.family: "Stack Sans Headline"
                 font.pixelSize: root.width < 500 ? 20 : 24
                 font.weight: Font.DemiBold
                 color: theme.primaryText
@@ -137,7 +137,7 @@ Item {
                                     verticalCenter: parent.verticalCenter
                                 }
                                 text: modelData.label
-                                font.family: "Inter"
+                                font.family: "Stack Sans Headline"
                                 font.pixelSize: 14
                                 color: theme.primaryText
                                 elide: Text.ElideRight
@@ -207,7 +207,7 @@ Item {
                     Text {
                         width: parent.width
                         text: "Documentation"
-                        font.family: "Inter"
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 14
                         font.weight: Font.DemiBold
                         color: theme.primaryText
@@ -216,7 +216,7 @@ Item {
                     Text {
                         width: parent.width
                         text: "Guides, filter types, and workflow tips"
-                        font.family: "Inter"
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 12
                         color: theme.secondaryText
                         elide: Text.ElideRight

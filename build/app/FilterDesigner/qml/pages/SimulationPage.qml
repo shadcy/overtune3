@@ -22,7 +22,7 @@ Item {
 
         Text {
             text: "Simulation"
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 18
             font.weight: Font.DemiBold
             color: theme.primaryText
@@ -61,7 +61,7 @@ Item {
         Text {
             Layout.fillWidth: true
             text: simulation.hasData ? simulation.signalLabel : "No signal loaded — generate or load a signal to begin."
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 12
             color: theme.secondaryText
             elide: Text.ElideRight

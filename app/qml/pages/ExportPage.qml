@@ -22,7 +22,7 @@ Item {
 
         Text {
             text: "Export Code"
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 18
             font.weight: Font.DemiBold
             color: theme.primaryText
@@ -74,7 +74,7 @@ Item {
                   + "  ·  Order " + filterEngine.order
                   + "  ·  Fc " + filterEngine.cutoffFreq + " Hz"
                   + "  ·  Fs " + filterEngine.sampleRate + " Hz"
-            font.family: "Inter"
+            font.family: "Stack Sans Headline"
             font.pixelSize: 12
             color: theme.secondaryText
             elide: Text.ElideRight

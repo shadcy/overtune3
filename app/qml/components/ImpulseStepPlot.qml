@@ -93,7 +93,7 @@ Item {
             }
 
             ctx.fillStyle = theme.secondaryText
-            ctx.font = "10px sans-serif"
+            ctx.font = "10px 'Stack Sans Headline', sans-serif"
             ctx.textAlign = "right"
             ctx.textBaseline = "middle"
             for (let i = 0; i <= 4; ++i) {

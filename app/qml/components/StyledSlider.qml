@@ -81,7 +81,7 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         text: Number(sl.value).toFixed(root.valueDecimals) + root.valueSuffix
-        font.family: "Inter"
+        font.family: "Stack Sans Headline"
         font.pixelSize: root.width < 110 ? 10 : 12
         font.weight: Font.Medium
         color: theme.accent

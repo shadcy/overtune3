@@ -20,15 +20,16 @@ Window {
     readonly property bool isCompact: width < 1100
     readonly property int contentMargin: isNarrow ? 12 : 20
 
-    // ── Bundled fonts (Inter OFL, Codicons CC-BY 4.0) ──────────────────────────
-    FontLoader { id: interRegular;  source: "qrc:/FilterDesigner/fonts/Inter-Regular.ttf" }
-    FontLoader { id: interMedium;   source: "qrc:/FilterDesigner/fonts/Inter-Medium.ttf" }
-    FontLoader { id: interSemiBold; source: "qrc:/FilterDesigner/fonts/Inter-SemiBold.ttf" }
-    FontLoader { id: interBold;     source: "qrc:/FilterDesigner/fonts/Inter-Bold.ttf" }
-    FontLoader { id: codiconFont;   source: "qrc:/FilterDesigner/fonts/codicon.ttf" }
+    // ── Bundled fonts (Stack Sans Headline, Inter, Codicons) ───────────────────
+    FontLoader { id: stackSansRegular;  source: "qrc:/FilterDesigner/fonts/StackSansHeadline-Regular.ttf" }
+    FontLoader { id: stackSansMedium;   source: "qrc:/FilterDesigner/fonts/StackSansHeadline-Medium.ttf" }
+    FontLoader { id: stackSansSemiBold; source: "qrc:/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf" }
+    FontLoader { id: stackSansBold;     source: "qrc:/FilterDesigner/fonts/StackSansHeadline-Bold.ttf" }
+    FontLoader { id: interRegular;      source: "qrc:/FilterDesigner/fonts/Inter-Regular.ttf" }
+    FontLoader { id: codiconFont;       source: "qrc:/FilterDesigner/fonts/codicon.ttf" }
 
     readonly property bool fontsReady:
-        interRegular.status === FontLoader.Ready &&
+        stackSansRegular.status === FontLoader.Ready &&
         codiconFont.status === FontLoader.Ready
 
     function navigateTo(pageIndex) {
