@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/FilterDesigner">
+    <file alias="qmldir">/home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir</file>
+  </qresource>
+</RCC>
+

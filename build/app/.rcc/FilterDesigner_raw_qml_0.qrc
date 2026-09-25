@@ -1,0 +1,33 @@
+<RCC>
+  <qresource prefix="/FilterDesigner/">
+    <file alias="qml/Main.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/Main.qml</file>
+    <file alias="qml/theme/Theme.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/theme/Theme.qml</file>
+    <file alias="qml/components/Sidebar.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/Sidebar.qml</file>
+    <file alias="qml/components/SidebarItem.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SidebarItem.qml</file>
+    <file alias="qml/components/Codicon.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/Codicon.qml</file>
+    <file alias="qml/components/FrequencyPlot.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/FrequencyPlot.qml</file>
+    <file alias="qml/components/PoleZeroPlot.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/PoleZeroPlot.qml</file>
+    <file alias="qml/components/ImpulseStepPlot.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/ImpulseStepPlot.qml</file>
+    <file alias="qml/components/FilterCard.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/FilterCard.qml</file>
+    <file alias="qml/components/ParameterRow.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/ParameterRow.qml</file>
+    <file alias="qml/components/StyledCombo.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/StyledCombo.qml</file>
+    <file alias="qml/components/StyledSlider.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/StyledSlider.qml</file>
+    <file alias="qml/components/StyledButton.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/StyledButton.qml</file>
+    <file alias="qml/components/SectionHeader.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SectionHeader.qml</file>
+    <file alias="qml/components/CodeViewer.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/CodeViewer.qml</file>
+    <file alias="qml/components/SignalPlot.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SignalPlot.qml</file>
+    <file alias="qml/pages/DesignPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml</file>
+    <file alias="qml/pages/AnalysisPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml</file>
+    <file alias="qml/pages/SimulationPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml</file>
+    <file alias="qml/pages/ExportPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/ExportPage.qml</file>
+    <file alias="qml/pages/DocsPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DocsPage.qml</file>
+    <file alias="qml/pages/SettingsPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml</file>
+    <file alias="fonts/Inter-Regular.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf</file>
+    <file alias="fonts/Inter-Medium.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf</file>
+    <file alias="fonts/Inter-SemiBold.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf</file>
+    <file alias="fonts/Inter-Bold.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf</file>
+    <file alias="fonts/codicon.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf</file>
+    <file alias="fonts/NOTICE">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE</file>
+  </qresource>
+</RCC>
+

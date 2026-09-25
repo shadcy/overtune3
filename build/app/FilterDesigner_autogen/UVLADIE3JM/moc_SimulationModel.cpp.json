@@ -1,0 +1,190 @@
+{
+    "classes": [
+        {
+            "className": "SimulationModel",
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "path",
+                            "type": "QString"
+                        }
+                    ],
+                    "name": "loadWav",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "path",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "column",
+                            "type": "int"
+                        }
+                    ],
+                    "name": "loadCsv",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "path",
+                            "type": "QString"
+                        }
+                    ],
+                    "name": "loadCsv",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "freq",
+                            "type": "double"
+                        },
+                        {
+                            "name": "sampleRate",
+                            "type": "double"
+                        },
+                        {
+                            "name": "durationSec",
+                            "type": "double"
+                        }
+                    ],
+                    "name": "generateSine",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "f0",
+                            "type": "double"
+                        },
+                        {
+                            "name": "f1",
+                            "type": "double"
+                        },
+                        {
+                            "name": "sampleRate",
+                            "type": "double"
+                        },
+                        {
+                            "name": "durationSec",
+                            "type": "double"
+                        }
+                    ],
+                    "name": "generateChirp",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "enginePtr",
+                            "type": "QObject*"
+                        }
+                    ],
+                    "name": "applyFilter",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "name": "clear",
+                    "returnType": "void"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "name": "inputSignal",
+                    "notify": "dataChanged",
+                    "read": "inputSignal",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantList",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "name": "outputSignal",
+                    "notify": "dataChanged",
+                    "read": "outputSignal",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QVariantList",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 2,
+                    "name": "hasData",
+                    "notify": "dataChanged",
+                    "read": "hasData",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "bool",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 3,
+                    "name": "signalLabel",
+                    "notify": "dataChanged",
+                    "read": "signalLabel",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                }
+            ],
+            "qualifiedClassName": "SimulationModel",
+            "signals": [
+                {
+                    "access": "public",
+                    "name": "dataChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "message",
+                            "type": "QString"
+                        }
+                    ],
+                    "name": "errorOccurred",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "SimulationModel.h",
+    "outputRevision": 68
+}

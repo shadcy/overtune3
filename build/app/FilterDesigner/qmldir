@@ -1,0 +1,26 @@
+module FilterDesigner
+typeinfo FilterDesigner.qmltypes
+prefer :/FilterDesigner/
+Main 1.0 qml/Main.qml
+Theme 1.0 qml/theme/Theme.qml
+Sidebar 1.0 qml/components/Sidebar.qml
+SidebarItem 1.0 qml/components/SidebarItem.qml
+Codicon 1.0 qml/components/Codicon.qml
+FrequencyPlot 1.0 qml/components/FrequencyPlot.qml
+PoleZeroPlot 1.0 qml/components/PoleZeroPlot.qml
+ImpulseStepPlot 1.0 qml/components/ImpulseStepPlot.qml
+FilterCard 1.0 qml/components/FilterCard.qml
+ParameterRow 1.0 qml/components/ParameterRow.qml
+StyledCombo 1.0 qml/components/StyledCombo.qml
+StyledSlider 1.0 qml/components/StyledSlider.qml
+StyledButton 1.0 qml/components/StyledButton.qml
+SectionHeader 1.0 qml/components/SectionHeader.qml
+CodeViewer 1.0 qml/components/CodeViewer.qml
+SignalPlot 1.0 qml/components/SignalPlot.qml
+DesignPage 1.0 qml/pages/DesignPage.qml
+AnalysisPage 1.0 qml/pages/AnalysisPage.qml
+SimulationPage 1.0 qml/pages/SimulationPage.qml
+ExportPage 1.0 qml/pages/ExportPage.qml
+DocsPage 1.0 qml/pages/DocsPage.qml
+SettingsPage 1.0 qml/pages/SettingsPage.qml
+

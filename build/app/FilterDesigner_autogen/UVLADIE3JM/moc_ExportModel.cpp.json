@@ -1,0 +1,89 @@
+{
+    "classes": [
+        {
+            "className": "ExportModel",
+            "methods": [
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "engine",
+                            "type": "QObject*"
+                        }
+                    ],
+                    "name": "generate",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "arguments": [
+                        {
+                            "name": "path",
+                            "type": "QString"
+                        }
+                    ],
+                    "name": "saveToFile",
+                    "returnType": "bool"
+                },
+                {
+                    "access": "public",
+                    "name": "copyToClipboard",
+                    "returnType": "void"
+                }
+            ],
+            "object": true,
+            "properties": [
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 0,
+                    "name": "code",
+                    "notify": "codeChanged",
+                    "read": "code",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "QString",
+                    "user": false
+                },
+                {
+                    "constant": false,
+                    "designable": true,
+                    "final": false,
+                    "index": 1,
+                    "name": "format",
+                    "notify": "formatChanged",
+                    "read": "format",
+                    "required": false,
+                    "scriptable": true,
+                    "stored": true,
+                    "type": "int",
+                    "user": false,
+                    "write": "setFormat"
+                }
+            ],
+            "qualifiedClassName": "ExportModel",
+            "signals": [
+                {
+                    "access": "public",
+                    "name": "codeChanged",
+                    "returnType": "void"
+                },
+                {
+                    "access": "public",
+                    "name": "formatChanged",
+                    "returnType": "void"
+                }
+            ],
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QObject"
+                }
+            ]
+        }
+    ],
+    "inputFile": "ExportModel.h",
+    "outputRevision": 68
+}

@@ -1,0 +1,14 @@
+-rootPath
+/home/shreyash/Desktop/Anti-gravity/overtune3/app
+-cmake-output
+-output-file
+/home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake
+-importPath
+/home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner
+-importPath
+/home/shreyash/Desktop/Anti-gravity/overtune3/build/app
+-importPath
+/usr/lib/x86_64-linux-gnu/qt6/qml
+-qrcFiles
+/home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc
+/home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc

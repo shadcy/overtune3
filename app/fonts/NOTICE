@@ -1,0 +1,16 @@
+Third-party fonts bundled with Filter Designer
+==============================================
+
+Inter
+  Files: Inter-Regular.ttf, Inter-Medium.ttf, Inter-SemiBold.ttf, Inter-Bold.ttf
+  Source: https://github.com/rsms/inter
+  License: SIL Open Font License 1.1
+  Copyright (c) 2016-2020 The Inter Project Authors
+
+Codicons (@vscode/codicons)
+  File: codicon.ttf
+  Source: https://github.com/microsoft/vscode-codicons
+  License: Creative Commons Attribution 4.0 International (CC-BY 4.0)
+  Copyright (c) Microsoft Corporation
+
+Full license texts are available from the upstream projects linked above.
