@@ -440,7 +440,7 @@ Item {
                         textFormat: Text.RichText
                         text: "The core DSP synthesis engine in Overtune 3 is packed with classical continuous-to-discrete mathematical transformations. This page highlights a number of them and lets you interactively explore theoretical pole-zero mappings, pre-warped bilinear transforms, and biquadratic section cascades. For full mathematical derivations on the filter engine and more head over to our <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>documentation</a>."
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -470,7 +470,7 @@ Item {
                                 textFormat: Text.RichText
                                 text: "• &nbsp;<a href='" + modelData.url + "' style='color:#3794FF; text-decoration:none;'>" + modelData.title + "</a> <font color='#CCCCCC'>- " + modelData.desc + "</font>"
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13.5
+                                font.pixelSize: 13
                                 lineHeight: 1.55
                                 wrapMode: Text.WordWrap
                                 leftPadding: 16
@@ -495,7 +495,7 @@ Item {
                         textFormat: Text.RichText
                         text: "The bilinear transform maps continuous frequencies &Omega; into discrete frequencies &omega; via trapezoidal integration. Because the digital frequency interval [0, &pi;] non-linearly compresses the infinite analog frequency axis, all critical cutoff frequencies are pre-warped. Try the following analytical transformations in the synthesis pipeline below:"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -520,7 +520,7 @@ Item {
                                 textFormat: Text.RichText
                                 text: modelData.html
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13.5
+                                font.pixelSize: 13
                                 lineHeight: 1.6
                                 wrapMode: Text.WordWrap
                                 leftPadding: 16
@@ -534,7 +534,7 @@ Item {
                         textFormat: Text.RichText
                         text: "That is the tip of the iceberg for digital filter mathematics. Have a look at the Frequency Analysis Suite and our handy pole-zero constellation guide for additional diagnostic views."
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -565,7 +565,7 @@ Item {
                         textFormat: Text.RichText
                         text: "The tutorial studio in Overtune 3 is packed with step-by-step DSP recipes. This page highlights a number of them and lets you interactively explore filter design workflows, from rapid specification to bare-metal embedded deployment. For full details on custom presets and community guides head over to our <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>documentation</a>."
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -594,7 +594,7 @@ Item {
                                 textFormat: Text.RichText
                                 text: "• &nbsp;<a href='" + modelData.url + "' style='color:#3794FF; text-decoration:none;'>" + modelData.title + "</a> <font color='#CCCCCC'>- " + modelData.desc + "</font>"
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13.5
+                                font.pixelSize: 13
                                 lineHeight: 1.55
                                 wrapMode: Text.WordWrap
                                 leftPadding: 16
@@ -619,7 +619,7 @@ Item {
                         textFormat: Text.RichText
                         text: "Synthesizing and deploying a filter involves four core steps across the application workspaces. Try the following actions in the workflow pipeline below:"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -644,7 +644,7 @@ Item {
                                 textFormat: Text.RichText
                                 text: modelData.html
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13.5
+                                font.pixelSize: 13
                                 lineHeight: 1.6
                                 wrapMode: Text.WordWrap
                                 leftPadding: 16
@@ -658,7 +658,7 @@ Item {
                         textFormat: Text.RichText
                         text: "That is the tip of the iceberg for digital filter engineering workflows. Have a look at the workspace switcher and our handy keyboard shortcuts for additional actions."
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -689,7 +689,7 @@ Item {
                         textFormat: Text.RichText
                         text: "The Overtune 3 open-source project is packed with community contributions and DSP reference literature. This page highlights key contributors, guidelines for extending the engine, and direct links to comprehensive articles on digital signal processing across our <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>documentation</a>."
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -719,7 +719,7 @@ Item {
                                 textFormat: Text.RichText
                                 text: "• &nbsp;<a href='" + modelData.url + "' style='color:#3794FF; text-decoration:none;'>" + modelData.title + "</a> <font color='#CCCCCC'>- " + modelData.desc + "</font>"
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13.5
+                                font.pixelSize: 13
                                 lineHeight: 1.55
                                 wrapMode: Text.WordWrap
                                 leftPadding: 16
@@ -744,7 +744,7 @@ Item {
                         textFormat: Text.RichText
                         text: "We welcome contributions from digital signal processing researchers, audio engineers, embedded firmware developers, and UI designers. Try the following contribution actions in the repository below:"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
@@ -769,7 +769,7 @@ Item {
                                 textFormat: Text.RichText
                                 text: modelData.html
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13.5
+                                font.pixelSize: 13
                                 lineHeight: 1.6
                                 wrapMode: Text.WordWrap
                                 leftPadding: 16
@@ -784,7 +784,7 @@ Item {
                         textFormat: Text.RichText
                         text: "That is the tip of the iceberg for community collaboration. Have a look at our <a href='https://github.com/shadcy/overtune3/issues' style='color:#3794FF; text-decoration:none;'>issue tracker</a> and contribution guide on GitHub for open tasks and discussions. Maintained by <a href='https://github.com/shadcy' style='color:#3794FF; text-decoration:none;'>shadcy</a> and open-source contributors."
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         lineHeight: 1.55
                         color: "#CCCCCC"
                         wrapMode: Text.WordWrap
