@@ -118,6 +118,60 @@
                         "access": "public",
                         "name": "filterResponseName",
                         "returnType": "QString"
+                    },
+                    {
+                        "access": "public",
+                        "name": "reset",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "text",
+                                "type": "QString"
+                            }
+                        ],
+                        "name": "copyText",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "name",
+                                "type": "QString"
+                            }
+                        ],
+                        "name": "savePreset",
+                        "returnType": "bool"
+                    },
+                    {
+                        "access": "public",
+                        "name": "loadPresets",
+                        "returnType": "QVariantList"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "name",
+                                "type": "QString"
+                            }
+                        ],
+                        "name": "deletePreset",
+                        "returnType": "bool"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "name",
+                                "type": "QString"
+                            }
+                        ],
+                        "name": "applyPreset",
+                        "returnType": "bool"
                     }
                 ],
                 "object": true,

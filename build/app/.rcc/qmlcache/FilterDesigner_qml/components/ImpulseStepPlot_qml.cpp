@@ -1482,9 +1482,9 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 int r7_1;
-QString r2_3;
 bool r2_2;
 int r2_1;
+QString r2_3;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadScopeObjectPropertyLookup(0, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -1523,8 +1523,8 @@ return r2_3;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 QObject *r7_1;
-QObject *r2_1;
 bool r2_2;
+QObject *r2_1;
 // if (canvas.available)
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(6, &r2_1)) {
@@ -1795,8 +1795,8 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 QObject *r7_1;
-QObject *r2_2;
 bool r2_1;
+QObject *r2_2;
 // onAvailableChanged: {
 // generate_CreateCallContext
 {

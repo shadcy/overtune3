@@ -56,7 +56,10 @@ Item {
         }
     }
 
-    HoverHandler { id: hov }
+    HoverHandler {
+        id: hov
+        cursorShape: Qt.PointingHandCursor
+    }
     TapHandler {
         gesturePolicy: TapHandler.ReleaseWithinBounds
         onTapped: root.clicked()

@@ -7,6 +7,7 @@ d7cb1da5bb5292938142fe59394f4931 app/.rcc/qmlcache/FilterDesigner_qml/components
 9134689da02e0a2e4f79ad3c9aaadb73 app/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp
 086f71f8898a4547b708e666b6932287 app/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp
 ba8316d848c1eff9e413e07869cfdffb app/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp
+6437474d2bea97628b143196ff6325c7 app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp
 c60c419b836632c785b0ca3c5e0da56f app/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp
 fd04f7f61942eb296f3b480cfb551497 app/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp
 3d178096c31fc09804c9fe57f3857519 app/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp
@@ -30,8 +31,8 @@ aa7a56b19fb11d8d5d7752163efbf207 app/CMakeFiles/FilterDesigner_autogen
 aa7a56b19fb11d8d5d7752163efbf207 app/CMakeFiles/FilterDesigner_autogen_timestamp_deps
 6d1d4323c021dcb03127fcee4821d645 app/CMakeFiles/FilterDesigner_automoc_json_extraction
 aa7a56b19fb11d8d5d7752163efbf207 app/CMakeFiles/FilterDesigner_qmlimportscan
-caf971924d1e55382201a7498c936ac0 app/CMakeFiles/FilterDesigner_qmllint
-d88c18901146351ddc54acbef5c71db7 app/CMakeFiles/FilterDesigner_qmllint_json
+24fdb498ee934b409f3843946d322711 app/CMakeFiles/FilterDesigner_qmllint
+a6283b947ef58d15df0a557ed97e8d4c app/CMakeFiles/FilterDesigner_qmllint_json
 aa7a56b19fb11d8d5d7752163efbf207 app/CMakeFiles/FilterDesigner_qmltyperegistration
 fa80d3b1e0bc3f4916e49a1a75883c39 app/FilterDesigner/fonts/Inter-Bold.ttf
 6828e5e71512d316a6d10ce472d957e7 app/FilterDesigner/fonts/Inter-Medium.ttf
@@ -53,6 +54,20 @@ c7beab6b1429193d5e9115f0a5549979 app/FilterDesigner/icons/export-b.svg
 ac244ca0edd28a8071de5bd49fb6d4ff app/FilterDesigner/icons/play-w.svg
 e799fd7b9c82f0be2704c5471495f23e app/FilterDesigner/icons/settings-b.svg
 1b1e37a7d6f38492739029f264cf580c app/FilterDesigner/icons/settings-w.svg
+8bddeda970831f5ac07853f51c8dde1f app/FilterDesigner/math/eq1_dark.png
+34b981d847caa8cf27572f652e91aa1d app/FilterDesigner/math/eq1_light.png
+74a817eeff9647b787a7950b10ffa740 app/FilterDesigner/math/eq2_dark.png
+45b9fd522a3dc840c5b46a64344ed3b3 app/FilterDesigner/math/eq2_light.png
+e8f859c0b2430436febe3b21ae3fa8b0 app/FilterDesigner/math/eq3_dark.png
+31f7ae41ce02ec892327eb2c7830a87c app/FilterDesigner/math/eq3_light.png
+6755d1c12f92d806108f36130f0ae08e app/FilterDesigner/math/eq4_dark.png
+c9cb704e928cb505ae249555194d6248 app/FilterDesigner/math/eq4_light.png
+bd61292db39fc51ae0d744f3f3aaad65 app/FilterDesigner/math/eq5_dark.png
+e13a6c21eb7a707308a4c739081f0437 app/FilterDesigner/math/eq5_light.png
+4a0bce6ec1b25d14dd965fa5402186f1 app/FilterDesigner/math/eq6_dark.png
+eded7b753b76f8897ab36685dd817552 app/FilterDesigner/math/eq6_light.png
+9a7c1ae58051cba32f33c0e2dd099a82 app/FilterDesigner/math/eq7_dark.png
+c073fcd5d8767734969f9d4e1a1d2169 app/FilterDesigner/math/eq7_light.png
 2b156f520939e7059e4c4831ebba4847 app/FilterDesigner/qml/Main.qml
 96966fb9ed35049baa21e6f4e6c89ee5 app/FilterDesigner/qml/components/ActivityIcon.qml
 d5926230fa18b72b9a3580b500246b7f app/FilterDesigner/qml/components/CodeViewer.qml
@@ -60,6 +75,7 @@ d5926230fa18b72b9a3580b500246b7f app/FilterDesigner/qml/components/CodeViewer.qm
 e6b935bb7a54fc83185fec5d20008eeb app/FilterDesigner/qml/components/FilterCard.qml
 f04f3c4a91b7c4410ce797a6a14b2519 app/FilterDesigner/qml/components/FrequencyPlot.qml
 5359d6ca62d0e5f17cc4124f4d3fff7d app/FilterDesigner/qml/components/ImpulseStepPlot.qml
+6b636e66751744cbb0df5cdf4ce18ba5 app/FilterDesigner/qml/components/LaTeXBlock.qml
 a559c42dd6aa3b0c401ebe8172e6edae app/FilterDesigner/qml/components/ParameterRow.qml
 254d173983a15a3e5c11b03a81bafc04 app/FilterDesigner/qml/components/PoleZeroPlot.qml
 bdcb833767b3b79183e2f6e2567d59b1 app/FilterDesigner/qml/components/SectionHeader.qml

@@ -387,4 +387,41 @@ app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o: \
  /home/shreyash/Desktop/Anti-gravity/overtune3/dsp/include/dsp/FilterDesigner.h \
  /home/shreyash/Desktop/Anti-gravity/overtune3/dsp/include/dsp/CodeExporter.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QDebug \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qdebug.h
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdebug.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QStandardPaths \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qstandardpaths.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QDir \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfiledevice.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h \
+ /usr/include/c++/13/filesystem /usr/include/c++/13/bits/fs_fwd.h \
+ /usr/include/c++/13/bits/fs_path.h /usr/include/c++/13/codecvt \
+ /usr/include/c++/13/bits/fs_dir.h /usr/include/c++/13/bits/fs_ops.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfileinfo.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QJsonDocument \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qjsondocument.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QJsonObject \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qjsonobject.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QJsonArray \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/QGuiApplication \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiglobal.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtgui-config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiexports.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qcoreapplication.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qcoreevent.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qeventloop.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qnativeinterface.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qcoreapplication_platform.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qwindowdefs.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qinputmethod.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qpoint.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qsize.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qmargins.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication_platform.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qguiapplication.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/QClipboard \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qclipboard.h

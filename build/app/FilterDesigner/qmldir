@@ -17,6 +17,7 @@ StyledButton 1.0 qml/components/StyledButton.qml
 SectionHeader 1.0 qml/components/SectionHeader.qml
 CodeViewer 1.0 qml/components/CodeViewer.qml
 SignalPlot 1.0 qml/components/SignalPlot.qml
+LaTeXBlock 1.0 qml/components/LaTeXBlock.qml
 DesignPage 1.0 qml/pages/DesignPage.qml
 AnalysisPage 1.0 qml/pages/AnalysisPage.qml
 SimulationPage 1.0 qml/pages/SimulationPage.qml

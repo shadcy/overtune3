@@ -35,6 +35,7 @@ qt_add_qml_module(FilterDesigner
         qml/components/SectionHeader.qml
         qml/components/CodeViewer.qml
         qml/components/SignalPlot.qml
+        qml/components/LaTeXBlock.qml
         qml/pages/DesignPage.qml
         qml/pages/AnalysisPage.qml
         qml/pages/SimulationPage.qml
@@ -52,6 +53,20 @@ qt_add_qml_module(FilterDesigner
         fonts/Inter-Bold.ttf
         fonts/codicon.ttf
         fonts/NOTICE
+        math/eq1_dark.png
+        math/eq1_light.png
+        math/eq2_dark.png
+        math/eq2_light.png
+        math/eq3_dark.png
+        math/eq3_light.png
+        math/eq4_dark.png
+        math/eq4_light.png
+        math/eq5_dark.png
+        math/eq5_light.png
+        math/eq6_dark.png
+        math/eq6_light.png
+        math/eq7_dark.png
+        math/eq7_light.png
 )
 
 target_link_libraries(FilterDesigner PRIVATE

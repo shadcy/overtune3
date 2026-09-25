@@ -3,7 +3,48 @@
 #include "dsp/CodeExporter.h"
 #include <QVariantMap>
 #include <QDebug>
+#include <QStandardPaths>
+#include <QDir>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QGuiApplication>
+#include <QClipboard>
 #include <stdexcept>
+
+static QString presetsFilePath() {
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(dir);
+    return dir + "/presets.json";
+}
+
+static QJsonArray defaultPresets() {
+    QJsonArray arr;
+    auto makePreset = [](const QString& name, int type, int resp, int order, double fc, double fc2, double rp, double rs, double fs, const QString& desc) {
+        QJsonObject o;
+        o["name"] = name;
+        o["type"] = type;
+        o["response"] = resp;
+        o["order"] = order;
+        o["cutoffFreq"] = fc;
+        o["cutoffFreq2"] = fc2;
+        o["rippleDb"] = rp;
+        o["stopbandDb"] = rs;
+        o["sampleRate"] = fs;
+        o["desc"] = desc;
+        o["isUser"] = false;
+        return o;
+    };
+
+    arr.append(makePreset("butterworth_lpf_1khz", 0, 0, 4, 1000, 0, 1.0, 40.0, 48000, "~/presets/audio/lowpass-48k"));
+    arr.append(makePreset("chebyshev1_speech_bpf", 2, 1, 4, 300, 3400, 0.5, 40.0, 48000, "~/presets/telecom/bandpass-speech"));
+    arr.append(makePreset("elliptic_mains_notch_50hz", 3, 3, 4, 48, 52, 1.0, 50.0, 48000, "~/presets/mains-hum/notch-50hz"));
+    arr.append(makePreset("bessel_linear_phase_8k", 0, 4, 6, 8000, 0, 1.0, 40.0, 48000, "~/presets/mastering/linear-phase"));
+    arr.append(makePreset("subsonic_rumble_hpf_80hz", 1, 0, 4, 80, 0, 1.0, 40.0, 48000, "~/presets/subsonic/rumble-cut"));
+    arr.append(makePreset("chebyshev2_stopband_10k", 0, 2, 4, 10000, 0, 1.0, 60.0, 48000, "~/presets/scientific/monotonic-passband"));
+    return arr;
+}
 
 FilterEngine::FilterEngine(QObject* parent) : QObject(parent) {
     // Design with defaults on construction
@@ -134,3 +175,141 @@ QString FilterEngine::exportCode(int format) {
 
 QString FilterEngine::filterTypeName()     const { return QString::fromStdString(m_spec.typeName()); }
 QString FilterEngine::filterResponseName() const { return QString::fromStdString(m_spec.responseName()); }
+
+QVariantList FilterEngine::loadPresets() {
+    QFile f(presetsFilePath());
+    QJsonArray arr;
+    if (!f.exists()) {
+        arr = defaultPresets();
+        if (f.open(QIODevice::WriteOnly)) {
+            f.write(QJsonDocument(arr).toJson());
+            f.close();
+        }
+    } else {
+        if (f.open(QIODevice::ReadOnly)) {
+            QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
+            if (doc.isArray()) arr = doc.array();
+            f.close();
+        }
+    }
+
+    QVariantList list;
+    for (const auto& val : arr) {
+        list.append(val.toObject().toVariantMap());
+    }
+    return list;
+}
+
+void FilterEngine::copyText(const QString& text) {
+    if (auto* cb = QGuiApplication::clipboard()) {
+        cb->setText(text);
+    }
+}
+
+void FilterEngine::reset() {
+    m_spec = dsp::FilterSpec{};
+    emit specChanged();
+    design();
+}
+
+bool FilterEngine::savePreset(const QString& name) {
+    if (name.trimmed().isEmpty()) return false;
+    QFile f(presetsFilePath());
+    QJsonArray arr;
+    if (f.open(QIODevice::ReadOnly)) {
+        QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
+        if (doc.isArray()) arr = doc.array();
+        f.close();
+    } else {
+        arr = defaultPresets();
+    }
+
+    QJsonObject p;
+    p["name"] = name.trimmed();
+    p["type"] = static_cast<int>(m_spec.type);
+    p["response"] = static_cast<int>(m_spec.response);
+    p["order"] = m_spec.order;
+    p["cutoffFreq"] = m_spec.cutoffFreq;
+    p["cutoffFreq2"] = m_spec.cutoffFreq2;
+    p["rippleDb"] = m_spec.rippleDb;
+    p["stopbandDb"] = m_spec.stopbandDb;
+    p["sampleRate"] = m_spec.sampleRate;
+    p["desc"] = QString("User Preset · %1 %2 · Fc %3 Hz")
+                    .arg(filterTypeName())
+                    .arg(filterResponseName())
+                    .arg(static_cast<int>(m_spec.cutoffFreq));
+    p["isUser"] = true;
+
+    bool replaced = false;
+    for (int i = 0; i < arr.size(); ++i) {
+        if (arr[i].toObject()["name"].toString() == name.trimmed()) {
+            arr[i] = p;
+            replaced = true;
+            break;
+        }
+    }
+    if (!replaced) arr.append(p);
+
+    if (f.open(QIODevice::WriteOnly)) {
+        f.write(QJsonDocument(arr).toJson());
+        f.close();
+        return true;
+    }
+    return false;
+}
+
+bool FilterEngine::deletePreset(const QString& name) {
+    QFile f(presetsFilePath());
+    QJsonArray arr;
+    if (f.open(QIODevice::ReadOnly)) {
+        QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
+        if (doc.isArray()) arr = doc.array();
+        f.close();
+    } else {
+        return false;
+    }
+
+    QJsonArray newArr;
+    for (const auto& val : arr) {
+        if (val.toObject()["name"].toString() != name) {
+            newArr.append(val);
+        }
+    }
+
+    if (f.open(QIODevice::WriteOnly)) {
+        f.write(QJsonDocument(newArr).toJson());
+        f.close();
+        return true;
+    }
+    return false;
+}
+
+bool FilterEngine::applyPreset(const QString& name) {
+    QFile f(presetsFilePath());
+    QJsonArray arr;
+    if (f.open(QIODevice::ReadOnly)) {
+        QJsonDocument doc = QJsonDocument::fromJson(f.readAll());
+        if (doc.isArray()) arr = doc.array();
+        f.close();
+    } else {
+        arr = defaultPresets();
+    }
+
+    for (const auto& val : arr) {
+        QJsonObject o = val.toObject();
+        if (o["name"].toString() == name) {
+            m_spec.type = static_cast<dsp::FilterType>(o["type"].toInt());
+            m_spec.response = static_cast<dsp::FilterResponse>(o["response"].toInt());
+            m_spec.order = o["order"].toInt();
+            m_spec.cutoffFreq = o["cutoffFreq"].toDouble();
+            m_spec.cutoffFreq2 = o["cutoffFreq2"].toDouble();
+            m_spec.rippleDb = o["rippleDb"].toDouble();
+            m_spec.stopbandDb = o["stopbandDb"].toDouble();
+            m_spec.sampleRate = o["sampleRate"].toDouble();
+            emit specChanged();
+            design();
+            return true;
+        }
+    }
+    return false;
+}

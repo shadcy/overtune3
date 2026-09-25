@@ -26,7 +26,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_FilterEngine_t {
-    uint offsetsAndSizes[52];
+    uint offsetsAndSizes[68];
     char stringdata0[13];
     char stringdata1[12];
     char stringdata2[1];
@@ -38,21 +38,29 @@ struct qt_meta_stringdata_FilterEngine_t {
     char stringdata8[7];
     char stringdata9[15];
     char stringdata10[19];
-    char stringdata11[11];
-    char stringdata12[15];
-    char stringdata13[6];
+    char stringdata11[6];
+    char stringdata12[9];
+    char stringdata13[5];
     char stringdata14[11];
-    char stringdata15[11];
+    char stringdata15[5];
     char stringdata16[12];
-    char stringdata17[9];
-    char stringdata18[11];
-    char stringdata19[14];
-    char stringdata20[10];
-    char stringdata21[15];
-    char stringdata22[13];
-    char stringdata23[12];
-    char stringdata24[9];
-    char stringdata25[11];
+    char stringdata17[13];
+    char stringdata18[12];
+    char stringdata19[11];
+    char stringdata20[15];
+    char stringdata21[6];
+    char stringdata22[11];
+    char stringdata23[11];
+    char stringdata24[12];
+    char stringdata25[9];
+    char stringdata26[11];
+    char stringdata27[14];
+    char stringdata28[10];
+    char stringdata29[15];
+    char stringdata30[13];
+    char stringdata31[12];
+    char stringdata32[9];
+    char stringdata33[11];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_FilterEngine_t::offsetsAndSizes) + ofs), len 
@@ -69,21 +77,29 @@ Q_CONSTINIT static const qt_meta_stringdata_FilterEngine_t qt_meta_stringdata_Fi
         QT_MOC_LITERAL(81, 6),  // "format"
         QT_MOC_LITERAL(88, 14),  // "filterTypeName"
         QT_MOC_LITERAL(103, 18),  // "filterResponseName"
-        QT_MOC_LITERAL(122, 10),  // "filterType"
-        QT_MOC_LITERAL(133, 14),  // "filterResponse"
-        QT_MOC_LITERAL(148, 5),  // "order"
-        QT_MOC_LITERAL(154, 10),  // "sampleRate"
-        QT_MOC_LITERAL(165, 10),  // "cutoffFreq"
-        QT_MOC_LITERAL(176, 11),  // "cutoffFreq2"
-        QT_MOC_LITERAL(188, 8),  // "rippleDb"
-        QT_MOC_LITERAL(197, 10),  // "stopbandDb"
-        QT_MOC_LITERAL(208, 13),  // "magnitudeData"
-        QT_MOC_LITERAL(222, 9),  // "phaseData"
-        QT_MOC_LITERAL(232, 14),  // "groupDelayData"
-        QT_MOC_LITERAL(247, 12),  // "poleZeroData"
-        QT_MOC_LITERAL(260, 11),  // "impulseData"
-        QT_MOC_LITERAL(272, 8),  // "stepData"
-        QT_MOC_LITERAL(281, 10)   // "hasResults"
+        QT_MOC_LITERAL(122, 5),  // "reset"
+        QT_MOC_LITERAL(128, 8),  // "copyText"
+        QT_MOC_LITERAL(137, 4),  // "text"
+        QT_MOC_LITERAL(142, 10),  // "savePreset"
+        QT_MOC_LITERAL(153, 4),  // "name"
+        QT_MOC_LITERAL(158, 11),  // "loadPresets"
+        QT_MOC_LITERAL(170, 12),  // "deletePreset"
+        QT_MOC_LITERAL(183, 11),  // "applyPreset"
+        QT_MOC_LITERAL(195, 10),  // "filterType"
+        QT_MOC_LITERAL(206, 14),  // "filterResponse"
+        QT_MOC_LITERAL(221, 5),  // "order"
+        QT_MOC_LITERAL(227, 10),  // "sampleRate"
+        QT_MOC_LITERAL(238, 10),  // "cutoffFreq"
+        QT_MOC_LITERAL(249, 11),  // "cutoffFreq2"
+        QT_MOC_LITERAL(261, 8),  // "rippleDb"
+        QT_MOC_LITERAL(270, 10),  // "stopbandDb"
+        QT_MOC_LITERAL(281, 13),  // "magnitudeData"
+        QT_MOC_LITERAL(295, 9),  // "phaseData"
+        QT_MOC_LITERAL(305, 14),  // "groupDelayData"
+        QT_MOC_LITERAL(320, 12),  // "poleZeroData"
+        QT_MOC_LITERAL(333, 11),  // "impulseData"
+        QT_MOC_LITERAL(345, 8),  // "stepData"
+        QT_MOC_LITERAL(354, 10)   // "hasResults"
     },
     "FilterEngine",
     "specChanged",
@@ -96,6 +112,14 @@ Q_CONSTINIT static const qt_meta_stringdata_FilterEngine_t qt_meta_stringdata_Fi
     "format",
     "filterTypeName",
     "filterResponseName",
+    "reset",
+    "copyText",
+    "text",
+    "savePreset",
+    "name",
+    "loadPresets",
+    "deletePreset",
+    "applyPreset",
     "filterType",
     "filterResponse",
     "order",
@@ -121,23 +145,29 @@ Q_CONSTINIT static const uint qt_meta_data_FilterEngine[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
-      15,   67, // properties
+      13,   14, // methods
+      15,  117, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
        3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   56,    2, 0x06,   16 /* Public */,
-       3,    0,   57,    2, 0x06,   17 /* Public */,
-       4,    1,   58,    2, 0x06,   18 /* Public */,
+       1,    0,   92,    2, 0x06,   16 /* Public */,
+       3,    0,   93,    2, 0x06,   17 /* Public */,
+       4,    1,   94,    2, 0x06,   18 /* Public */,
 
  // methods: name, argc, parameters, tag, flags, initial metatype offsets
-       6,    0,   61,    2, 0x02,   20 /* Public */,
-       7,    1,   62,    2, 0x02,   21 /* Public */,
-       9,    0,   65,    2, 0x102,   23 /* Public | MethodIsConst  */,
-      10,    0,   66,    2, 0x102,   24 /* Public | MethodIsConst  */,
+       6,    0,   97,    2, 0x02,   20 /* Public */,
+       7,    1,   98,    2, 0x02,   21 /* Public */,
+       9,    0,  101,    2, 0x102,   23 /* Public | MethodIsConst  */,
+      10,    0,  102,    2, 0x102,   24 /* Public | MethodIsConst  */,
+      11,    0,  103,    2, 0x02,   25 /* Public */,
+      12,    1,  104,    2, 0x02,   26 /* Public */,
+      14,    1,  107,    2, 0x02,   28 /* Public */,
+      16,    0,  110,    2, 0x02,   30 /* Public */,
+      17,    1,  111,    2, 0x02,   31 /* Public */,
+      18,    1,  114,    2, 0x02,   33 /* Public */,
 
  // signals: parameters
     QMetaType::Void,
@@ -149,23 +179,29 @@ Q_CONSTINIT static const uint qt_meta_data_FilterEngine[] = {
     QMetaType::QString, QMetaType::Int,    8,
     QMetaType::QString,
     QMetaType::QString,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::QString,   13,
+    QMetaType::Bool, QMetaType::QString,   15,
+    QMetaType::QVariantList,
+    QMetaType::Bool, QMetaType::QString,   15,
+    QMetaType::Bool, QMetaType::QString,   15,
 
  // properties: name, type, flags
-      11, QMetaType::Int, 0x00015103, uint(0), 0,
-      12, QMetaType::Int, 0x00015103, uint(0), 0,
-      13, QMetaType::Int, 0x00015103, uint(0), 0,
-      14, QMetaType::Double, 0x00015103, uint(0), 0,
-      15, QMetaType::Double, 0x00015103, uint(0), 0,
-      16, QMetaType::Double, 0x00015103, uint(0), 0,
-      17, QMetaType::Double, 0x00015103, uint(0), 0,
-      18, QMetaType::Double, 0x00015103, uint(0), 0,
-      19, QMetaType::QVariantList, 0x00015001, uint(1), 0,
-      20, QMetaType::QVariantList, 0x00015001, uint(1), 0,
-      21, QMetaType::QVariantList, 0x00015001, uint(1), 0,
-      22, QMetaType::QVariantList, 0x00015001, uint(1), 0,
-      23, QMetaType::QVariantList, 0x00015001, uint(1), 0,
-      24, QMetaType::QVariantList, 0x00015001, uint(1), 0,
-      25, QMetaType::Bool, 0x00015001, uint(1), 0,
+      19, QMetaType::Int, 0x00015103, uint(0), 0,
+      20, QMetaType::Int, 0x00015103, uint(0), 0,
+      21, QMetaType::Int, 0x00015103, uint(0), 0,
+      22, QMetaType::Double, 0x00015103, uint(0), 0,
+      23, QMetaType::Double, 0x00015103, uint(0), 0,
+      24, QMetaType::Double, 0x00015103, uint(0), 0,
+      25, QMetaType::Double, 0x00015103, uint(0), 0,
+      26, QMetaType::Double, 0x00015103, uint(0), 0,
+      27, QMetaType::QVariantList, 0x00015001, uint(1), 0,
+      28, QMetaType::QVariantList, 0x00015001, uint(1), 0,
+      29, QMetaType::QVariantList, 0x00015001, uint(1), 0,
+      30, QMetaType::QVariantList, 0x00015001, uint(1), 0,
+      31, QMetaType::QVariantList, 0x00015001, uint(1), 0,
+      32, QMetaType::QVariantList, 0x00015001, uint(1), 0,
+      33, QMetaType::Bool, 0x00015001, uint(1), 0,
 
        0        // eod
 };
@@ -224,7 +260,23 @@ Q_CONSTINIT const QMetaObject FilterEngine::staticMetaObject = { {
         // method 'filterTypeName'
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         // method 'filterResponseName'
-        QtPrivate::TypeAndForceComplete<QString, std::false_type>
+        QtPrivate::TypeAndForceComplete<QString, std::false_type>,
+        // method 'reset'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'copyText'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
+        // method 'savePreset'
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
+        // method 'loadPresets'
+        QtPrivate::TypeAndForceComplete<QVariantList, std::false_type>,
+        // method 'deletePreset'
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
+        // method 'applyPreset'
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        QtPrivate::TypeAndForceComplete<const QString &, std::false_type>
     >,
     nullptr
 } };
@@ -245,6 +297,16 @@ void FilterEngine::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
             if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
         case 6: { QString _r = _t->filterResponseName();
             if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = std::move(_r); }  break;
+        case 7: _t->reset(); break;
+        case 8: _t->copyText((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 9: { bool _r = _t->savePreset((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])));
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
+        case 10: { QVariantList _r = _t->loadPresets();
+            if (_a[0]) *reinterpret_cast< QVariantList*>(_a[0]) = std::move(_r); }  break;
+        case 11: { bool _r = _t->deletePreset((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])));
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
+        case 12: { bool _r = _t->applyPreset((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])));
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -331,13 +393,13 @@ int FilterEngine::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 13;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 13)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 7;
+        _id -= 13;
     }else if (_c == QMetaObject::ReadProperty || _c == QMetaObject::WriteProperty
             || _c == QMetaObject::ResetProperty || _c == QMetaObject::BindableProperty
             || _c == QMetaObject::RegisterPropertyMetaType) {

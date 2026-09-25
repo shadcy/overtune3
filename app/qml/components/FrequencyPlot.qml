@@ -64,21 +64,14 @@ Item {
             paintRetry.restart()
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: theme.surface
-        radius: 10
-        border.color: theme.borderColor
-        border.width: 1
-    }
-
+    // Inner plot area grid background
     Rectangle {
         x: root.marginLeft
         y: root.marginTop
         width: root.plotW
         height: root.plotH
         color: theme.surfaceHigh
-        radius: 6
+        radius: 4
         border.color: theme.borderColor
         border.width: 1
     }

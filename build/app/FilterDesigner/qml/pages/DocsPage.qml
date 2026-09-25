@@ -3,9 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 import "../components"
-import "../theme"
 
-// DocsPage.qml — VS Code documentation style (clean typography, no blocks/cards, hypertext routes)
+// DocsPage.qml — Clean modular docs: Get Started, Theory & Math with LaTeX, Step-by-Step Tutorials, and Reference Tables
 Item {
     id: root
     Layout.fillWidth: true
@@ -14,8 +13,10 @@ Item {
     implicitHeight: 600
     clip: true
 
-    readonly property bool isNarrow: width < 760
-    property int selectedTopic: 0
+    readonly property bool isNarrow: width < 720
+    readonly property int pageMargin: isNarrow ? 18 : 36
+
+    property int activeTab: 0 // 0=Get Started, 1=Theory & Math, 2=Tutorials, 3=Reference Tables
 
     function go(pageIndex) {
         const w = Window.window
@@ -23,97 +24,84 @@ Item {
             w.navigateTo(pageIndex)
     }
 
-    readonly property var topics: [
-        { id: "overview",   title: "Overview & Quickstart",     tag: "Getting Started" },
-        { id: "topologies", title: "Filter Topologies",         tag: "Design" },
-        { id: "responses",  title: "Approximation Types",       tag: "Design" },
-        { id: "maths",      title: "DSP Mathematics & SOS",     tag: "Theory" },
-        { id: "simulation", title: "Signal Simulation & Audio", tag: "Simulation" },
-        { id: "export",     title: "Code Export & Integration", tag: "Code" }
-    ]
-
-    Row {
+    Column {
         anchors.fill: parent
+        spacing: 0
 
-        // ─── Left Sidebar (VS Code Documentation Navigation) ───────────────
+        // ─── Sticky Sub-Navigation Bar ─────────────────────────────────────────
         Rectangle {
-            id: tocSidebar
-            width: root.isNarrow ? 180 : 230
-            height: parent.height
-            color: theme.isDark ? "#181818" : "#F3F3F3"
+            id: navBar
+            width: parent.width
+            height: 42
+            color: theme.isDark ? "#1E1E1E" : "#F3F3F3"
             border.color: theme.borderColor
             border.width: 1
+            z: 10
 
-            Column {
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 12
+            Row {
+                anchors.left: parent.left
+                anchors.leftMargin: root.pageMargin
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                spacing: 0
 
-                Text {
-                    text: "DOCUMENTATION"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 11
-                    font.weight: Font.DemiBold
-                    font.letterSpacing: 0.8
-                    color: theme.secondaryText
-                }
-
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    color: theme.borderColor
-                }
-
-                ListView {
-                    id: tocList
-                    width: parent.width
-                    height: parent.height - 40
-                    clip: true
-                    model: root.topics
-                    spacing: 2
-
+                Repeater {
+                    model: [
+                        { label: "Get Started",        icon: "book" },
+                        { label: "Theory & Math",      icon: "graph" },
+                        { label: "Tutorials & Guides",  icon: "mortar-board" },
+                        { label: "Technical Tables",   icon: "table" }
+                    ]
                     delegate: Rectangle {
-                        width: tocList.width
-                        height: 32
-                        radius: 4
-                        color: {
-                            if (root.selectedTopic === index)
-                                return theme.isDark ? "#2A2D2E" : "#E4E4E4"
-                            if (itemHov.hovered)
-                                return theme.isDark ? "#1F1F1F" : "#EBEBEB"
-                            return "transparent"
-                        }
+                        required property int index
+                        required property var modelData
 
+                        readonly property bool active: root.activeTab === index
+                        width: Math.max(80, tabTextRow.implicitWidth + 24)
+                        height: navBar.height
+                        color: active
+                            ? (theme.isDark ? "#252526" : "#FFFFFF")
+                            : (nhov.hovered ? (theme.isDark ? "#2A2D2E" : "#E8E8E8") : "transparent")
+
+                        // Active blue bottom indicator
                         Rectangle {
-                            width: 3
-                            height: 18
-                            radius: 1.5
-                            color: theme.accent
+                            anchors.bottom: parent.bottom
                             anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            visible: root.selectedTopic === index
+                            anchors.right: parent.right
+                            height: 2
+                            color: theme.accent
+                            visible: parent.active
                         }
 
-                        Text {
-                            anchors {
-                                left: parent.left
-                                leftMargin: 12
-                                right: parent.right
-                                rightMargin: 8
-                                verticalCenter: parent.verticalCenter
+                        Row {
+                            id: tabTextRow
+                            anchors.centerIn: parent
+                            spacing: 8
+
+                            Codicon {
+                                icon: modelData.icon
+                                iconSize: 14
+                                iconColor: parent.parent.active ? theme.accent : theme.secondaryText
+                                anchors.verticalCenter: parent.verticalCenter
                             }
-                            text: modelData.title
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            font.weight: root.selectedTopic === index ? Font.Medium : Font.Normal
-                            color: root.selectedTopic === index ? theme.primaryText : theme.secondaryText
-                            elide: Text.ElideRight
+
+                            Text {
+                                text: modelData.label
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 12
+                                font.weight: parent.parent.active ? Font.DemiBold : Font.Normal
+                                color: parent.parent.active ? theme.primaryText : theme.secondaryText
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
                         }
 
-                        HoverHandler { id: itemHov }
+                        HoverHandler {
+                            id: nhov
+                            cursorShape: Qt.PointingHandCursor
+                        }
                         TapHandler {
                             onTapped: {
-                                root.selectedTopic = index
+                                root.activeTab = index
                                 docFlick.contentY = 0
                             }
                         }
@@ -122,609 +110,1407 @@ Item {
             }
         }
 
-        // ─── Main Content Area (Clean VS Code Article) ─────────────────────
+        // ─── Scrollable Content Area ───────────────────────────────────────────
         Flickable {
             id: docFlick
-            width: parent.width - tocSidebar.width
-            height: parent.height
+            width: parent.width
+            height: parent.height - navBar.height
             clip: true
             contentWidth: width
-            contentHeight: articleCol.implicitHeight + 48
+            contentHeight: contentCol.implicitHeight + 64
             boundsBehavior: Flickable.StopAtBounds
+            flickableDirection: Flickable.VerticalFlick
             ScrollBar.vertical: ScrollBar {
                 policy: docFlick.contentHeight > docFlick.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
 
             Column {
-                id: articleCol
-                width: Math.min(docFlick.width - (root.isNarrow ? 32 : 64), 780)
+                id: contentCol
+                width: Math.min(docFlick.width - root.pageMargin * 2, 880)
                 anchors.horizontalCenter: parent.horizontalCenter
                 topPadding: 24
                 bottomPadding: 32
-                spacing: 20
+                spacing: 28
 
-                // Breadcrumb path
-                Row {
-                    spacing: 6
-                    Text {
-                        text: "Docs"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 12
-                        color: theme.accent
-                    }
-                    Text {
-                        text: "/"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 12
-                        color: theme.secondaryText
-                    }
-                    Text {
-                        text: "Overtune 3"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 12
-                        color: theme.secondaryText
-                    }
-                    Text {
-                        text: "/"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 12
-                        color: theme.secondaryText
-                    }
-                    Text {
-                        text: root.topics[root.selectedTopic].title
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 12
-                        color: theme.primaryText
-                    }
-                }
-
-                // Document Title
-                Text {
-                    width: parent.width
-                    text: root.topics[root.selectedTopic].title
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 26
-                    font.weight: Font.Bold
-                    color: theme.primaryText
-                }
-
-                // Underline separator
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    color: theme.borderColor
-                }
-
-                // ─── TOPIC 0: Overview & Quickstart ────────────────────────
+                // ═════════════════════════════════════════════════════════════════
+                // TAB 0: GET STARTED (VS Code Welcome Screen + Clean Theory on Start)
+                // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 16
-                    visible: root.selectedTopic === 0
+                    spacing: 24
+                    visible: root.activeTab === 0
 
-                    Text {
+                    // Headline
+                    Column {
                         width: parent.width
-                        text: "Overtune 3 is an interactive digital signal processing workstation for designing, analyzing, simulating, and exporting recursive infinite impulse response (IIR) digital filters."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "Key Workflow Routes"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                        topPadding: 8
-                    }
-
-                    // Hypertext route 1
-                    Row {
-                        spacing: 8
-                        Text { text: "•"; color: theme.secondaryText; font.pixelSize: 14 }
-                        Text {
-                            text: "Filter Designer Studio"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            font.underline: hovR1.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovR1; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(0) }
-                        }
-                        Text {
-                            text: "— configure topology (Lowpass, Highpass, Bandpass, Bandstop), response approximation, and interactive cutoff frequency."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            color: theme.secondaryText
-                            width: articleCol.width - 240
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-
-                    // Hypertext route 2
-                    Row {
-                        spacing: 8
-                        Text { text: "•"; color: theme.secondaryText; font.pixelSize: 14 }
-                        Text {
-                            text: "Analysis & Visualisation"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            font.underline: hovR2.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovR2; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(1) }
-                        }
-                        Text {
-                            text: "— inspect high-resolution magnitude dB, unwrapped continuous phase, exact group delay, and z-plane pole-zero plots."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            color: theme.secondaryText
-                            width: articleCol.width - 240
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-
-                    // Hypertext route 3
-                    Row {
-                        spacing: 8
-                        Text { text: "•"; color: theme.secondaryText; font.pixelSize: 14 }
-                        Text {
-                            text: "Signal & Audio Simulation"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            font.underline: hovR3.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovR3; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(2) }
-                        }
-                        Text {
-                            text: "— generate test signals (sine, chirp, noise) or load 16/24-bit WAV audio files to test filter filtering in real time."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            color: theme.secondaryText
-                            width: articleCol.width - 240
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-
-                    // Hypertext route 4
-                    Row {
-                        spacing: 8
-                        Text { text: "•"; color: theme.secondaryText; font.pixelSize: 14 }
-                        Text {
-                            text: "Production Code Exporter"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            font.underline: hovR4.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovR4; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(3) }
-                        }
-                        Text {
-                            text: "— export Second-Order Section (SOS) biquad coefficients for C, C++20, Python SciPy, and JSON configurations."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            color: theme.secondaryText
-                            width: articleCol.width - 240
-                            wrapMode: Text.WordWrap
-                        }
-                    }
-
-                    Text {
-                        text: "Architecture Highlights"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                        topPadding: 16
-                    }
-
-                    Text {
-                        width: parent.width
-                        text: "All digital filter designs in Overtune 3 are synthesized strictly in Second-Order Sections (biquads). Factoring higher-order polynomials into coupled biquad stages mitigates finite word-length coefficient quantization errors and prevents overflow instability typical of direct-form realization."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-                }
-
-                // ─── TOPIC 1: Filter Topologies ────────────────────────────
-                Column {
-                    width: parent.width
-                    spacing: 16
-                    visible: root.selectedTopic === 1
-
-                    Text {
-                        width: parent.width
-                        text: "Overtune 3 provides 4 primary standard filter frequency transformation topologies via frequency pre-warping and bilinear mapping."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "1. Lowpass Filter (LPF)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Passes spectral energy below the primary cutoff frequency Fc while attenuating higher frequencies. Transmission zeros from analog infinity map directly to z = -1 (Nyquist)."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "2. Highpass Filter (HPF)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Attenuates low frequencies and DC offset while passing signals above Fc. Under inverted analog frequency mapping, prototype zeros at infinity map exactly to z = +1 (DC), ensuring zero DC transmission."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "3. Bandpass Filter (BPF)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Passes frequencies strictly within the passband between Fc1 and Fc2. Each prototype pole maps to a complex conjugate pair, doubling the filter order. Zeros are placed in equal numbers at z = +1 and z = -1."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "4. Bandstop Filter (BSF / Notch)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Eliminates unwanted spectral components between Fc1 and Fc2 (such as 50/60 Hz power-line hum or acoustic resonance peaks). Zeros are synthesized directly on the unit circle at the digital center frequency."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Row {
                         spacing: 6
-                        topPadding: 8
+
                         Text {
-                            text: "→ Adjust filter topologies in the Designer"
+                            text: "Overtune 3"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: root.isNarrow ? 24 : 32
+                            font.weight: Font.Bold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            text: "Digital Filter Designer & DSP Simulation Workstation"
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 14
-                            font.underline: hovTop.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovTop; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(0) }
+                            color: theme.secondaryText
+                        }
+                    }
+                    // Two-Column: Start + Shortcuts
+                    GridLayout {
+                        width: parent.width
+                        columns: root.isNarrow ? 1 : 2
+                        rowSpacing: 24
+                        columnSpacing: 40
+
+                        // Start Section
+                        Column {
+                            Layout.fillWidth: true
+                            spacing: 12
+
+                            Text {
+                                text: "Start"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 18
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                                bottomPadding: 4
+                            }
+
+                            Repeater {
+                                model: [
+                                    { text: "New Filter Design...",         icon: "new-file",     page: 0 },
+                                    { text: "Inspect Frequency & Poles...", icon: "graph",        page: 1 },
+                                    { text: "Run Signal Simulation...",     icon: "play",         page: 2 },
+                                    { text: "Export Production Code...",    icon: "export",       page: 3 },
+                                    { text: "Configure Settings...",        icon: "settings-gear", page: 5 },
+                                    { text: "Deep Theory & Mathematics...", icon: "book",         tab: 1 },
+                                    { text: "Step-by-Step Tutorials...",    icon: "mortar-board", tab: 2 },
+                                    { text: "Specification Tables...",      icon: "table",        tab: 3 }
+                                ]
+                                delegate: Row {
+                                    spacing: 10
+                                    height: 24
+
+                                    Codicon {
+                                        icon: modelData.icon
+                                        iconSize: 15
+                                        iconColor: startHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Text {
+                                        text: modelData.text
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: startHov.hovered
+                                        color: startHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+
+                                        HoverHandler {
+                                            id: startHov
+                                            cursorShape: Qt.PointingHandCursor
+                                        }
+                                        TapHandler {
+                                            onTapped: {
+                                                if (modelData.hasOwnProperty("tab")) {
+                                                    root.activeTab = modelData.tab
+                                                    docFlick.contentY = 0
+                                                } else {
+                                                    root.go(modelData.page)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Shortcuts Section
+                        Column {
+                            Layout.fillWidth: true
+                            spacing: 12
+
+                            Text {
+                                text: "Shortcuts"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 18
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                                bottomPadding: 4
+                            }
+
+                            Repeater {
+                                model: [
+                                    { keys: ["Ctrl", "Tab"],    label: "Next Workspace Tab" },
+                                    { keys: ["Ctrl", "1..6"],   label: "Direct Tab Switch (1..6)" },
+                                    { keys: ["Ctrl", "S"],      label: "Save / Export Code to File" },
+                                    { keys: ["Ctrl", "R"],      label: "Reset Filter to Defaults" },
+                                    { keys: ["Ctrl", "K"],      label: "Clear Simulation Buffers" },
+                                    { keys: ["Alt", "1..3"],    label: "Switch Plot Sub-Tabs" }
+                                ]
+                                delegate: Row {
+                                    spacing: 12
+                                    height: 24
+
+                                    Row {
+                                        spacing: 4
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        Repeater {
+                                            model: modelData.keys
+                                            delegate: Rectangle {
+                                                width: keyText.implicitWidth + 12
+                                                height: 20
+                                                radius: 4
+                                                color: theme.isDark ? "#2A2D2E" : "#E4E4E4"
+                                                border.color: theme.borderColor
+                                                border.width: 1
+
+                                                Text {
+                                                    id: keyText
+                                                    anchors.centerIn: parent
+                                                    text: modelData
+                                                    font.family: "Monospace"
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.Medium
+                                                    color: theme.primaryText
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        text: modelData.label
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        color: scHov.hovered ? theme.primaryText : theme.secondaryText
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        font.underline: scHov.hovered
+
+                                        HoverHandler {
+                                            id: scHov
+                                            cursorShape: Qt.PointingHandCursor
+                                        }
+                                        TapHandler {
+                                            onTapped: root.go(modelData.page)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Row {
+                                spacing: 6
+                                topPadding: 4
+
+                                Codicon {
+                                    icon: "link-external"
+                                    iconSize: 12
+                                    iconColor: moreHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                Text {
+                                    text: "More guides & tables..."
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Medium
+                                    font.underline: moreHov.hovered
+                                    color: moreHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    HoverHandler {
+                                        id: moreHov
+                                        cursorShape: Qt.PointingHandCursor
+                                    }
+                                    TapHandler {
+                                        onTapped: {
+                                            root.activeTab = 3
+                                            docFlick.contentY = 0
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
 
-                // ─── TOPIC 2: Approximation Types ──────────────────────────
+                // ═════════════════════════════════════════════════════════════════
+                // TAB 1: THEORY & MATHEMATICS (Dedicated Math Page with LaTeX)
+                // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 16
-                    visible: root.selectedTopic === 2
+                    spacing: 24
+                    visible: root.activeTab === 1
 
                     Text {
-                        width: parent.width
-                        text: "Five classical mathematical approximations are supported, each optimized for specific trade-offs between magnitude ripple, phase linearity, and transition steepness."
+                        text: "DSP Theory & Mathematical Foundations"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "Butterworth (Maximally Flat)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 22
+                        font.weight: Font.Bold
                         color: theme.primaryText
                     }
-                    Text {
-                        width: parent.width
-                        text: "Features a completely monotonic response with no ripple in either the passband or stopband. The magnitude response satisfies |H(jΩ)|² = 1 / (1 + (Ω/Ωc)^(2N)). It is the standard choice when smooth response without coloration is desired."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
 
-                    Text {
-                        text: "Chebyshev Type I (Passband Equiripple)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
+                    // Section 1: Analog Prototype
+                    Column {
                         width: parent.width
-                        text: "Minimizes the maximum error over the passband by introducing controlled ripple (Rp dB). For the same order, Chebyshev I provides a much sharper transition band than Butterworth."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
+                        spacing: 10
 
-                    Text {
-                        text: "Chebyshev Type II (Inverse Chebyshev)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Provides a maximally flat passband and equiripple stopband. Stopband attenuation (Rs dB) is guaranteed. Contains finite zeros on the imaginary axis that map to the unit circle."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "Elliptic / Cauer"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Features equiripple behavior in both the passband and stopband using Jacobi elliptic functions. Yields the absolute steepest possible cutoff for a given order, at the cost of non-linear phase distortion."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "Bessel / Thomson (Linear Phase)"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Maximizes the flatness of the group delay in the passband based on reverse Bessel polynomials. Preserves waveshapes and transients with zero ringing or overshoot, making it ideal for audio mastering and pulse communications."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Row {
-                        spacing: 6
-                        topPadding: 8
                         Text {
-                            text: "→ View frequency and phase response curves in Analysis"
+                            text: "1. Analog Prototype Syntheses"
                             font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            font.underline: hovAn.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovAn; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(1) }
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "Digital IIR filters are synthesized by calculating the complex poles and zeros of classical normalized analog prototypes (Ωc = 1 rad/s). The poles for an n-th order Butterworth prototype lie on the left-half unit circle:"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+
+                        LaTeXBlock {
+                            width: parent.width
+                            eqId: "eq3"
+                            title: "Butterworth Prototype S-Plane Poles"
+                            equationNumber: "(3)"
+                            renderedHtml: "<i>s</i><sub><i>k</i></sub> = exp<span style=\"font-size:15px;\">(</span><i>j</i> &middot; <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 2px;\">&pi;(2<i>k</i> + <i>n</i> &minus; 1)</td></tr><tr><td style=\"padding:0 2px;\">2<i>n</i></td></tr></table><span style=\"font-size:15px;\">)</span>, &nbsp;&nbsp; <i>k</i> = 1, 2, ..., <i>n</i>"
+                            latexSource: "s_k = \\exp\\left( j \\frac{\\pi(2k + n - 1)}{2n} \\right), \\quad k = 1, \\dots, n"
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "• Chebyshev Type I: Poles placed on an ellipse with minor axis sinh(a) and major axis cosh(a), where a = asinh(1/ε)/n. Minimizes maximum peak error in the passband.\n• Chebyshev Type II: Inverted prototype poles with finite transmission zeros placed along the imaginary jΩ axis at zeros zk = ±j / cos(θk).\n• Elliptic (Cauer): Employs Jacobian elliptic rational functions to produce equiripple behavior in both passband and stopband with the steepest transition bandwidth.\n• Bessel (Thomson): Roots derived from reverse Bessel polynomials yn(s) to maximize group delay flatness and eliminate waveform ringing."
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+                    }
+
+                    // Section 2: Bilinear Transform & Pre-Warping
+                    Column {
+                        width: parent.width
+                        spacing: 10
+
+                        Text {
+                            text: "2. Bilinear Transform with Tangent Pre-Warping"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "The bilinear transform maps the continuous-time complex s-plane into the discrete-time z-plane via trapezoidal integration. Because the digital frequency interval [0, π] non-linearly compresses the infinite analog frequency axis [0, ∞), all critical cutoff frequencies are pre-warped:"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+
+                        LaTeXBlock {
+                            width: parent.width
+                            eqId: "eq4"
+                            title: "Bilinear Mapping & Frequency Pre-Warping"
+                            equationNumber: "(4)"
+                            renderedHtml: "<i>s</i> = <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 3px;\">2</td></tr><tr><td style=\"padding:0 3px;\"><i>T</i></td></tr></table> <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 3px;\">1 &minus; <i>z</i><sup>&minus;1</sup></td></tr><tr><td style=\"padding:0 3px;\">1 + <i>z</i><sup>&minus;1</sup></td></tr></table> &nbsp;&hArr;&nbsp; &Omega; = 2<i>f</i><sub><i>s</i></sub> tan<span style=\"font-size:15px;\">(</span><table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 2px;\">&pi;<i>f</i><sub><i>c</i></sub></td></tr><tr><td style=\"padding:0 2px;\"><i>f</i><sub><i>s</i></sub></td></tr></table><span style=\"font-size:15px;\">)</span>"
+                            latexSource: "s = \\frac{2}{T} \\frac{1 - z^{-1}}{1 + z^{-1}} \\iff \\Omega = 2 f_s \\tan\\left( \\frac{\\pi f_c}{f_s} \\right)"
+                        }
+                    }
+
+                    // Section 3: SOS Conjugate Pairing
+                    Column {
+                        width: parent.width
+                        spacing: 10
+
+                        Text {
+                            text: "3. Second-Order Section (SOS) Conjugate Pairing"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "Direct realization of high-order transfer functions suffers from severe numerical coefficient sensitivity. Overtune 3 groups complex roots into strict conjugate pairs (p, p*) to ensure purely real biquad coefficients:"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+
+                        LaTeXBlock {
+                            width: parent.width
+                            eqId: "eq5"
+                            title: "Second-Order Section (SOS) Cascade"
+                            equationNumber: "(5)"
+                            renderedHtml: "<i>H</i>(<i>z</i>) = <i>g</i> &middot; &prod;<sub><i>k</i>=1</sub><sup><i>K</i></sup> <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 4px;\"><i>b</i><sub>0,<i>k</i></sub> + <i>b</i><sub>1,<i>k</i></sub><i>z</i><sup>&minus;1</sup> + <i>b</i><sub>2,<i>k</i></sub><i>z</i><sup>&minus;2</sup></td></tr><tr><td style=\"padding:0 4px;\">1 + <i>a</i><sub>1,<i>k</i></sub><i>z</i><sup>&minus;1</sup> + <i>a</i><sub>2,<i>k</i></sub><i>z</i><sup>&minus;2</sup></td></tr></table>"
+                            latexSource: "H(z) = g \\cdot \\prod_{k=1}^{K} \\frac{b_{0,k} + b_{1,k} z^{-1} + b_{2,k} z^{-2}}{1 + a_{1,k} z^{-1} + a_{2,k} z^{-2}}"
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "For each conjugate pole pair p = r·e^(±jθ), the denominator coefficients are calculated as a1 = -2·r·cos(θ) and a2 = r². Sections are ordered by ascending pole radius (low Q first) to maximize signal-to-noise ratio and prevent internal state overflow."
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+                    }
+
+                    // Section 4: Exact Group Delay
+                    Column {
+                        width: parent.width
+                        spacing: 10
+
+                        Text {
+                            text: "4. Exact Analytical Group Delay"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "Instead of noisy finite-difference numerical approximations, Overtune 3 computes exact analytical derivatives of the unwrapped phase response across all biquad stages:"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+
+                        LaTeXBlock {
+                            width: parent.width
+                            eqId: "eq6"
+                            title: "Analytical Phase Derivative Group Delay"
+                            equationNumber: "(6)"
+                            renderedHtml: "&tau;<sub><i>g</i></sub>(&omega;) = &minus;<table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 2px;\"><i>d</i>&theta;(&omega;)</td></tr><tr><td style=\"padding:0 2px;\"><i>d</i>&omega;</td></tr></table> = &sum;<sub><i>k</i>=1</sub><sup><i>K</i></sup> <span style=\"font-size:15px;\">[</span> <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 3px;\"><i>P</i><sub><i>a</i>,<i>k</i></sub>(&omega;)</td></tr><tr><td style=\"padding:0 3px;\">|<i>A</i><sub><i>k</i></sub>(<i>e</i><sup><i>j&omega;</i></sup>)|<sup>2</sup></td></tr></table> &minus; <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 3px;\"><i>P</i><sub><i>b</i>,<i>k</i></sub>(&omega;)</td></tr><tr><td style=\"padding:0 3px;\">|<i>B</i><sub><i>k</i></sub>(<i>e</i><sup><i>j&omega;</i></sup>)|<sup>2</sup></td></tr></table> <span style=\"font-size:15px;\">]</span>"
+                            latexSource: "\\tau_g(\\omega) = -\\frac{d\\theta(\\omega)}{d\\omega} = \\sum_{k=1}^{K} \\left[ \\frac{P_{a,k}(\\omega)}{|A_k(e^{j\\omega})|^2} - \\frac{P_{b,k}(\\omega)}{|B_k(e^{j\\omega})|^2} \\right]"
+                        }
+                    }
+
+                    // Section 5: Stability Condition
+                    Column {
+                        width: parent.width
+                        spacing: 10
+
+                        Text {
+                            text: "5. Stability Criterion in the Complex Z-Domain"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 16
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: "A causal digital IIR filter is Bounded-Input Bounded-Output (BIBO) stable if and only if all system poles lie strictly inside the complex unit circle |z| < 1:"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                            wrapMode: Text.WordWrap
+                            lineHeight: 1.45
+                        }
+
+                        LaTeXBlock {
+                            width: parent.width
+                            eqId: "eq7"
+                            title: "Unit Circle Stability Bound"
+                            equationNumber: "(7)"
+                            renderedHtml: "max<sub><i>k</i></sub> |<i>p</i><sub><i>k</i></sub>| &lt; 1.0 &nbsp;&hArr;&nbsp; &forall; <i>k</i>, &nbsp; <i>p</i><sub><i>k</i></sub> &isin; <font face=\"serif\">&Popf;</font> = { <i>z</i> &isin; <font face=\"serif\">&Copf;</font> : |<i>z</i>| &lt; 1 }"
+                            latexSource: "\\max_{k} |p_k| < 1.0 \\iff \\forall k, \\; p_k \\in \\mathbb{D} = \\{ z \\in \\mathbb{C} : |z| < 1 \\}"
                         }
                     }
                 }
 
-                // ─── TOPIC 3: DSP Mathematics & SOS ────────────────────────
+                // ═════════════════════════════════════════════════════════════════
+                // TAB 2: STEP-BY-STEP TUTORIALS & WORKFLOW GUIDES
+                // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 16
-                    visible: root.selectedTopic === 3
+                    spacing: 24
+                    visible: root.activeTab === 2
 
                     Text {
-                        width: parent.width
-                        text: "Overtune 3 synthesizes all filters with rigorous numerical mathematics. Below is the theoretical formulation used across the computation pipeline."
+                        text: "Step-by-Step DSP Workflow Tutorials"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "1. Tangent Pre-Warping"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 22
+                        font.weight: Font.Bold
                         color: theme.primaryText
                     }
+
                     Text {
-                        width: parent.width
-                        text: "Because the bilinear transform non-linearly compresses the infinite analog frequency axis into the digital range [-π, π], analog prototype cutoff frequencies are pre-warped:\n\n    Ω = 2 * Fs * tan(π * Fc / Fs)\n\nThis ensures exact matching of critical frequencies in the discrete domain."
-                        font.family: "Monospace"
+                        text: "Practical, production-tested guides for designing, analyzing, simulating, and deploying digital filters across audio, instrumentation, and embedded firmware applications."
+                        font.family: "Stack Sans Headline"
                         font.pixelSize: 13
-                        color: theme.isDark ? "#D4D4D4" : "#24292E"
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.4
-                    }
-
-                    Text {
-                        text: "2. Second-Order Section (SOS) Decomposition"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "The overall transfer function H(z) is factored into a cascade of biquads:\n\n    H(z) = G * ∏ [ (b0_k + b1_k*z⁻¹ + b2_k*z⁻²) / (1 + a1_k*z⁻¹ + a2_k*z⁻²) ]\n\nComplex poles and zeros are grouped into exact conjugate pairs to guarantee real coefficients."
-                        font.family: "Monospace"
-                        font.pixelSize: 13
-                        color: theme.isDark ? "#D4D4D4" : "#24292E"
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.4
-                    }
-
-                    Text {
-                        text: "3. Exact Analytical Group Delay"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
-                        width: parent.width
-                        text: "Rather than noisy numerical difference quotients, Overtune 3 evaluates the exact analytical phase derivative across every biquad stage:\n\n    τ_g(ω) = Re{ (b1*z⁻¹ + 2*b2*z⁻²) / B(z) } - Re{ (a1*z⁻¹ + 2*a2*z⁻²) / A(z) }\n\nThis yields mathematically exact delay values with zero numerical noise."
-                        font.family: "Monospace"
-                        font.pixelSize: 13
-                        color: theme.isDark ? "#D4D4D4" : "#24292E"
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.4
-                    }
-                }
-
-                // ─── TOPIC 4: Signal Simulation & Audio ─────────────────────
-                Column {
-                    width: parent.width
-                    spacing: 16
-                    visible: root.selectedTopic === 4
-
-                    Text {
-                        width: parent.width
-                        text: "The simulation environment allows instant auditioning and time-domain waveform inspection of how your designed filter alters synthetic test signals and real audio files."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
                         color: theme.secondaryText
                         wrapMode: Text.WordWrap
-                        lineHeight: 1.45
                     }
 
-                    Text {
-                        text: "Supported Test Signals"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
+                    // ── Tutorial 1: Studio Audio Lowpass ───────────────────────────
+                    Rectangle {
                         width: parent.width
-                        text: "• Sine Wave: single frequency tone for inspecting gain and phase shift.\n• Frequency Chirp: linear frequency sweep from 20 Hz to 20 kHz to visualize cutoff rolloff.\n• Square Wave: rich harmonic series to observe high-frequency attenuation and transient edge response.\n• White Noise: uniform power across all frequencies for full spectrum filtering."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.5
+                        implicitHeight: t1Col.implicitHeight + 36
+                        height: implicitHeight
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+
+                        Column {
+                            id: t1Col
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                margins: 18
+                            }
+                            spacing: 14
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: t1Tag.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#1C2D3D" : "#E1EFFF"
+                                    Text {
+                                        id: t1Tag
+                                        anchors.centerIn: parent
+                                        text: "Audio Engineering"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: theme.accent
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Beginner  •  Duration: 4 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            Text {
+                                text: "Tutorial 1: Studio Audio Lowpass & High-Frequency Denoising"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 16
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Goal: Remove unwanted high-frequency tape hiss and air noise above 12,000 Hz from a 48 kHz studio vocal recording without introducing phase smearing or audible transients."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            // Parameter Specs Matrix
+                            Rectangle {
+                                width: parent.width
+                                implicitHeight: Math.max(56, t1MatrixRow.implicitHeight + 16)
+                                height: implicitHeight
+                                radius: 4
+                                color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    id: t1MatrixRow
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 8
+                                    }
+
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Lowpass (LPF)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Butterworth / Bessel"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Order (N)"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "4th Order (2 Biquads)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Cutoff / Sample Rate"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Fc = 12 kHz, Fs = 48 kHz"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. Open the Filter Designer Studio workspace.\n2. Select Lowpass (LPF) from the Topology selector, and Butterworth from the Response Type selector.\n3. Adjust the Order slider to 4, Cutoff Frequency (Fc) to 12,000 Hz, and Sampling Rate (Fs) to 48,000 Hz.\n4. Observe the interactive Magnitude response: the -3 dB corner aligns precisely at 12 kHz with a monotonic 24 dB/octave rolloff.\n5. Navigate to the Signal Simulation Studio, choose the Audio WAV tab, and import your recording to audition the filtered signal in real-time."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            // Clean Hyperlinks
+                            Row {
+                                spacing: 20
+                                topPadding: 4
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t1Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Launch Filter Designer Studio"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t1Hov.hovered
+                                        color: t1Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t1Hov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(0) }
+                                }
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t1SimHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Open Signal Simulation Studio"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t1SimHov.hovered
+                                        color: t1SimHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t1SimHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(2) }
+                                }
+                            }
+                        }
                     }
 
-                    Text {
-                        text: "Audio File Import"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
-                    }
-                    Text {
+                    // ── Tutorial 2: Mains Hum 50/60 Hz Notch Filter ────────────────
+                    Rectangle {
                         width: parent.width
-                        text: "Load uncompressed 16-bit or 24-bit PCM WAV audio files. The engine processes the signal through the biquad cascade in real time and provides instant A/B playback comparison."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
+                        implicitHeight: t2Col.implicitHeight + 36
+                        height: implicitHeight
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+
+                        Column {
+                            id: t2Col
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                margins: 18
+                            }
+                            spacing: 14
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: t2Tag.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#2A1C3D" : "#F4EAFF"
+                                    Text {
+                                        id: t2Tag
+                                        anchors.centerIn: parent
+                                        text: "Signal Conditioning"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: theme.isDark ? "#D2A8FF" : "#8A3FFC"
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Intermediate  •  Duration: 5 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            Text {
+                                text: "Tutorial 2: 50 Hz / 60 Hz Electrical Ground Loop Notch Filter"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 16
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Goal: Eliminate 50 Hz or 60 Hz AC electrical mains interference from sensitive sensor telemetry or audio signals while keeping bass frequencies (40 Hz - 70 Hz) completely intact."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            // Parameter Specs Matrix
+                            Rectangle {
+                                width: parent.width
+                                implicitHeight: Math.max(56, t2MatrixRow.implicitHeight + 16)
+                                height: implicitHeight
+                                radius: 4
+                                color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    id: t2MatrixRow
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 8
+                                    }
+
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Bandstop (Notch)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Elliptic (Cauer)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Bandwidth (Fc1, Fc2)"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "49 Hz to 51 Hz (2 Hz BW)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Rejection / Sampling"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Rs = 60 dB, Fs = 44.1 kHz"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. In Filter Designer Studio, select Bandstop (Notch) Topology.\n2. Choose Elliptic Response for maximum notch selectivity.\n3. Configure Lower Cutoff Fc1 = 49 Hz and Upper Cutoff Fc2 = 51 Hz (for 50 Hz mains) or 59/61 Hz (for 60 Hz mains).\n4. Set Stopband Attenuation to 60 dB and Order to 4.\n5. Switch to Frequency Analysis Suite: inspect the Z-Plane pole-zero diagram. Notice the zeros positioned directly on the unit circle (|z| = 1.0) at the angular frequency ω = 2π(50/44100), ensuring mathematical -inf dB cancellation at the mains frequency."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            // Clean Hyperlinks
+                            Row {
+                                spacing: 20
+                                topPadding: 4
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t2Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Configure in Designer Studio"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t2Hov.hovered
+                                        color: t2Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t2Hov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(0) }
+                                }
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t2AnHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Inspect Poles in Frequency Analysis Suite"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t2AnHov.hovered
+                                        color: t2AnHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t2AnHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(1) }
+                                }
+                            }
+                        }
                     }
 
-                    Row {
-                        spacing: 6
-                        topPadding: 8
-                        Text {
-                            text: "→ Open Signal Simulation Studio"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 14
-                            font.underline: hovSim.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovSim; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(2) }
+                    // ── Tutorial 3: Speech Bandpass ITU-T G.712 ────────────────────
+                    Rectangle {
+                        width: parent.width
+                        implicitHeight: t3Col.implicitHeight + 36
+                        height: implicitHeight
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+
+                        Column {
+                            id: t3Col
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                margins: 18
+                            }
+                            spacing: 14
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: t3Tag.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#1C3D27" : "#E6F4EA"
+                                    Text {
+                                        id: t3Tag
+                                        anchors.centerIn: parent
+                                        text: "Communications DSP"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: "#30D158"
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Intermediate  •  Duration: 5 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            Text {
+                                text: "Tutorial 3: Telephony & Voice Bandpass Filter (ITU-T G.712 Standard)"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 16
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Goal: Design a 300 Hz to 3,400 Hz voice telephony bandpass filter complying with telecommunications channel transmission standards to reject DC bias and out-of-band acoustic noise."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            // Parameter Specs Matrix
+                            Rectangle {
+                                width: parent.width
+                                implicitHeight: Math.max(56, t3MatrixRow.implicitHeight + 16)
+                                height: implicitHeight
+                                radius: 4
+                                color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    id: t3MatrixRow
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 8
+                                    }
+
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Bandpass (BPF)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Passband Range"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "300 Hz to 3,400 Hz"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Chebyshev Type I"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Order / Ripple"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Order 6, Ripple 0.5 dB"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. Select Bandpass (BPF) Topology and Chebyshev Type I response.\n2. Set Lower Cutoff Fc1 = 300 Hz and Upper Cutoff Fc2 = 3,400 Hz, with Order = 6 and Sampling Rate Fs = 16,000 Hz.\n3. Verify the Passband Ripple is under 0.5 dB across the 300-3400 Hz interval.\n4. Check the Analytical Group Delay in Analysis View: verify delay variation is less than 0.8 ms in the critical 500-2500 Hz speech formant region to ensure intelligibility."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            // Clean Hyperlinks
+                            Row {
+                                spacing: 20
+                                topPadding: 4
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t3Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Design Telephony Filter in Studio"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t3Hov.hovered
+                                        color: t3Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t3Hov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(0) }
+                                }
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t3ExpHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Export Biquads in Code Exporter"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t3ExpHov.hovered
+                                        color: t3ExpHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t3ExpHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(3) }
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Tutorial 4: Embedded C & C++20 Firmware Integration ─────────
+                    Rectangle {
+                        width: parent.width
+                        implicitHeight: t4Col.implicitHeight + 36
+                        height: implicitHeight
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+
+                        Column {
+                            id: t4Col
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                margins: 18
+                            }
+                            spacing: 14
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: t4Tag.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#3D2B1C" : "#FFF3E6"
+                                    Text {
+                                        id: t4Tag
+                                        anchors.centerIn: parent
+                                        text: "Embedded Systems"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: "#FF9500"
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Advanced  •  Duration: 7 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            Text {
+                                text: "Tutorial 4: Bare-Metal Microcontroller C & Modern C++20 Integration"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 16
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Goal: Deploy synthesized biquad coefficients into an ARM Cortex-M or microcontroller DMA audio buffer callback with zero dynamic heap allocation and deterministic cycle count."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. Design your target filter in Filter Designer Studio.\n2. Open the Production Code Exporter workspace.\n3. Choose Embedded C or Modern C++20 from the format selector.\n4. Click 'Copy Code' to place the complete standalone implementation into your clipboard.\n5. Paste the generated struct into your firmware project. The biquad processing loop uses Direct Form II Transposed equations requiring only 2 state variables per biquad:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            // Direct Form II Transposed Code Snippet
+                            Rectangle {
+                                width: parent.width
+                                implicitHeight: cCodeCol.implicitHeight + 16
+                                radius: 4
+                                color: theme.isDark ? "#141414" : "#F4F4F4"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Column {
+                                    id: cCodeCol
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.margins: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 3
+
+                                    Text {
+                                        text: "// Direct Form II Transposed processing loop (zero heap allocation)\nfloat biquad_process(Biquad* s, float in) {\n    float out = s->b0 * in + s->w1;\n    s->w1 = s->b1 * in - s->a1 * out + s->w2;\n    s->w2 = s->b2 * in - s->a2 * out;\n    return out;\n}"
+                                        font.family: "Monospace"
+                                        font.pixelSize: 11
+                                        color: theme.isDark ? "#9CDCFE" : "#001080"
+                                        wrapMode: Text.WrapAnywhere
+                                    }
+                                }
+                            }
+
+                            // Clean Hyperlinks
+                            Row {
+                                spacing: 20
+                                topPadding: 4
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t4ExpHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Open Production Code Exporter"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t4ExpHov.hovered
+                                        color: t4ExpHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t4ExpHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(3) }
+                                }
+
+                                Row {
+                                    spacing: 6
+                                    Codicon {
+                                        icon: "link-external"
+                                        iconSize: 12
+                                        iconColor: t4DesHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Tune Parameters in Filter Designer Studio"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Medium
+                                        font.underline: t4DesHov.hovered
+                                        color: t4DesHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    HoverHandler { id: t4DesHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(0) }
+                                }
+                            }
                         }
                     }
                 }
 
-                // ─── TOPIC 5: Code Export & Integration ─────────────────────
+                // ═════════════════════════════════════════════════════════════════
+                // TAB 3: SYMMETRIC REFERENCE TABLES (Dedicated Tables Page)
+                // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 16
-                    visible: root.selectedTopic === 5
+                    spacing: 24
+                    visible: root.activeTab === 3
 
                     Text {
-                        width: parent.width
-                        text: "Export production-ready biquad code with zero dynamic memory allocation, suitable for microcontrollers, embedded DSPs, audio plugins, and scientific workflows."
+                        text: "Technical Reference & Specification Tables"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.45
-                    }
-
-                    Text {
-                        text: "Available Export Targets"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 22
+                        font.weight: Font.Bold
                         color: theme.primaryText
                     }
 
-                    Text {
+                    // Table 1: Workspaces
+                    Column {
                         width: parent.width
-                        text: "• Embedded C: Static arrays and Direct Form II Transposed processing function with static state buffers. Clean MISRA-C compliant code.\n• Modern C++20: Templated biquad cascade struct with constexpr section counts and zero overhead.\n• Python (SciPy): Standard 6-column SOS coefficient matrix formatted for scipy.signal.sosfilt.\n• JSON: Structured section coefficients, poles, zeros, and specification metadata for automated build toolchains."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 14
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                        lineHeight: 1.5
-                    }
+                        spacing: 0
 
-                    Row {
-                        spacing: 6
-                        topPadding: 8
                         Text {
-                            text: "→ Open Code Exporter"
+                            text: "1. Core Application Workspaces Matrix"
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 14
-                            font.underline: hovExp.hovered
-                            color: theme.accent
-                            HoverHandler { id: hovExp; cursorShape: Qt.PointingHandCursor }
-                            TapHandler { onTapped: root.go(3) }
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                            bottomPadding: 8
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 32
+                            color: theme.isDark ? "#252526" : "#EBEBEB"
+                            border.color: theme.borderColor
+                            border.width: 1
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                anchors.rightMargin: 12
+
+                                Text { width: parent.width * 0.28; text: "Workspace Route"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.46; text: "Controls & Specifications"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.26; text: "Action"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+                        }
+
+                        Repeater {
+                            model: [
+                                { route: "Filter Designer Studio",   desc: "Topology, Response Type, Order (1..10), Cutoff Frequencies (Fc, Fc2), Sample Rate (Fs), Passband Ripple, Stopband Attenuation", page: 0 },
+                                { route: "Frequency Analysis Suite", desc: "Magnitude in dB, Unwrapped Continuous Phase in Degrees, Exact Analytical Group Delay in Samples, Z-Plane Pole-Zero Constellation", page: 1 },
+                                { route: "Signal Simulation Studio", desc: "Sine Waves, Frequency Chirps (20Hz-20kHz), Square Waves, White Noise, 16/24-bit PCM WAV Import, Real-time Audio Playback", page: 2 },
+                                { route: "Production Code Exporter", desc: "Embedded C (Direct Form II Transposed), C++20 Header-Only Struct, Python SciPy SOS Matrix, Machine-Readable JSON Schema", page: 3 },
+                                { route: "Workspace Settings",       desc: "Dark / Light Theme Toggle, Sampling Rate Defaults, Export Configuration, Application Version Information", page: 5 }
+                            ]
+                            delegate: Rectangle {
+                                width: parent.width
+                                height: 38
+                                color: rowHov.hovered ? (theme.isDark ? "#222526" : "#F5F5F5") : (index % 2 === 0 ? "transparent" : (theme.isDark ? "#1C1C1D" : "#FAFAFA"))
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+
+                                    Text { width: parent.width * 0.28; text: modelData.route; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter; elide: Text.ElideRight }
+                                    Text { width: parent.width * 0.46; text: modelData.desc; font.family: "Stack Sans Headline"; font.pixelSize: 12; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter; elide: Text.ElideRight }
+                                    
+                                    Row {
+                                        width: parent.width * 0.26
+                                        spacing: 6
+                                        anchors.verticalCenter: parent.verticalCenter
+
+                                        Codicon {
+                                            icon: "link-external"
+                                            iconSize: 12
+                                            iconColor: actHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        Text {
+                                            text: "Open Workspace"
+                                            font.family: "Stack Sans Headline"
+                                            font.pixelSize: 12
+                                            font.weight: Font.Medium
+                                            font.underline: actHov.hovered
+                                            color: actHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
+                                    HoverHandler { id: actHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(modelData.page) }
+                                }
+                                HoverHandler { id: rowHov }
+                            }
+                        }
+                    }
+
+                    // Table 2: Topologies
+                    Column {
+                        width: parent.width
+                        spacing: 0
+
+                        Text {
+                            text: "2. Supported Topologies & Zero Distributions"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                            bottomPadding: 8
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 32
+                            color: theme.isDark ? "#252526" : "#EBEBEB"
+                            border.color: theme.borderColor
+                            border.width: 1
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                anchors.rightMargin: 12
+
+                                Text { width: parent.width * 0.22; text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.28; text: "Passband Range"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.28; text: "Stopband Range"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.22; text: "Z-Domain Zeros"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+                        }
+
+                        Repeater {
+                            model: [
+                                { top: "Lowpass (LPF)",    pb: "0  ≤  f  ≤  Fc",       sb: "Fc  <  f  ≤  Fs/2",      zeros: "N zeros at z = -1 (Nyquist)" },
+                                { top: "Highpass (HPF)",   pb: "Fc  ≤  f  ≤  Fs/2",    sb: "0  ≤  f  <  Fc",         zeros: "N zeros at z = +1 (DC Rejection)" },
+                                { top: "Bandpass (BPF)",   pb: "Fc1  ≤  f  ≤  Fc2",    sb: "f < Fc1  and  f > Fc2",  zeros: "N zeros at z = +1, N at z = -1" },
+                                { top: "Bandstop (Notch)", pb: "f < Fc1  and  f > Fc2", sb: "Fc1  ≤  f  ≤  Fc2",    zeros: "2N zeros on unit circle at e^(±jω0)" }
+                            ]
+                            delegate: Rectangle {
+                                width: parent.width
+                                height: 36
+                                color: t2Hov.hovered ? (theme.isDark ? "#222526" : "#F5F5F5") : (index % 2 === 0 ? "transparent" : (theme.isDark ? "#1C1C1D" : "#FAFAFA"))
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+
+                                    Text { width: parent.width * 0.22; text: modelData.top; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.28; text: modelData.pb; font.family: "Monospace"; font.pixelSize: 11; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.28; text: modelData.sb; font.family: "Monospace"; font.pixelSize: 11; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.22; text: modelData.zeros; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.accent; anchors.verticalCenter: parent.verticalCenter; elide: Text.ElideRight }
+                                }
+                                HoverHandler { id: t2Hov }
+                            }
+                        }
+                    }
+
+                    // Table 3: Approximation Types
+                    Column {
+                        width: parent.width
+                        spacing: 0
+
+                        Text {
+                            text: "3. Approximation Types & Mathematical Comparison"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                            bottomPadding: 8
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 32
+                            color: theme.isDark ? "#252526" : "#EBEBEB"
+                            border.color: theme.borderColor
+                            border.width: 1
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                anchors.rightMargin: 12
+
+                                Text { width: parent.width * 0.20; text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.25; text: "Passband Profile"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.25; text: "Stopband Profile"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.30; text: "Phase & Group Delay"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+                        }
+
+                        Repeater {
+                            model: [
+                                { name: "Butterworth",     pb: "Maximally Flat (0 dB ripple)", sb: "Monotonic rolloff",    gd: "Moderate non-linearity" },
+                                { name: "Chebyshev I",     pb: "Equiripple (±Rp dB)",          sb: "Monotonic rolloff",    gd: "Non-linear near cutoff" },
+                                { name: "Chebyshev II",    pb: "Maximally Flat",               sb: "Equiripple (-Rs dB)",  gd: "Non-linear near cutoff" },
+                                { name: "Elliptic (Cauer)", pb: "Equiripple (±Rp dB)",         sb: "Equiripple (-Rs dB)",  gd: "Steep non-linear delay" },
+                                { name: "Bessel (Thomson)", pb: "Smooth gradual rolloff",      sb: "Gentle attenuation",   gd: "Maximally Flat (Linear Phase)" }
+                            ]
+                            delegate: Rectangle {
+                                width: parent.width
+                                height: 36
+                                color: t3Hov.hovered ? (theme.isDark ? "#222526" : "#F5F5F5") : (index % 2 === 0 ? "transparent" : (theme.isDark ? "#1C1C1D" : "#FAFAFA"))
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+
+                                    Text { width: parent.width * 0.20; text: modelData.name; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.25; text: modelData.pb; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.25; text: modelData.sb; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.30; text: modelData.gd; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter; elide: Text.ElideRight }
+                                }
+                                HoverHandler { id: t3Hov }
+                            }
+                        }
+                    }
+
+                    // Table 4: Code Export Specification
+                    Column {
+                        width: parent.width
+                        spacing: 0
+
+                        Text {
+                            text: "4. Production Code Export Formats"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 14
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                            bottomPadding: 8
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 32
+                            color: theme.isDark ? "#252526" : "#EBEBEB"
+                            border.color: theme.borderColor
+                            border.width: 1
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                anchors.rightMargin: 12
+
+                                Text { width: parent.width * 0.22; text: "Target Format"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.38; text: "Architecture & Implementation"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                Text { width: parent.width * 0.40; text: "Target Environments"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+                        }
+
+                        Repeater {
+                            model: [
+                                { lang: "Embedded C",   arch: "Direct Form II Transposed biquad cascade with static state array", env: "ARM Cortex-M, STM32, ESP32, MISRA-C" },
+                                { lang: "Modern C++20",  arch: "Templated constexpr struct with zero-allocation buffers",        env: "JUCE audio plugins, VST3/AU, game audio" },
+                                { lang: "Python SciPy", arch: "6-column Second-Order Section matrix for scipy.signal.sosfilt",  env: "NumPy, SciPy, Jupyter research pipelines" },
+                                { lang: "JSON Schema",  arch: "Serialized biquad sections, poles, zeros, and gain object",      env: "Automated test suites, CI/CD, web APIs" }
+                            ]
+                            delegate: Rectangle {
+                                width: parent.width
+                                height: 36
+                                color: t4Hov.hovered ? (theme.isDark ? "#222526" : "#F5F5F5") : (index % 2 === 0 ? "transparent" : (theme.isDark ? "#1C1C1D" : "#FAFAFA"))
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 12
+
+                                    Text { width: parent.width * 0.22; text: modelData.lang; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    Text { width: parent.width * 0.38; text: modelData.arch; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText; anchors.verticalCenter: parent.verticalCenter; elide: Text.ElideRight }
+                                    Text { width: parent.width * 0.40; text: modelData.env; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.accent; anchors.verticalCenter: parent.verticalCenter; elide: Text.ElideRight }
+                                }
+                                HoverHandler { id: t4Hov }
+                            }
                         }
                     }
                 }

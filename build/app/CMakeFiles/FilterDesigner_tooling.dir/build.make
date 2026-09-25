@@ -130,69 +130,129 @@ app/FilterDesigner/qml/components/SignalPlot.qml: /home/shreyash/Desktop/Anti-gr
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Generating FilterDesigner/qml/components/SignalPlot.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SignalPlot.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/components/SignalPlot.qml
 
+app/FilterDesigner/qml/components/LaTeXBlock.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Generating FilterDesigner/qml/components/LaTeXBlock.qml"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/components/LaTeXBlock.qml
+
 app/FilterDesigner/qml/pages/DesignPage.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Generating FilterDesigner/qml/pages/DesignPage.qml"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Generating FilterDesigner/qml/pages/DesignPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/DesignPage.qml
 
 app/FilterDesigner/qml/pages/AnalysisPage.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Generating FilterDesigner/qml/pages/AnalysisPage.qml"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Generating FilterDesigner/qml/pages/AnalysisPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/AnalysisPage.qml
 
 app/FilterDesigner/qml/pages/SimulationPage.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Generating FilterDesigner/qml/pages/SimulationPage.qml"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Generating FilterDesigner/qml/pages/SimulationPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/SimulationPage.qml
 
 app/FilterDesigner/qml/pages/ExportPage.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/ExportPage.qml
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Generating FilterDesigner/qml/pages/ExportPage.qml"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Generating FilterDesigner/qml/pages/ExportPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/ExportPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/ExportPage.qml
 
 app/FilterDesigner/qml/pages/DocsPage.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DocsPage.qml
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Generating FilterDesigner/qml/pages/DocsPage.qml"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating FilterDesigner/qml/pages/DocsPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DocsPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/DocsPage.qml
 
 app/FilterDesigner/qml/pages/SettingsPage.qml: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating FilterDesigner/qml/pages/SettingsPage.qml"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating FilterDesigner/qml/pages/SettingsPage.qml"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qml/pages/SettingsPage.qml
 
 app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Regular.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating FilterDesigner/fonts/StackSansHeadline-Regular.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating FilterDesigner/fonts/StackSansHeadline-Regular.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Regular.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf
 
 app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Medium.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating FilterDesigner/fonts/StackSansHeadline-Medium.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating FilterDesigner/fonts/StackSansHeadline-Medium.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Medium.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf
 
 app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-SemiBold.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-SemiBold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf
 
 app/FilterDesigner/fonts/StackSansHeadline-Bold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Bold.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating FilterDesigner/fonts/StackSansHeadline-Bold.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating FilterDesigner/fonts/StackSansHeadline-Bold.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/StackSansHeadline-Bold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/StackSansHeadline-Bold.ttf
 
 app/FilterDesigner/fonts/Inter-Regular.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Generating FilterDesigner/fonts/Inter-Regular.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating FilterDesigner/fonts/Inter-Regular.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Regular.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-Regular.ttf
 
 app/FilterDesigner/fonts/Inter-Medium.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Generating FilterDesigner/fonts/Inter-Medium.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Generating FilterDesigner/fonts/Inter-Medium.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Medium.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-Medium.ttf
 
 app/FilterDesigner/fonts/Inter-SemiBold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Generating FilterDesigner/fonts/Inter-SemiBold.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Generating FilterDesigner/fonts/Inter-SemiBold.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-SemiBold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-SemiBold.ttf
 
 app/FilterDesigner/fonts/Inter-Bold.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Generating FilterDesigner/fonts/Inter-Bold.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Generating FilterDesigner/fonts/Inter-Bold.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/Inter-Bold.ttf
 
 app/FilterDesigner/fonts/codicon.ttf: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Generating FilterDesigner/fonts/codicon.ttf"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Generating FilterDesigner/fonts/codicon.ttf"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/codicon.ttf
 
 app/FilterDesigner/fonts/NOTICE: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Generating FilterDesigner/fonts/NOTICE"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Generating FilterDesigner/fonts/NOTICE"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/fonts/NOTICE
+
+app/FilterDesigner/math/eq1_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Generating FilterDesigner/math/eq1_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq1_dark.png
+
+app/FilterDesigner/math/eq1_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Generating FilterDesigner/math/eq1_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq1_light.png
+
+app/FilterDesigner/math/eq2_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Generating FilterDesigner/math/eq2_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq2_dark.png
+
+app/FilterDesigner/math/eq2_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Generating FilterDesigner/math/eq2_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq2_light.png
+
+app/FilterDesigner/math/eq3_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Generating FilterDesigner/math/eq3_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq3_dark.png
+
+app/FilterDesigner/math/eq3_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Generating FilterDesigner/math/eq3_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq3_light.png
+
+app/FilterDesigner/math/eq4_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Generating FilterDesigner/math/eq4_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq4_dark.png
+
+app/FilterDesigner/math/eq4_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Generating FilterDesigner/math/eq4_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq4_light.png
+
+app/FilterDesigner/math/eq5_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Generating FilterDesigner/math/eq5_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq5_dark.png
+
+app/FilterDesigner/math/eq5_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Generating FilterDesigner/math/eq5_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq5_light.png
+
+app/FilterDesigner/math/eq6_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Generating FilterDesigner/math/eq6_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq6_dark.png
+
+app/FilterDesigner/math/eq6_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Generating FilterDesigner/math/eq6_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq6_light.png
+
+app/FilterDesigner/math/eq7_dark.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_dark.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Generating FilterDesigner/math/eq7_dark.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_dark.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq7_dark.png
+
+app/FilterDesigner/math/eq7_light.png: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_light.png
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Generating FilterDesigner/math/eq7_light.png"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/app && /usr/bin/cmake -E copy /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_light.png /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/math/eq7_light.png
 
 FilterDesigner_tooling: app/FilterDesigner/fonts/Inter-Bold.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/Inter-Medium.ttf
@@ -204,12 +264,27 @@ FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-Medium.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-Regular.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf
 FilterDesigner_tooling: app/FilterDesigner/fonts/codicon.ttf
+FilterDesigner_tooling: app/FilterDesigner/math/eq1_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq1_light.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq2_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq2_light.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq3_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq3_light.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq4_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq4_light.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq5_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq5_light.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq6_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq6_light.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq7_dark.png
+FilterDesigner_tooling: app/FilterDesigner/math/eq7_light.png
 FilterDesigner_tooling: app/FilterDesigner/qml/Main.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/CodeViewer.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/Codicon.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/FilterCard.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/FrequencyPlot.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/ImpulseStepPlot.qml
+FilterDesigner_tooling: app/FilterDesigner/qml/components/LaTeXBlock.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/ParameterRow.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/PoleZeroPlot.qml
 FilterDesigner_tooling: app/FilterDesigner/qml/components/SectionHeader.qml

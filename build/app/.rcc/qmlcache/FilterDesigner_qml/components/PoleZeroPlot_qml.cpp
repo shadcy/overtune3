@@ -1179,8 +1179,8 @@ extern const QQmlPrivate::AOTCompiledFunction aotBuiltFunctions[] = {
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 QObject *r7_1;
-QObject *r2_1;
 bool r2_2;
+QObject *r2_1;
 // if (canvas.available)
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(0, &r2_1)) {

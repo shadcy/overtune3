@@ -14,6 +14,7 @@
 /FilterDesigner/qml/components/SectionHeader.qml
 /FilterDesigner/qml/components/CodeViewer.qml
 /FilterDesigner/qml/components/SignalPlot.qml
+/FilterDesigner/qml/components/LaTeXBlock.qml
 /FilterDesigner/qml/pages/DesignPage.qml
 /FilterDesigner/qml/pages/AnalysisPage.qml
 /FilterDesigner/qml/pages/SimulationPage.qml

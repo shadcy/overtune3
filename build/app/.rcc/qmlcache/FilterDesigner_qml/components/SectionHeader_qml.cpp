@@ -300,8 +300,8 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 double r2_3;
-bool r2_1;
 QObject *r2_2;
+bool r2_1;
 // generate_LoadQmlContextPropertyLookup
 {
 QObject * retrieved;

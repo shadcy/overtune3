@@ -264,13 +264,23 @@ app/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp: app/FilterDe
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/components/SignalPlot.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SignalPlot.qml
 
+app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp: /usr/lib/qt6/libexec/qmlcachegen
+app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml
+app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp: app/.rcc/qmake_FilterDesigner.qrc
+app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
+app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
+app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp: app/FilterDesigner/qmldir
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Generating .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/components/LaTeXBlock.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml
+
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp: /usr/lib/qt6/libexec/qmlcachegen
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp: app/.rcc/qmake_FilterDesigner.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp: app/FilterDesigner/qmldir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/pages/DesignPage.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml
 
@@ -280,7 +290,7 @@ app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp: app/.rcc/qmake_
 app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
 app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp: app/FilterDesigner/qmldir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/pages/AnalysisPage.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml
 
@@ -290,7 +300,7 @@ app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp: app/.rcc/qmak
 app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
 app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp: app/FilterDesigner/qmldir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/pages/SimulationPage.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml
 
@@ -300,7 +310,7 @@ app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp: app/.rcc/qmake_Fi
 app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
 app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp: app/FilterDesigner/qmldir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/pages/ExportPage.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/ExportPage.qml
 
@@ -310,7 +320,7 @@ app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp: app/.rcc/qmake_Filt
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
 app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp: app/FilterDesigner/qmldir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/pages/DocsPage.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DocsPage.qml
 
@@ -320,7 +330,7 @@ app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp: app/.rcc/qmake_
 app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp: app/FilterDesigner/FilterDesigner.qmltypes
 app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp: app/FilterDesigner/qmldir
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Generating .rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/cmake -E make_directory /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/qmlcachegen --bare --resource-path /FilterDesigner/qml/pages/SettingsPage.qml -I /home/shreyash/Desktop/Anti-gravity/overtune3/build/app -I /usr/lib/x86_64-linux-gnu/qt6/qml -i /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner/qmldir --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmake_FilterDesigner.qrc --resource /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc -o /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SettingsPage.qml
 
@@ -340,6 +350,7 @@ app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/o
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SectionHeader.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/CodeViewer.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SignalPlot.qml
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml
@@ -356,15 +367,29 @@ app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/o
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_light.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_light.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_light.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_light.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_light.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_light.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_dark.png
+app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_light.png
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: app/.rcc/FilterDesigner_raw_qml_0.qrc
 app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp: /usr/lib/qt6/libexec/rcc
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Running rcc for resource FilterDesigner_raw_qml_0"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Running rcc for resource FilterDesigner_raw_qml_0"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/lib/qt6/libexec/rcc --output /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp --name FilterDesigner_raw_qml_0 /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/FilterDesigner_raw_qml_0.qrc
 
 app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o: app/FilterDesigner_autogen/mocs_compilation.cpp
 app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o -MF CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o.d -o CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/FilterDesigner_autogen/mocs_compilation.cpp
 
 app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.i: cmake_force
@@ -378,7 +403,7 @@ app/CMakeFiles/FilterDesigner.dir/FilterDesigner_autogen/mocs_compilation.cpp.s:
 app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o: /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/main.cpp
 app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/src/main.cpp.o -MF CMakeFiles/FilterDesigner.dir/src/main.cpp.o.d -o CMakeFiles/FilterDesigner.dir/src/main.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/main.cpp
 
 app/CMakeFiles/FilterDesigner.dir/src/main.cpp.i: cmake_force
@@ -392,7 +417,7 @@ app/CMakeFiles/FilterDesigner.dir/src/main.cpp.s: cmake_force
 app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o: /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/FilterEngine.cpp
 app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o -MF CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o.d -o CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/FilterEngine.cpp
 
 app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.i: cmake_force
@@ -406,7 +431,7 @@ app/CMakeFiles/FilterDesigner.dir/src/FilterEngine.cpp.s: cmake_force
 app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o: /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/SimulationModel.cpp
 app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o -MF CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o.d -o CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/SimulationModel.cpp
 
 app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.i: cmake_force
@@ -420,7 +445,7 @@ app/CMakeFiles/FilterDesigner.dir/src/SimulationModel.cpp.s: cmake_force
 app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o: /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/ExportModel.cpp
 app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o -MF CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o.d -o CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/ExportModel.cpp
 
 app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.i: cmake_force
@@ -434,7 +459,7 @@ app/CMakeFiles/FilterDesigner.dir/src/ExportModel.cpp.s: cmake_force
 app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o: /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/ThemeManager.cpp
 app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o -MF CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o.d -o CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/app/src/ThemeManager.cpp
 
 app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.i: cmake_force
@@ -448,7 +473,7 @@ app/CMakeFiles/FilterDesigner.dir/src/ThemeManager.cpp.s: cmake_force
 app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o: app/filterdesigner_qmltyperegistrations.cpp
 app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building CXX object app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o -MF CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o.d -o CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/filterdesigner_qmltyperegistrations.cpp
 
 app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.i: cmake_force
@@ -462,7 +487,7 @@ app/CMakeFiles/FilterDesigner.dir/filterdesigner_qmltyperegistrations.cpp.s: cma
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o: app/.rcc/qrc_qmake_FilterDesigner.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qrc_qmake_FilterDesigner.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.i: cmake_force
@@ -476,7 +501,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_qmake_FilterDesigner.cpp.s: cmake_for
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o: app/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.cpp.i: cmake_force
@@ -490,7 +515,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qmlcache_loader.c
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.i: cmake_force
@@ -504,7 +529,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/Main_qml.cpp.
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_37) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_qml.cpp.i: cmake_force
@@ -518,7 +543,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/theme/Theme_q
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_38) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Sidebar_qml.cpp.i: cmake_force
@@ -532,7 +557,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Si
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_39) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SidebarItem_qml.cpp.i: cmake_force
@@ -546,7 +571,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Si
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_40) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Codicon_qml.cpp.i: cmake_force
@@ -560,7 +585,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Co
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_41) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp.i: cmake_force
@@ -574,7 +599,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Fr
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_42) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp.i: cmake_force
@@ -588,7 +613,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Po
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_43) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.i: cmake_force
@@ -602,7 +627,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Im
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_44) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp.i: cmake_force
@@ -616,7 +641,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Fi
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_45) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.i: cmake_force
@@ -630,7 +655,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Pa
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_46) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledCombo_qml.cpp.i: cmake_force
@@ -644,7 +669,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/St
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_47) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledSlider_qml.cpp.i: cmake_force
@@ -658,7 +683,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/St
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_48) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/StyledButton_qml.cpp.i: cmake_force
@@ -672,7 +697,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/St
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_49) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.i: cmake_force
@@ -686,7 +711,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Se
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_50) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.i: cmake_force
@@ -700,7 +725,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Co
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_51) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_52) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.i: cmake_force
@@ -711,10 +736,24 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/Si
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.s"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.s
 
+app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
+app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp
+app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_53) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp
+
+app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp > CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i
+
+app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s"
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s
+
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_52) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_54) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.i: cmake_force
@@ -728,7 +767,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignP
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_53) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_55) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.i: cmake_force
@@ -742,7 +781,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/Analysi
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_54) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_56) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.i: cmake_force
@@ -756,7 +795,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/Simulat
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_55) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_57) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportPage_qml.cpp.i: cmake_force
@@ -770,7 +809,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/ExportP
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_56) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_58) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPage_qml.cpp.i: cmake_force
@@ -784,7 +823,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DocsPag
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o: app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_57) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_59) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SettingsPage_qml.cpp.i: cmake_force
@@ -798,7 +837,7 @@ app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/Setting
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o: app/CMakeFiles/FilterDesigner.dir/flags.make
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o: app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o: app/CMakeFiles/FilterDesigner.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_58) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_60) "Building CXX object app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o -MF CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o.d -o CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.o -c /home/shreyash/Desktop/Anti-gravity/overtune3/build/app/.rcc/qrc_FilterDesigner_raw_qml_0.cpp
 
 app/CMakeFiles/FilterDesigner.dir/.rcc/qrc_FilterDesigner_raw_qml_0.cpp.i: cmake_force
@@ -836,6 +875,7 @@ FilterDesigner_OBJECTS = \
 "CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o" \
 "CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o" \
 "CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o" \
+"CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o" \
 "CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o" \
 "CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o" \
 "CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o" \
@@ -872,6 +912,7 @@ bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesign
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp.o
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/CodeViewer_qml.cpp.o
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/SignalPlot_qml.cpp.o
+bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/DesignPage_qml.cpp.o
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/AnalysisPage_qml.cpp.o
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/pages/SimulationPage_qml.cpp.o
@@ -893,7 +934,7 @@ bin/FilterDesigner: /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.4.2
 bin/FilterDesigner: /usr/lib/x86_64-linux-gnu/libGLX.so
 bin/FilterDesigner: /usr/lib/x86_64-linux-gnu/libOpenGL.so
 bin/FilterDesigner: app/CMakeFiles/FilterDesigner.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_59) "Linking CXX executable ../bin/FilterDesigner"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/shreyash/Desktop/Anti-gravity/overtune3/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_61) "Linking CXX executable ../bin/FilterDesigner"
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build/app && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/FilterDesigner.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -910,6 +951,7 @@ app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/c
 app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/FilterCard_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/FrequencyPlot_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp
+app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/PoleZeroPlot_qml.cpp
 app/CMakeFiles/FilterDesigner.dir/depend: app/.rcc/qmlcache/FilterDesigner_qml/components/SectionHeader_qml.cpp

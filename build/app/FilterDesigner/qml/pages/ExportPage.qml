@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 import "../components"
 
-// ExportPage.qml — overflow-safe export UI
+// ExportPage.qml — VS Code styled production code exporter
 Item {
     id: root
     Layout.fillWidth: true
@@ -15,95 +15,379 @@ Item {
 
     readonly property int pageMargin: width < 700 ? 10 : 16
 
-    ColumnLayout {
+    function openSaveDialog() {
+        if (exportModel.code.length === 0) {
+            exportModel.generate(filterEngine)
+        }
+        saveDialog.open()
+    }
+
+    Column {
         anchors.fill: parent
         anchors.margins: root.pageMargin
-        spacing: 12
+        spacing: 10
 
-        Text {
-            text: "Export Code"
-            font.family: "Stack Sans Headline"
-            font.pixelSize: 18
-            font.weight: Font.DemiBold
-            color: theme.primaryText
-            Layout.fillWidth: true
-            elide: Text.ElideRight
-        }
+        // ── Header Title & Subtitle ───────────────────────────────────────────
+        Row {
+            width: parent.width
+            spacing: 12
 
-        Flickable {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 32
-            contentWidth: formatRow.implicitWidth
-            clip: true
-            flickableDirection: Flickable.HorizontalFlick
-            boundsBehavior: Flickable.StopAtBounds
-            interactive: contentWidth > width
-
-            Row {
-                id: formatRow
-                spacing: 8
-                Repeater {
-                    model: ["C", "C++ Header", "Python", "JSON"]
-                    delegate: StyledButton {
-                        required property int index
-                        required property string modelData
-                        text: modelData
-                        primary: exportModel.format === index
-                        implicitWidth: Math.max(72, Math.min(110, text.length * 9 + 24))
-                        implicitHeight: 30
-                        onClicked: {
-                            exportModel.format = index
-                            exportModel.generate(filterEngine)
-                        }
-                    }
+            Column {
+                spacing: 2
+                Text {
+                    text: "Production Code Exporter"
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 18
+                    font.weight: Font.DemiBold
+                    color: theme.primaryText
                 }
-                Item { width: 8; height: 1 }
-                StyledButton {
-                    text: "Save As…"
-                    primary: false
-                    implicitWidth: 88
-                    enabled: exportModel.code.length > 0
-                    onClicked: saveDialog.open()
+                Text {
+                    text: "Export synthesized biquad coefficients into zero-allocation embedded C, modern C++20, Python SciPy, or JSON"
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 12
+                    color: theme.secondaryText
                 }
             }
         }
 
-        Text {
-            Layout.fillWidth: true
-            text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName()
-                  + "  ·  Order " + filterEngine.order
-                  + "  ·  Fc " + filterEngine.cutoffFreq + " Hz"
-                  + "  ·  Fs " + filterEngine.sampleRate + " Hz"
-            font.family: "Stack Sans Headline"
-            font.pixelSize: 12
-            color: theme.secondaryText
-            elide: Text.ElideRight
-            wrapMode: Text.WordWrap
-            maximumLineCount: 2
-        }
-
-        FilterCard {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumHeight: 140
+        // ── Main VS Code Editor Container ─────────────────────────────────────
+        Rectangle {
+            width: parent.width
+            height: parent.height - 56
+            radius: 8
+            color: theme.surface
+            border.color: theme.borderColor
+            border.width: 1
             clip: true
-            CodeViewer {
+
+            Column {
                 anchors.fill: parent
-                code: exportModel.code
+                spacing: 0
+
+                // Sticky VS Code Editor Tab Bar
+                Rectangle {
+                    id: editorTabBar
+                    width: parent.width
+                    height: 38
+                    color: theme.isDark ? "#252526" : "#F3F3F3"
+                    z: 5
+
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: 1
+                        color: theme.borderColor
+                    }
+
+                    // Left: File Tabs
+                    Row {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        spacing: 0
+
+                        Repeater {
+                            model: [
+                                { name: "filter.c",    lang: "Embedded C",   icon: "file-code" },
+                                { name: "Filter.hpp",  lang: "Modern C++20", icon: "file-code" },
+                                { name: "filter.py",   lang: "Python SciPy", icon: "file-code" },
+                                { name: "filter.json", lang: "JSON Schema",  icon: "file-code" }
+                            ]
+                            delegate: Rectangle {
+                                required property int index
+                                required property var modelData
+
+                                readonly property bool active: exportModel.format === index
+                                width: Math.max(100, tabRow.implicitWidth + 24)
+                                height: editorTabBar.height
+                                color: active
+                                    ? (theme.isDark ? "#1E1E1E" : "#FFFFFF")
+                                    : (tabHov.hovered ? (theme.isDark ? "#2A2D2E" : "#E8E8E8") : "transparent")
+
+                                // Active top blue accent indicator line
+                                Rectangle {
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    height: 2
+                                    color: theme.accent
+                                    visible: parent.active
+                                }
+
+                                // Right vertical divider line
+                                Rectangle {
+                                    anchors.right: parent.right
+                                    anchors.top: parent.top
+                                    anchors.bottom: parent.bottom
+                                    width: 1
+                                    color: theme.borderColor
+                                    opacity: 0.6
+                                }
+
+                                Row {
+                                    id: tabRow
+                                    anchors.centerIn: parent
+                                    spacing: 6
+
+                                    Codicon {
+                                        icon: modelData.icon
+                                        iconSize: 13
+                                        iconColor: parent.parent.active ? theme.accent : theme.secondaryText
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Text {
+                                        text: modelData.name
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 12
+                                        font.weight: parent.parent.active ? Font.DemiBold : Font.Normal
+                                        color: parent.parent.active ? theme.primaryText : theme.secondaryText
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+
+                                HoverHandler { id: tabHov; cursorShape: Qt.PointingHandCursor }
+                                TapHandler {
+                                    onTapped: {
+                                        exportModel.format = index
+                                        exportModel.generate(filterEngine)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Right: Action buttons (Copy & Save As)
+                    Row {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 8
+
+                        // Copy Button
+                        Rectangle {
+                            width: copyBtnContent.implicitWidth + 16
+                            height: 26
+                            radius: 4
+                            color: copyHov.hovered ? (theme.isDark ? "#3A3D41" : "#E4E4E4") : (theme.isDark ? "#2D2D30" : "#EEEEEE")
+                            border.color: theme.borderColor
+                            border.width: 1
+
+                            property bool copied: false
+                            Timer {
+                                id: copiedTimer
+                                interval: 1500
+                                onTriggered: parent.copied = false
+                            }
+
+                            Row {
+                                id: copyBtnContent
+                                anchors.centerIn: parent
+                                spacing: 5
+
+                                Codicon {
+                                    icon: parent.parent.copied ? "check" : "copy"
+                                    iconSize: 12
+                                    iconColor: parent.parent.copied ? "#30D158" : theme.primaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                Text {
+                                    text: parent.parent.copied ? "Copied!" : "Copy Code"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Medium
+                                    color: parent.parent.copied ? "#30D158" : theme.primaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            HoverHandler { id: copyHov; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                onTapped: {
+                                    exportModel.copyToClipboard()
+                                    parent.copied = true
+                                    copiedTimer.restart()
+                                }
+                            }
+                        }
+
+                        // Save As Button
+                        Rectangle {
+                            width: saveBtnContent.implicitWidth + 16
+                            height: 26
+                            radius: 4
+                            color: saveHov.hovered ? "#1890FF" : theme.accent
+
+                            Row {
+                                id: saveBtnContent
+                                anchors.centerIn: parent
+                                spacing: 5
+
+                                Codicon {
+                                    icon: "save"
+                                    iconSize: 12
+                                    iconColor: "#FFFFFF"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                Text {
+                                    text: "Save File..."
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    font.weight: Font.DemiBold
+                                    color: "#FFFFFF"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            HoverHandler { id: saveHov; cursorShape: Qt.PointingHandCursor }
+                            TapHandler {
+                                onTapped: saveDialog.open()
+                            }
+                        }
+                    }
+                }
+
+                // Filter Spec Summary Pill Strip
+                Rectangle {
+                    width: parent.width
+                    height: 28
+                    color: theme.isDark ? "#1A1A1A" : "#F7F8F9"
+
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: 1
+                        color: theme.borderColor
+                        opacity: 0.4
+                    }
+
+                    Row {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 12
+
+                        Text {
+                            text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName()
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            font.weight: Font.Medium
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            text: "•"
+                            color: theme.secondaryText
+                            font.pixelSize: 10
+                        }
+
+                        Text {
+                            text: "Order " + filterEngine.order + " (" + Math.ceil(filterEngine.order / 2) + " Biquads)"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+
+                        Text {
+                            text: "•"
+                            color: theme.secondaryText
+                            font.pixelSize: 10
+                        }
+
+                        Text {
+                            text: "Fc = " + Number(filterEngine.cutoffFreq).toLocaleString(Qt.locale(), "f", 0) + " Hz"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+
+                        Text {
+                            text: "•"
+                            color: theme.secondaryText
+                            font.pixelSize: 10
+                        }
+
+                        Text {
+                            text: "Fs = " + Number(filterEngine.sampleRate).toLocaleString(Qt.locale(), "f", 0) + " Hz"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+                    }
+                }
+
+                // Code Editor Viewer
+                CodeViewer {
+                    width: parent.width
+                    height: parent.height - editorTabBar.height - 28 - 24
+                    code: exportModel.code
+                }
+
+                // Status Bar at Bottom
+                Rectangle {
+                    width: parent.width
+                    height: 24
+                    color: theme.isDark ? "#181818" : "#EBEBEB"
+
+                    Rectangle {
+                        anchors.top: parent.top
+                        width: parent.width
+                        height: 1
+                        color: theme.borderColor
+                        opacity: 0.5
+                    }
+
+                    Row {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 16
+
+                        Text {
+                            text: "Lines: " + exportModel.code.split("\n").length
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+
+                        Text {
+                            text: "Size: " + exportModel.code.length + " bytes"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+
+                        Text {
+                            text: "Encoding: UTF-8"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+
+                        Text {
+                            text: "IEEE 754 64-bit Floating Point"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.accent
+                        }
+                    }
+                }
             }
         }
     }
 
     FileDialog {
         id: saveDialog
-        title: "Save Code As"
+        title: "Save Filter Source Code"
         fileMode: FileDialog.SaveFile
         nameFilters: {
             const ext = [
-                "C files (*.c)",
-                "C++ headers (*.h)",
-                "Python files (*.py)",
-                "JSON files (*.json)"
+                "C source files (*.c)",
+                "C++ header files (*.hpp *.h)",
+                "Python script (*.py)",
+                "JSON configuration (*.json)"
             ]
             return [ext[exportModel.format], "All files (*)"]
         }

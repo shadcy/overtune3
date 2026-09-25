@@ -18,6 +18,10 @@ Item {
     readonly property bool narrowLayout: width < 900
     readonly property int pageMargin: width < 700 ? 10 : 16
 
+    function setPlotMode(m) {
+        if (freqPlot) freqPlot.displayMode = m
+    }
+
     readonly property real configWidth: {
         const w = Math.min(340, Math.max(240, width * 0.3))
         return Math.min(w, Math.max(200, width - 280))
@@ -282,8 +286,8 @@ Item {
         }
     }
 
-    // ── Plot area ─────────────────────────────────────────────────────────────
-    ColumnLayout {
+    // ── Plot area: unified workbench card ─────────────────────────────────────
+    Rectangle {
         id: plotArea
         anchors {
             left: root.narrowLayout ? parent.left : configPanel.right
@@ -292,37 +296,165 @@ Item {
             bottom: parent.bottom
             margins: root.pageMargin
         }
-        spacing: 10
+        color: theme.surface
+        radius: 8
+        border.color: theme.borderColor
+        border.width: 1
         clip: true
 
-        // Mode tabs — fill available width, wrap-safe via equal stretch
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 30
-            Layout.maximumHeight: 30
-            spacing: 6
+        // Sticky VS Code Editor Tab Bar (seamlessly integrated into top of card)
+        Rectangle {
+            id: stickyTabBar
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+            }
+            height: 38
+            color: theme.isDark ? "#252526" : "#F3F3F3"
+            z: 10
 
-            Repeater {
-                model: ["Magnitude", "Phase", "Group Delay"]
-                delegate: StyledButton {
-                    required property int index
-                    required property string modelData
-                    text: modelData
-                    primary: freqPlot.displayMode === index
-                    Layout.fillWidth: true
-                    Layout.minimumWidth: 64
-                    Layout.preferredHeight: 28
-                    font.pixelSize: plotArea.width < 360 ? 11 : 12
-                    onClicked: freqPlot.displayMode = index
+            // 1px horizontal separator line between tabs and plot
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 1
+                color: theme.borderColor
+            }
+
+            Row {
+                id: tabRow
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                spacing: 0
+
+                Repeater {
+                    model: [
+                        { label: "Magnitude",   unit: "dB",      icon: "graph" },
+                        { label: "Phase",       unit: "°",       icon: "pulse" },
+                        { label: "Group Delay", unit: "samples", icon: "history" }
+                    ]
+                    delegate: Rectangle {
+                        required property int index
+                        required property var modelData
+
+                        readonly property bool active: freqPlot.displayMode === index
+                        width: Math.max(90, tabContent.implicitWidth + 24)
+                        height: stickyTabBar.height
+                        color: active
+                            ? (theme.isDark ? "#1E1E1E" : "#FFFFFF")
+                            : (tabHov.hovered ? (theme.isDark ? "#2A2D2E" : "#E8E8E8") : "transparent")
+
+                        // Active blue top indicator bar (VS Code tab style)
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: 2
+                            color: theme.accent
+                            visible: parent.active
+                        }
+
+                        // Right vertical divider
+                        Rectangle {
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            width: 1
+                            color: theme.borderColor
+                            visible: !parent.active
+                        }
+
+                        Row {
+                            id: tabContent
+                            anchors.centerIn: parent
+                            spacing: 6
+
+                            Codicon {
+                                icon: modelData.icon
+                                iconSize: 14
+                                iconColor: parent.parent.active ? theme.accent : theme.secondaryText
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                text: modelData.label
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 12
+                                font.weight: parent.parent.active ? Font.DemiBold : Font.Normal
+                                color: parent.parent.active ? theme.primaryText : theme.secondaryText
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            // Unit pill badge
+                            Rectangle {
+                                width: unitText.implicitWidth + 8
+                                height: 16
+                                radius: 4
+                                color: parent.parent.active
+                                    ? (theme.isDark ? "#2D2D2D" : "#EAEAEA")
+                                    : (theme.isDark ? "#1E1E1E" : "#DFDFDF")
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Text {
+                                    id: unitText
+                                    anchors.centerIn: parent
+                                    text: modelData.unit
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 10
+                                    color: theme.secondaryText
+                                }
+                            }
+                        }
+
+                        HoverHandler {
+                            id: tabHov
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                        TapHandler {
+                            onTapped: freqPlot.displayMode = index
+                        }
+                    }
+                }
+            }
+
+            // Real-time readout metric on the right of sticky bar
+            Row {
+                anchors {
+                    right: parent.right
+                    rightMargin: 14
+                    verticalCenter: parent.verticalCenter
+                }
+                spacing: 8
+                visible: stickyTabBar.width > 560
+
+                Text {
+                    text: {
+                        if (freqPlot.displayMode === 0)
+                            return "Cutoff: " + Number(filterEngine.cutoffFreq).toLocaleString(Qt.locale(), "f", 0) + " Hz  ·  -3.0 dB"
+                        else if (freqPlot.displayMode === 1)
+                            return "Order: " + filterEngine.order + "  ·  Unwrapped Phase"
+                        else
+                            return "Fs: " + Number(filterEngine.sampleRate).toLocaleString(Qt.locale(), "f", 0) + " Hz  ·  Exact τg"
+                    }
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 11
+                    color: theme.secondaryText
                 }
             }
         }
 
+        // Plot canvas connected seamlessly below sticky tab bar
         FrequencyPlot {
             id: freqPlot
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumHeight: 120
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: stickyTabBar.bottom
+                bottom: parent.bottom
+            }
         }
     }
 }

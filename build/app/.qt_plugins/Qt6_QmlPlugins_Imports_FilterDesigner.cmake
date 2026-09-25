@@ -1,4 +1,4 @@
-set(qml_import_scanner_imports_count 28)
+set(qml_import_scanner_imports_count 27)
 set(qml_import_scanner_import_0 "CLASSNAME;QtQuick2Plugin;LINKTARGET;Qt6::qtquick2plugin;NAME;QtQuick;PATH;/usr/lib/x86_64-linux-gnu/qt6/qml/QtQuick;PLUGIN;qtquick2plugin;PLUGINISOPTIONAL;;PREFER;:/qt-project.org/imports/QtQuick/;RELATIVEPATH;QtQuick;TYPE;module;")
 set(qml_import_scanner_import_1 "CLASSNAME;QtQmlPlugin;LINKTARGET;Qt6::qmlplugin;NAME;QtQml;PATH;/usr/lib/x86_64-linux-gnu/qt6/qml/QtQml;PLUGIN;qmlplugin;PLUGINISOPTIONAL;;PREFER;:/qt-project.org/imports/QtQml/;RELATIVEPATH;QtQml;TYPE;module;")
 set(qml_import_scanner_import_2 "CLASSNAME;QtQmlModelsPlugin;LINKTARGET;Qt6::modelsplugin;NAME;QtQml.Models;PATH;/usr/lib/x86_64-linux-gnu/qt6/qml/QtQml/Models;PLUGIN;modelsplugin;PLUGINISOPTIONAL;;PREFER;:/qt-project.org/imports/QtQml/Models/;RELATIVEPATH;QtQml/Models;TYPE;module;")
@@ -25,6 +25,5 @@ set(qml_import_scanner_import_22 "CLASSNAME;QtQuickLayoutsPlugin;LINKTARGET;Qt6:
 set(qml_import_scanner_import_23 "NAME;components;PATH;/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/Main.qml/components;TYPE;directory;")
 set(qml_import_scanner_import_24 "NAME;pages;PATH;/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/Main.qml/pages;TYPE;directory;")
 set(qml_import_scanner_import_25 "NAME;../components;PATH;/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/components;TYPE;directory;")
-set(qml_import_scanner_import_26 "NAME;../theme;PATH;/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/theme;TYPE;directory;")
-set(qml_import_scanner_import_27 "CLASSNAME;QtQuickDialogsPlugin;LINKTARGET;Qt6::qtquickdialogsplugin;NAME;QtQuick.Dialogs;PATH;/usr/lib/x86_64-linux-gnu/qt6/qml/QtQuick/Dialogs;PLUGIN;qtquickdialogsplugin;PLUGINISOPTIONAL;;PREFER;:/qt-project.org/imports/QtQuick/Dialogs/;RELATIVEPATH;QtQuick/Dialogs;TYPE;module;")
+set(qml_import_scanner_import_26 "CLASSNAME;QtQuickDialogsPlugin;LINKTARGET;Qt6::qtquickdialogsplugin;NAME;QtQuick.Dialogs;PATH;/usr/lib/x86_64-linux-gnu/qt6/qml/QtQuick/Dialogs;PLUGIN;qtquickdialogsplugin;PLUGINISOPTIONAL;;PREFER;:/qt-project.org/imports/QtQuick/Dialogs/;RELATIVEPATH;QtQuick/Dialogs;TYPE;module;")
 

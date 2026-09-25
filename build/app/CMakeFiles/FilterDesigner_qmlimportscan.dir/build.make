@@ -87,6 +87,7 @@ app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desk
 app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SectionHeader.qml
 app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/CodeViewer.qml
 app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SignalPlot.qml
+app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml
 app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml
 app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml
 app/.qt_plugins/Qt6_QmlPlugins_Imports_FilterDesigner.cmake: /home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml

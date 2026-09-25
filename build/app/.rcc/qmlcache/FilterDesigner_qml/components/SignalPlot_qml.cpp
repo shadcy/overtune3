@@ -1619,8 +1619,8 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 QObject *r7_1;
-bool r2_1;
 QObject *r2_2;
+bool r2_1;
 // onAvailableChanged: {
 // generate_CreateCallContext
 {

@@ -428,6 +428,30 @@ FilterDesigner_autogen/fast:
 	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/FilterDesigner.dir/build.make app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.s
 .PHONY : .rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.cpp.s
 
+.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.o: .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o
+.PHONY : .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.o
+
+# target to build an object file
+.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o:
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/FilterDesigner.dir/build.make app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o
+.PHONY : .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.o
+
+.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.i: .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i
+.PHONY : .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.i
+
+# target to preprocess a source file
+.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i:
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/FilterDesigner.dir/build.make app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i
+.PHONY : .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.i
+
+.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.s: .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s
+.PHONY : .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.s
+
+# target to generate assembly for a file
+.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s:
+	cd /home/shreyash/Desktop/Anti-gravity/overtune3/build && $(MAKE) $(MAKESILENT) -f app/CMakeFiles/FilterDesigner.dir/build.make app/CMakeFiles/FilterDesigner.dir/.rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s
+.PHONY : .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.cpp.s
+
 .rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.o: .rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.cpp.o
 .PHONY : .rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.o
 
@@ -1091,6 +1115,9 @@ help:
 	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.o"
 	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.i"
 	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/ImpulseStepPlot_qml.s"
+	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.o"
+	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.i"
+	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/LaTeXBlock_qml.s"
 	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.o"
 	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.i"
 	@echo "... .rcc/qmlcache/FilterDesigner_qml/components/ParameterRow_qml.s"

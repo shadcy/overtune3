@@ -68,6 +68,18 @@ public:
     Q_INVOKABLE QString filterTypeName()     const;
     Q_INVOKABLE QString filterResponseName() const;
 
+    // Reset filter parameters to defaults
+    Q_INVOKABLE void         reset();
+
+    // Clipboard utility
+    Q_INVOKABLE void         copyText(const QString& text);
+
+    // Preset persistence to local storage
+    Q_INVOKABLE bool         savePreset(const QString& name);
+    Q_INVOKABLE QVariantList loadPresets();
+    Q_INVOKABLE bool         deletePreset(const QString& name);
+    Q_INVOKABLE bool         applyPreset(const QString& name);
+
 signals:
     void specChanged();
     void resultsChanged();

@@ -1,62 +1,83 @@
 import QtQuick
 import QtQuick.Controls
 
-// CodeViewer.qml — Monospaced code viewer with copy button and syntax highlighting bg
+// CodeViewer.qml — Monospaced code viewer with line numbers and responsive scrolling
 Item {
     id: root
     property string code: ""
 
+    // Calculate line count from code
+    readonly property var lines: root.code.split("\n")
+    readonly property int lineCount: lines.length
+
     Rectangle {
         anchors.fill: parent
-        color: theme.isDark ? "#1A1A2E" : "#F0F0F8"
-        radius: 10
+        color: theme.isDark ? "#1E1E1E" : "#FFFFFF"
+        radius: 6
         border.color: theme.borderColor
         border.width: 1
-
-        // Copy button
-        StyledButton {
-            id: copyBtn
-            anchors {
-                top: parent.top
-                right: parent.right
-                margins: 10
-            }
-            text: "Copy"
-            primary: false
-            implicitWidth: 70
-            implicitHeight: 26
-            font.pixelSize: 12
-            onClicked: {
-                exportModel.copyToClipboard()
-                text = "Copied!"
-                resetTimer.restart()
-            }
-
-            Timer {
-                id: resetTimer
-                interval: 1500
-                onTriggered: copyBtn.text = "Copy"
-            }
-        }
+        clip: true
 
         ScrollView {
-            anchors {
-                fill: parent
-                margins: 12
-                topMargin: 40
-            }
+            id: codeScroll
+            anchors.fill: parent
+            anchors.margins: 2
             ScrollBar.horizontal.policy: ScrollBar.AsNeeded
             ScrollBar.vertical.policy:   ScrollBar.AsNeeded
 
-            TextEdit {
-                readOnly: true
-                text: root.code
-                font.family: "Noto Sans Mono, Liberation Mono, monospace"
-                font.pixelSize: 12
-                color: theme.primaryText
-                wrapMode: TextEdit.NoWrap
-                selectByMouse: true
-                width: Math.max(root.width - 48, implicitWidth)
+            Row {
+                spacing: 0
+                height: Math.max(codeScroll.height, codeEdit.implicitHeight + 20)
+
+                // Line numbers gutter
+                Rectangle {
+                    width: Math.max(38, (root.lineCount.toString().length * 8) + 18)
+                    height: parent.height
+                    color: theme.isDark ? "#1A1A1A" : "#F8F8F8"
+
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        width: 1
+                        color: theme.borderColor
+                    }
+
+                    Column {
+                        anchors.top: parent.top
+                        anchors.topMargin: 10
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        spacing: 0
+
+                        Repeater {
+                            model: root.lineCount
+                            Text {
+                                text: (index + 1).toString()
+                                font.family: "Monospace"
+                                font.pixelSize: 12
+                                color: theme.secondaryText
+                                height: 18
+                                horizontalAlignment: Text.AlignRight
+                            }
+                        }
+                    }
+                }
+
+                // Code text area
+                TextEdit {
+                    id: codeEdit
+                    readOnly: true
+                    text: root.code
+                    font.family: "Monospace"
+                    font.pixelSize: 12
+                    color: theme.isDark ? "#D4D4D4" : "#24292E"
+                    wrapMode: TextEdit.NoWrap
+                    selectByMouse: true
+                    padding: 10
+                    topPadding: 10
+                    selectionColor: theme.isDark ? "#264F78" : "#ADD6FF"
+                }
             }
         }
     }

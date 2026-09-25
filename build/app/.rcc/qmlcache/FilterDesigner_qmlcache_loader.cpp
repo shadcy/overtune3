@@ -117,6 +117,13 @@ namespace _0x5f_FilterDesigner_qml_components_SignalPlot_qml {
         reinterpret_cast<const QV4::CompiledData::Unit*>(&qmlData), &aotBuiltFunctions[0], nullptr
     };
 }
+namespace _0x5f_FilterDesigner_qml_components_LaTeXBlock_qml { 
+    extern const unsigned char qmlData[];
+    extern const QQmlPrivate::AOTCompiledFunction aotBuiltFunctions[];
+    const QQmlPrivate::CachedQmlUnit unit = {
+        reinterpret_cast<const QV4::CompiledData::Unit*>(&qmlData), &aotBuiltFunctions[0], nullptr
+    };
+}
 namespace _0x5f_FilterDesigner_qml_pages_DesignPage_qml { 
     extern const unsigned char qmlData[];
     extern const QQmlPrivate::AOTCompiledFunction aotBuiltFunctions[];
@@ -189,6 +196,7 @@ Registry::Registry() {
     resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/components/SectionHeader.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_components_SectionHeader_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/components/CodeViewer.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_components_CodeViewer_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/components/SignalPlot.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_components_SignalPlot_qml::unit);
+    resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/components/LaTeXBlock.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_components_LaTeXBlock_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/pages/DesignPage.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_pages_DesignPage_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/pages/AnalysisPage.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_pages_AnalysisPage_qml::unit);
     resourcePathToCachedUnit.insert(QStringLiteral("/FilterDesigner/qml/pages/SimulationPage.qml"), &QmlCacheGeneratedCode::_0x5f_FilterDesigner_qml_pages_SimulationPage_qml::unit);

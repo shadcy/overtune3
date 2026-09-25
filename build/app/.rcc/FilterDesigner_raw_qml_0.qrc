@@ -16,6 +16,7 @@
     <file alias="qml/components/SectionHeader.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SectionHeader.qml</file>
     <file alias="qml/components/CodeViewer.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/CodeViewer.qml</file>
     <file alias="qml/components/SignalPlot.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/SignalPlot.qml</file>
+    <file alias="qml/components/LaTeXBlock.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/components/LaTeXBlock.qml</file>
     <file alias="qml/pages/DesignPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/DesignPage.qml</file>
     <file alias="qml/pages/AnalysisPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/AnalysisPage.qml</file>
     <file alias="qml/pages/SimulationPage.qml">/home/shreyash/Desktop/Anti-gravity/overtune3/app/qml/pages/SimulationPage.qml</file>
@@ -32,6 +33,20 @@
     <file alias="fonts/Inter-Bold.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/Inter-Bold.ttf</file>
     <file alias="fonts/codicon.ttf">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/codicon.ttf</file>
     <file alias="fonts/NOTICE">/home/shreyash/Desktop/Anti-gravity/overtune3/app/fonts/NOTICE</file>
+    <file alias="math/eq1_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_dark.png</file>
+    <file alias="math/eq1_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq1_light.png</file>
+    <file alias="math/eq2_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_dark.png</file>
+    <file alias="math/eq2_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq2_light.png</file>
+    <file alias="math/eq3_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_dark.png</file>
+    <file alias="math/eq3_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq3_light.png</file>
+    <file alias="math/eq4_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_dark.png</file>
+    <file alias="math/eq4_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq4_light.png</file>
+    <file alias="math/eq5_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_dark.png</file>
+    <file alias="math/eq5_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq5_light.png</file>
+    <file alias="math/eq6_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_dark.png</file>
+    <file alias="math/eq6_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq6_light.png</file>
+    <file alias="math/eq7_dark.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_dark.png</file>
+    <file alias="math/eq7_light.png">/home/shreyash/Desktop/Anti-gravity/overtune3/app/math/eq7_light.png</file>
   </qresource>
 </RCC>
 

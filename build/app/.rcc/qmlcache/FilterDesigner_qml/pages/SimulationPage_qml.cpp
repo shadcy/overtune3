@@ -1608,8 +1608,8 @@ return r2_1;
         wrapCall(aotContext, dataPtr, argumentsPtr, [](const QQmlPrivate::AOTCompiledContext *aotContext, void **argumentsPtr) {
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
-double r2_2;
 QObject *r2_1;
+double r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadContextIdLookup(10, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -1665,8 +1665,8 @@ return r2_1;
 Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 double r7_1;
-bool r2_2;
 double r2_1;
+bool r2_2;
 // generate_LoadQmlContextPropertyLookup
 while (!aotContext->loadScopeObjectPropertyLookup(16, &r2_1)) {
 aotContext->setInstructionPointer(2);
@@ -1743,8 +1743,8 @@ Q_UNUSED(aotContext)
 Q_UNUSED(argumentsPtr)
 QString r7_1;
 QString r8_1;
-QString r2_1;
 QStringList r2_2;
+QString r2_1;
 // generate_LoadRuntimeString
 r2_1 = QStringLiteral("WAV files (*.wav)");
 // generate_StoreReg
