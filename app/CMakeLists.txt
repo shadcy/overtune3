@@ -36,6 +36,7 @@ qt_add_qml_module(FilterDesigner
         qml/components/CodeViewer.qml
         qml/components/SignalPlot.qml
         qml/components/LaTeXBlock.qml
+        qml/components/TutorialStudio.qml
         qml/pages/DesignPage.qml
         qml/pages/AnalysisPage.qml
         qml/pages/SimulationPage.qml

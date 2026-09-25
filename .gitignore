@@ -1,0 +1,83 @@
+# ==============================================================================
+# Filter Designer (.gitignore)
+# ==============================================================================
+
+# ── Build Directories ─────────────────────────────────────────────────────────
+build/
+build-*/
+cmake-build-*/
+out/
+bin/
+lib/
+
+# ── CMake In-Source Artifacts ──────────────────────────────────────────────────
+CMakeFiles/
+CMakeScripts/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+*.cmake.in
+
+# ── Qt & QML Generated Files ──────────────────────────────────────────────────
+.qt/
+.rcc/
+qrc_*.cpp
+moc_*.cpp
+moc_*.h
+ui_*.h
+*.moc
+*.qmlc
+*.jsc
+*.qrc.depends
+
+# Qt Creator project user settings
+*.user
+*.user.*
+CMakeLists.txt.user*
+
+# ── Compiled Objects & Libraries ──────────────────────────────────────────────
+*.o
+*.obj
+*.so
+*.so.*
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+*.out
+*.app/
+*.dSYM/
+
+# ── Editor & IDE Metadata ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.directory
+
+# ── OS Specific ───────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ── Temporary & Scratch Files ─────────────────────────────────────────────────
+scratch/
+*.log
+*.tmp
+*.bak
+*~
+*.swp
+*.swo
+
+# ── Python Cache (if running helper scripts) ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class

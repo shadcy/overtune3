@@ -141,7 +141,7 @@ Rectangle {
         // Rendered Equation Container
         Rectangle {
             width: parent.width
-            implicitHeight: root.eqId.length > 0 ? 94 : Math.max(50, renderedText.implicitHeight + 20)
+            implicitHeight: root.eqId.length > 0 ? 54 : Math.max(38, renderedText.implicitHeight + 14)
             color: theme.isDark ? "#161616" : "#FFFFFF"
             radius: 4
             border.color: theme.borderColor
@@ -151,15 +151,14 @@ Rectangle {
 
             // Compiled LaTeX Equation image (300 DPI, transparent, dark/light theme aware)
             Image {
-                id: eqImg
                 visible: root.eqId.length > 0
                 anchors.centerIn: parent
                 source: root.eqId.length > 0 ? ("qrc:/FilterDesigner/math/" + root.eqId + "_" + (theme.isDark ? "dark" : "light") + ".png") : ""
                 fillMode: Image.PreserveAspectFit
                 mipmap: true
                 smooth: true
-                width: Math.max(10, parent.width - 32)
-                height: Math.max(10, parent.height - 18)
+                height: Math.min(parent.height - 10, implicitHeight)
+                width: Math.min(parent.width - 20, implicitWidth)
             }
 
             // Fallback Rich Text rendering
@@ -171,7 +170,7 @@ Rectangle {
                 text: root.renderedHtml
                 textFormat: Text.RichText
                 font.family: "Stack Sans Headline"
-                font.pixelSize: 18
+                font.pixelSize: 14
                 color: theme.primaryText
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap

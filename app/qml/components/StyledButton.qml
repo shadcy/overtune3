@@ -39,8 +39,5 @@ Button {
         opacity: root.enabled ? 1 : 0.5
     }
 
-    HoverHandler {
-        id: hov
-        cursorShape: Qt.PointingHandCursor
-    }
+    HoverHandler { id: hov }
 }

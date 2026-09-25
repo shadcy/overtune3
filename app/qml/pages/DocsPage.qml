@@ -160,6 +160,75 @@ Item {
                             color: theme.secondaryText
                         }
                     }
+
+                    // Clean Theory Provided on Start
+                    Rectangle {
+                        width: parent.width
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
+
+                        Column {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                margins: 18
+                            }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                spacing: 8
+                                Codicon {
+                                    icon: "info"
+                                    iconSize: 16
+                                    iconColor: theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: "Theory & Principles at a Glance"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 14
+                                    font.weight: Font.DemiBold
+                                    color: theme.primaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Digital Infinite Impulse Response (IIR) filters compute discrete output samples using feedforward linear combinations of present and past inputs together with feedback from past outputs. In Overtune 3, transfer functions are mapped into the digital domain via the bilinear transformation with frequency pre-warping and decomposed into cascaded Second-Order Sections (SOS biquads) for numerical stability:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            // LaTeX Mathematical Equation Block on Start
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq1"
+                                title: "Direct Form II Difference Equation"
+                                equationNumber: "(1)"
+                                renderedHtml: "<i>y</i>[<i>n</i>] = &sum;<sub><i>k</i>=0</sub><sup><i>M</i></sup> <i>b</i><sub><i>k</i></sub><i>x</i>[<i>n</i>&minus;<i>k</i>] &minus; &sum;<sub><i>k</i>=1</sub><sup><i>N</i></sup> <i>a</i><sub><i>k</i></sub><i>y</i>[<i>n</i>&minus;<i>k</i>]"
+                                latexSource: "y[n] = \\sum_{k=0}^{M} b_k x[n-k] - \\sum_{k=1}^{N} a_k y[n-k]"
+                            }
+
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq2"
+                                title: "Second-Order Section (SOS) Cascade Transfer Function"
+                                equationNumber: "(2)"
+                                renderedHtml: "<i>H</i>(<i>z</i>) = <i>g</i> &middot; &prod;<sub><i>k</i>=1</sub><sup><i>K</i></sup> <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 4px;\"><i>b</i><sub>0,<i>k</i></sub> + <i>b</i><sub>1,<i>k</i></sub><i>z</i><sup>&minus;1</sup> + <i>b</i><sub>2,<i>k</i></sub><i>z</i><sup>&minus;2</sup></td></tr><tr><td style=\"padding:0 4px;\">1 + <i>a</i><sub>1,<i>k</i></sub><i>z</i><sup>&minus;1</sup> + <i>a</i><sub>2,<i>k</i></sub><i>z</i><sup>&minus;2</sup></td></tr></table>"
+                                latexSource: "H(z) = g \\cdot \\prod_{k=1}^{K} \\frac{b_{0,k} + b_{1,k} z^{-1} + b_{2,k} z^{-2}}{1 + a_{1,k} z^{-1} + a_{2,k} z^{-2}}"
+                            }
+                        }
+                    }
+
                     // Two-Column: Start + Shortcuts
                     GridLayout {
                         width: parent.width
@@ -565,24 +634,34 @@ Item {
                         wrapMode: Text.WordWrap
                     }
 
+                    // ── Student Tutorial Studio & Creator ────────────────────────────
+                    TutorialStudio {
+                        width: parent.width
+                    }
+
+                    // ── Built-in Legacy Tutorials ────────────────────────────────────
+                    Text {
+                        text: "Built-in Static Guides & Workflows"
+                        font.family: "Stack Sans Headline"
+                        font.pixelSize: 16
+                        font.weight: Font.DemiBold
+                        color: theme.primaryText
+                        topPadding: 12
+                    }
+
                     // ── Tutorial 1: Studio Audio Lowpass ───────────────────────────
                     Rectangle {
                         width: parent.width
-                        implicitHeight: t1Col.implicitHeight + 36
-                        height: implicitHeight
+                        implicitHeight: tut1Col.implicitHeight + 36
                         radius: 8
                         color: theme.surface
                         border.color: theme.borderColor
                         border.width: 1
 
                         Column {
-                            id: t1Col
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-                                margins: 18
-                            }
+                            id: tut1Col
+                            anchors.fill: parent
+                            anchors.margins: 18
                             spacing: 14
 
                             Row {
@@ -635,21 +714,15 @@ Item {
                             // Parameter Specs Matrix
                             Rectangle {
                                 width: parent.width
-                                implicitHeight: Math.max(56, t1MatrixRow.implicitHeight + 16)
-                                height: implicitHeight
+                                height: 56
                                 radius: 4
                                 color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
                                 border.color: theme.borderColor
                                 border.width: 1
 
                                 Row {
-                                    id: t1MatrixRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 8
-                                    }
+                                    anchors.fill: parent
+                                    anchors.margins: 8
 
                                     Column {
                                         width: parent.width * 0.25; spacing: 2
@@ -737,21 +810,16 @@ Item {
                     // ── Tutorial 2: Mains Hum 50/60 Hz Notch Filter ────────────────
                     Rectangle {
                         width: parent.width
-                        implicitHeight: t2Col.implicitHeight + 36
-                        height: implicitHeight
+                        implicitHeight: tut2Col.implicitHeight + 36
                         radius: 8
                         color: theme.surface
                         border.color: theme.borderColor
                         border.width: 1
 
                         Column {
-                            id: t2Col
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-                                margins: 18
-                            }
+                            id: tut2Col
+                            anchors.fill: parent
+                            anchors.margins: 18
                             spacing: 14
 
                             Row {
@@ -804,21 +872,15 @@ Item {
                             // Parameter Specs Matrix
                             Rectangle {
                                 width: parent.width
-                                implicitHeight: Math.max(56, t2MatrixRow.implicitHeight + 16)
-                                height: implicitHeight
+                                height: 56
                                 radius: 4
                                 color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
                                 border.color: theme.borderColor
                                 border.width: 1
 
                                 Row {
-                                    id: t2MatrixRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 8
-                                    }
+                                    anchors.fill: parent
+                                    anchors.margins: 8
 
                                     Column {
                                         width: parent.width * 0.25; spacing: 2
@@ -906,21 +968,16 @@ Item {
                     // ── Tutorial 3: Speech Bandpass ITU-T G.712 ────────────────────
                     Rectangle {
                         width: parent.width
-                        implicitHeight: t3Col.implicitHeight + 36
-                        height: implicitHeight
+                        implicitHeight: tut3Col.implicitHeight + 36
                         radius: 8
                         color: theme.surface
                         border.color: theme.borderColor
                         border.width: 1
 
                         Column {
-                            id: t3Col
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-                                margins: 18
-                            }
+                            id: tut3Col
+                            anchors.fill: parent
+                            anchors.margins: 18
                             spacing: 14
 
                             Row {
@@ -973,21 +1030,15 @@ Item {
                             // Parameter Specs Matrix
                             Rectangle {
                                 width: parent.width
-                                implicitHeight: Math.max(56, t3MatrixRow.implicitHeight + 16)
-                                height: implicitHeight
+                                height: 56
                                 radius: 4
                                 color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
                                 border.color: theme.borderColor
                                 border.width: 1
 
                                 Row {
-                                    id: t3MatrixRow
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        top: parent.top
-                                        margins: 8
-                                    }
+                                    anchors.fill: parent
+                                    anchors.margins: 8
 
                                     Column {
                                         width: parent.width * 0.25; spacing: 2
@@ -1075,21 +1126,16 @@ Item {
                     // ── Tutorial 4: Embedded C & C++20 Firmware Integration ─────────
                     Rectangle {
                         width: parent.width
-                        implicitHeight: t4Col.implicitHeight + 36
-                        height: implicitHeight
+                        implicitHeight: tut4Col.implicitHeight + 36
                         radius: 8
                         color: theme.surface
                         border.color: theme.borderColor
                         border.width: 1
 
                         Column {
-                            id: t4Col
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                                top: parent.top
-                                margins: 18
-                            }
+                            id: tut4Col
+                            anchors.fill: parent
+                            anchors.margins: 18
                             spacing: 14
 
                             Row {
