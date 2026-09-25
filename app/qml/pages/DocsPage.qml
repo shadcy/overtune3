@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Window
 import "../components"
 
-// DocsPage.qml — Clean modular docs: Get Started, Theory & Math with LaTeX, Step-by-Step Tutorials, and Contributors & Wiki
+// DocsPage.qml — Clean unified docs: Get Started, Theory & Math with LaTeX, Tutorials, and Contributors & Wiki
 Item {
     id: root
     Layout.fillWidth: true
@@ -34,18 +34,9 @@ Item {
             width: parent.width
             height: 42
             color: theme.isDark ? "#1E1E1E" : "#F3F3F3"
-            border.color: theme.accent
-            border.width: 0
+            border.color: theme.borderColor
+            border.width: 1
             z: 10
-
-            // Bottom border in primary blue
-            Rectangle {
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: 1
-                color: theme.isDark ? "#282828" : "#E0E0E0"
-            }
 
             Row {
                 anchors.left: parent.left
@@ -418,363 +409,639 @@ Item {
                 }
 
                 // ═════════════════════════════════════════════════════════════════
-                // TAB 1: THEORY & MATHEMATICS
+                // TAB 1: THEORY & MATHEMATICS (Unified Card Style)
                 // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 24
+                    spacing: 20
                     visible: root.activeTab === 1
 
-                    Text {
-                        text: "DSP Theory & Mathematical Foundations"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 22
-                        font.weight: Font.Bold
-                        color: theme.primaryText
-                    }
-
-                    // Section 1: Analog Prototype
+                    // Headline
                     Column {
                         width: parent.width
-                        spacing: 10
+                        spacing: 6
 
                         Text {
-                            text: "1. Analog Prototype Syntheses"
+                            text: "DSP Theory & Mathematical Foundations"
                             font.family: "Stack Sans Headline"
-                            font.pixelSize: 16
-                            font.weight: Font.DemiBold
+                            font.pixelSize: 22
+                            font.weight: Font.Bold
                             color: theme.primaryText
                         }
 
                         Text {
-                            width: parent.width
-                            text: "Digital IIR filters are synthesized by calculating the complex poles and zeros of classical normalized analog prototypes (Ωc = 1 rad/s). The poles for an n-th order Butterworth prototype lie on the left-half unit circle:"
+                            text: "Rigorous mathematical derivations for continuous-time filter prototypes, bilinear frequency warping, and discrete second-order cascade realizations."
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 13
                             color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.45
-                        }
-
-                        LaTeXBlock {
-                            width: parent.width
-                            eqId: "eq3"
-                            title: "Butterworth Prototype S-Plane Poles"
-                            equationNumber: "(3)"
-                            renderedHtml: "<i>s</i><sub><i>k</i></sub> = exp(<i>j</i> &middot; &pi;(2<i>k</i> + <i>n</i> &minus; 1) / 2<i>n</i>), &nbsp;&nbsp; <i>k</i> = 1, 2, ..., <i>n</i>"
-                            latexSource: "s_k = \\exp\\left( j \\frac{\\pi(2k + n - 1)}{2n} \\right), \\quad k = 1, \\dots, n"
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: "• Butterworth: Maximally flat passband response with monotonic attenuation.\n• Chebyshev Type I: Equiripple passband with steep roll-off, minimizing peak error.\n• Chebyshev Type II: Maximally flat passband with equiripple stopband zeros.\n• Elliptic (Cauer): Jacobian elliptic rational functions for sharpest transition band.\n• Bessel (Thomson): Maximally flat group delay, linear phase, and zero ringing."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.5
                         }
                     }
 
-                    // Section 2: Bilinear Transform & Pre-Warping
-                    Column {
+                    // Card 1: Analog Prototype Syntheses
+                    Rectangle {
                         width: parent.width
-                        spacing: 10
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Text {
-                            text: "2. Bilinear Transform with Tangent Pre-Warping"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 16
-                            font.weight: Font.DemiBold
-                            color: theme.primaryText
-                        }
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
 
-                        Text {
-                            width: parent.width
-                            text: "The bilinear transform maps the continuous-time complex s-plane into the discrete-time z-plane via trapezoidal integration. Because the digital frequency interval [0, π] non-linearly compresses the infinite analog frequency axis [0, ∞), all critical cutoff frequencies are pre-warped:"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.45
-                        }
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "graph"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "1. Analog Prototype Syntheses"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
 
-                        LaTeXBlock {
-                            width: parent.width
-                            eqId: "eq4"
-                            title: "Bilinear Mapping & Frequency Pre-Warping"
-                            equationNumber: "(4)"
-                            renderedHtml: "<i>s</i> = (2/<i>T</i>) &middot; (1 &minus; <i>z</i><sup>&minus;1</sup>) / (1 + <i>z</i><sup>&minus;1</sup>) &nbsp;&hArr;&nbsp; &Omega; = 2<i>f</i><sub><i>s</i></sub> tan(&pi;<i>f</i><sub><i>c</i></sub> / <i>f</i><sub><i>s</i></sub>)"
-                            latexSource: "s = \\frac{2}{T} \\frac{1 - z^{-1}}{1 + z^{-1}} \\iff \\Omega = 2 f_s \\tan\\left( \\frac{\\pi f_c}{f_s} \\right)"
+                            Text {
+                                width: parent.width
+                                text: "Digital IIR filters are synthesized by calculating the complex poles and zeros of classical normalized analog prototypes (Ωc = 1 rad/s). The poles for an n-th order Butterworth prototype lie uniformly distributed along the left-half unit circle in the complex s-plane:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq3"
+                                title: "Butterworth Prototype S-Plane Poles"
+                                equationNumber: "(3)"
+                                renderedHtml: "<i>s</i><sub><i>k</i></sub> = exp(<i>j</i> &middot; &pi;(2<i>k</i> + <i>n</i> &minus; 1) / 2<i>n</i>), &nbsp;&nbsp; <i>k</i> = 1, 2, ..., <i>n</i>"
+                                latexSource: "s_k = \\exp\\left( j \\frac{\\pi(2k + n - 1)}{2n} \\right), \\quad k = 1, \\dots, n"
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "• Butterworth: Maximally flat magnitude response in passband with monotonic attenuation (6N dB/octave).\n• Chebyshev Type I: Equiripple passband with steep roll-off, minimizing maximum peak ripple error.\n• Chebyshev Type II: Maximally flat passband with transmission zeros placed along the imaginary jΩ axis.\n• Elliptic (Cauer): Jacobian elliptic rational functions producing the sharpest possible transition bandwidth.\n• Bessel (Thomson): Maximally flat group delay, preserving waveforms with linear phase and zero ringing."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
                         }
                     }
 
-                    // Section 3: SOS Conjugate Pairing
-                    Column {
+                    // Card 2: Bilinear Transform & Pre-Warping
+                    Rectangle {
                         width: parent.width
-                        spacing: 10
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Text {
-                            text: "3. Second-Order Section (SOS) Conjugate Pairing"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 16
-                            font.weight: Font.DemiBold
-                            color: theme.primaryText
-                        }
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
 
-                        Text {
-                            width: parent.width
-                            text: "Direct realization of high-order transfer functions suffers from severe numerical coefficient sensitivity. Overtune 3 groups complex roots into strict conjugate pairs (p, p*) to ensure purely real biquad coefficients, factoring high-order filters into cascades of 2nd-order sections:"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.45
-                        }
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "sync"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "2. Bilinear Transform with Tangent Pre-Warping"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
 
-                        LaTeXBlock {
-                            width: parent.width
-                            eqId: "eq5"
-                            title: "Second-Order Section Biquad Polynomial Factorization"
-                            equationNumber: "(5)"
-                            renderedHtml: "(1 &minus; <i>p</i><sub><i>k</i></sub><i>z</i><sup>&minus;1</sup>)(1 &minus; <i>p</i><sub><i>k</i></sub><sup>*</sup><i>z</i><sup>&minus;1</sup>) = 1 &minus; 2 Re(<i>p</i><sub><i>k</i></sub>)<i>z</i><sup>&minus;1</sup> + |<i>p</i><sub><i>k</i></sub>|<sup>2</sup><i>z</i><sup>&minus;2</sup>"
-                            latexSource: "(1 - p_k z^{-1})(1 - p_k^* z^{-1}) = 1 - 2\\,\\text{Re}(p_k)z^{-1} + |p_k|^2 z^{-2}"
+                            Text {
+                                width: parent.width
+                                text: "The bilinear transform maps the continuous-time complex s-plane into the discrete-time z-plane via trapezoidal integration. Because the digital frequency interval [0, π] non-linearly compresses the infinite analog frequency axis [0, ∞), all critical cutoff frequencies are pre-warped:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq4"
+                                title: "Bilinear Mapping & Frequency Pre-Warping"
+                                equationNumber: "(4)"
+                                renderedHtml: "<i>s</i> = (2/<i>T</i>) &middot; (1 &minus; <i>z</i><sup>&minus;1</sup>) / (1 + <i>z</i><sup>&minus;1</sup>) &nbsp;&hArr;&nbsp; &Omega; = 2<i>f</i><sub><i>s</i></sub> tan(&pi;<i>f</i><sub><i>c</i></sub> / <i>f</i><sub><i>s</i></sub>)"
+                                latexSource: "s = \\frac{2}{T} \\frac{1 - z^{-1}}{1 + z^{-1}} \\iff \\Omega = 2 f_s \\tan\\left( \\frac{\\pi f_c}{f_s} \\right)"
+                            }
                         }
                     }
 
-                    // Section 4: Group Delay & Unit Circle Stability
-                    Column {
+                    // Card 3: SOS Conjugate Pairing
+                    Rectangle {
                         width: parent.width
-                        spacing: 10
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Text {
-                            text: "4. Group Delay & Stability Criteria"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 16
-                            font.weight: Font.DemiBold
-                            color: theme.primaryText
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "layers"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "3. Second-Order Section (SOS) Conjugate Pairing"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Direct realization of high-order transfer functions suffers from severe numerical coefficient sensitivity. Overtune 3 groups complex roots into strict conjugate pairs (p, p*) to ensure purely real biquad coefficients, factoring high-order filters into cascades of 2nd-order sections:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq5"
+                                title: "Second-Order Section Biquad Polynomial Factorization"
+                                equationNumber: "(5)"
+                                renderedHtml: "(1 &minus; <i>p</i><sub><i>k</i></sub><i>z</i><sup>&minus;1</sup>)(1 &minus; <i>p</i><sub><i>k</i></sub><sup>*</sup><i>z</i><sup>&minus;1</sup>) = 1 &minus; 2 Re(<i>p</i><sub><i>k</i></sub>)<i>z</i><sup>&minus;1</sup> + |<i>p</i><sub><i>k</i></sub>|<sup>2</sup><i>z</i><sup>&minus;2</sup>"
+                                latexSource: "(1 - p_k z^{-1})(1 - p_k^* z^{-1}) = 1 - 2\\,\\text{Re}(p_k)z^{-1} + |p_k|^2 z^{-2}"
+                            }
                         }
+                    }
 
-                        Text {
-                            width: parent.width
-                            text: "Group delay represents the time delay of amplitude envelopes across frequencies. A causal digital IIR filter is Bounded-Input Bounded-Output (BIBO) stable if and only if all system poles lie strictly inside the complex unit circle |z| < 1:"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.45
-                        }
+                    // Card 4: Group Delay & Unit Circle Stability
+                    Rectangle {
+                        width: parent.width
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        LaTeXBlock {
-                            width: parent.width
-                            eqId: "eq6"
-                            title: "Analytical Group Delay Computation"
-                            equationNumber: "(6)"
-                            renderedHtml: "&tau;<sub><i>g</i></sub>(&omega;) = &minus; d&theta;(&omega;) / d&omega;"
-                            latexSource: "\\tau_g(\\omega) = -\\frac{d\\theta(\\omega)}{d\\omega} = \\sum_{k=1}^{K} \\left[ \\frac{P_{a,k}(\\omega)}{|A_k(e^{j\\omega})|^2} - \\frac{P_{b,k}(\\omega)}{|B_k(e^{j\\omega})|^2} \\right]"
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "pulse"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "4. Group Delay & Stability Criteria"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Group delay represents the transit delay of envelope information across frequencies. A causal digital IIR filter is Bounded-Input Bounded-Output (BIBO) stable if and only if all system poles lie strictly inside the complex unit circle |z| < 1:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq6"
+                                title: "Analytical Group Delay Computation"
+                                equationNumber: "(6)"
+                                renderedHtml: "&tau;<sub><i>g</i></sub>(&omega;) = &minus; d&theta;(&omega;) / d&omega;"
+                                latexSource: "\\tau_g(\\omega) = -\\frac{d\\theta(\\omega)}{d\\omega} = \\sum_{k=1}^{K} \\left[ \\frac{P_{a,k}(\\omega)}{|A_k(e^{j\\omega})|^2} - \\frac{P_{b,k}(\\omega)}{|B_k(e^{j\\omega})|^2} \\right]"
+                            }
                         }
                     }
                 }
 
                 // ═════════════════════════════════════════════════════════════════
-                // TAB 2: STEP-BY-STEP TUTORIALS & WORKFLOW GUIDES
+                // TAB 2: STEP-BY-STEP TUTORIALS (Unified Card Style)
                 // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 24
+                    spacing: 20
                     visible: root.activeTab === 2
 
-                    Text {
-                        text: "Step-by-Step DSP Workflow Tutorials"
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 22
-                        font.weight: Font.Bold
-                        color: theme.primaryText
+                    // Headline
+                    Column {
+                        width: parent.width
+                        spacing: 6
+
+                        Text {
+                            text: "Step-by-Step DSP Workflow Tutorials"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 22
+                            font.weight: Font.Bold
+                            color: theme.primaryText
+                        }
+
+                        Text {
+                            text: "Practical guides and interactive learning modules covering audio denoising, mains hum rejection, speech bandpassing, and microcontroller firmware integration."
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 13
+                            color: theme.secondaryText
+                        }
                     }
 
-                    Text {
-                        text: "Interactive guides for designing, analyzing, simulating, and deploying digital filters across audio, instrumentation, and embedded firmware applications."
-                        font.family: "Stack Sans Headline"
-                        font.pixelSize: 13
-                        color: theme.secondaryText
-                        wrapMode: Text.WordWrap
-                    }
-
-                    // ── Student Tutorial Studio & Creator ────────────────────────────
+                    // Tutorial Studio Widget
                     TutorialStudio {
                         width: parent.width
                     }
 
-                    // ── Built-in Guides ──────────────────────────────────────────────
                     Text {
                         text: "Guided Filter Workflows"
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 16
                         font.weight: Font.DemiBold
                         color: theme.primaryText
-                        topPadding: 12
+                        topPadding: 8
                     }
 
-                    // Workflow 1: Studio Audio Lowpass
-                    Column {
+                    // Card 1: Studio Audio Lowpass
+                    Rectangle {
                         width: parent.width
-                        spacing: 8
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Row {
-                            spacing: 8
-                            Rectangle {
-                                width: 3
-                                height: 16
-                                color: theme.accent
-                                radius: 1.5
-                                anchors.verticalCenter: parent.verticalCenter
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: tag1Text.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#1C2D3D" : "#E1EFFF"
+                                    Text {
+                                        id: tag1Text
+                                        anchors.centerIn: parent
+                                        text: "Audio Engineering"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: theme.accent
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Beginner  •  Duration: 4 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
                             }
-                            Text {
-                                text: "Workflow 1: Studio Audio Lowpass & Noise Reduction"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 15
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                                anchors.verticalCenter: parent.verticalCenter
+
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "radio-tower"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Workflow 1: Studio Audio Lowpass & Noise Reduction"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
                             }
-                        }
 
-                        Text {
-                            width: parent.width
-                            text: "Remove high-frequency tape hiss above 12,000 Hz from 48 kHz recordings without phase smearing.\n• Topology: Lowpass (LPF) | Approximation: Butterworth | Order: 4 (2 Biquads)\n• Corner Frequency: Fc = 12,000 Hz | Sampling Rate: Fs = 48,000 Hz\n• Expected Result: Flat 0 dB passband with clean 24 dB/octave attenuation slope above 12 kHz."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.5
-                        }
-
-                        Row {
-                            spacing: 6
-                            Codicon { icon: "link-external"; iconSize: 12; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
                             Text {
-                                text: "Configure in Filter Designer Studio ↗"
+                                width: parent.width
+                                text: "Remove unwanted high-frequency tape hiss and air noise above 12,000 Hz from a 48 kHz studio recording without introducing audible ringing or phase distortion."
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
-                                font.weight: Font.Medium
-                                color: theme.accent
-                                anchors.verticalCenter: parent.verticalCenter
-                                HoverHandler { cursorShape: Qt.PointingHandCursor }
-                                TapHandler { onTapped: root.go(0) }
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            // Specs Summary Box
+                            Rectangle {
+                                width: parent.width
+                                height: 48
+                                radius: 4
+                                color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.margins: 8
+
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Lowpass (LPF)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Butterworth"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Order (N)"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Order 4 (2 Biquads)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Cutoff / Sample Rate"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Fc = 12 kHz, Fs = 48 kHz"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. Open Filter Designer Studio, select Lowpass (LPF), and choose Butterworth response.\n2. Set Order = 4, Cutoff Frequency = 12,000 Hz, and Sampling Rate = 48,000 Hz.\n3. Verify the -3 dB corner aligns at 12 kHz with a smooth 24 dB/octave attenuation slope.\n4. Audition audio in Signal Simulation Studio to verify hiss reduction in real time."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            Row {
+                                spacing: 6
+                                topPadding: 4
+                                Codicon { icon: "link-external"; iconSize: 12; iconColor: wf1Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text {
+                                    text: "Configure in Filter Designer Studio ↗"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Medium
+                                    font.underline: wf1Hov.hovered
+                                    color: wf1Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    HoverHandler { id: wf1Hov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(0) }
+                                }
                             }
                         }
                     }
 
-                    // Workflow 2: Mains Hum 50/60 Hz Notch
-                    Column {
+                    // Card 2: Mains Hum Notch
+                    Rectangle {
                         width: parent.width
-                        spacing: 8
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Row {
-                            spacing: 8
-                            Rectangle {
-                                width: 3
-                                height: 16
-                                color: theme.accent
-                                radius: 1.5
-                                anchors.verticalCenter: parent.verticalCenter
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: tag2Text.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#1C2D3D" : "#E1EFFF"
+                                    Text {
+                                        id: tag2Text
+                                        anchors.centerIn: parent
+                                        text: "Signal Conditioning"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: theme.accent
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Intermediate  •  Duration: 5 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
                             }
-                            Text {
-                                text: "Workflow 2: 50 Hz / 60 Hz Ground Loop Notch Rejection"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 15
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                                anchors.verticalCenter: parent.verticalCenter
+
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "zap"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Workflow 2: 50 Hz / 60 Hz Ground Loop Notch Rejection"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
                             }
-                        }
 
-                        Text {
-                            width: parent.width
-                            text: "Eliminate 50 Hz or 60 Hz AC electrical hum from sensor telemetry while preserving nearby audio fundamentals.\n• Topology: Bandstop (Notch) | Approximation: Elliptic | Order: 4\n• Bandwidth: Fc1 = 49 Hz, Fc2 = 51 Hz (2 Hz notch) | Stopband Attenuation: 60 dB\n• Expected Result: Transmission zeros placed on the unit circle (|z| = 1.0) provide mathematical -inf dB rejection."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.5
-                        }
-
-                        Row {
-                            spacing: 6
-                            Codicon { icon: "link-external"; iconSize: 12; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
                             Text {
-                                text: "Open Frequency Analysis Suite ↗"
+                                width: parent.width
+                                text: "Eliminate 50 Hz or 60 Hz electrical mains interference from sensitive sensor telemetry or audio signals while keeping bass frequencies intact."
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
-                                font.weight: Font.Medium
-                                color: theme.accent
-                                anchors.verticalCenter: parent.verticalCenter
-                                HoverHandler { cursorShape: Qt.PointingHandCursor }
-                                TapHandler { onTapped: root.go(1) }
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            Rectangle {
+                                width: parent.width
+                                height: 48
+                                radius: 4
+                                color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.margins: 8
+
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Bandstop (Notch)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Elliptic (Cauer)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Notch Bandwidth"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Fc1=49Hz, Fc2=51Hz"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Rejection / Order"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Rs = 60 dB, Order 4"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. Choose Bandstop (Notch) Topology and Elliptic response.\n2. Set Fc1 = 49 Hz, Fc2 = 51 Hz, Order = 4, and Stopband Attenuation = 60 dB.\n3. Open Frequency Analysis Suite and observe transmission zeros placed on the unit circle (|z| = 1.0) providing mathematical cancellation at mains frequency."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            Row {
+                                spacing: 6
+                                topPadding: 4
+                                Codicon { icon: "link-external"; iconSize: 12; iconColor: wf2Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text {
+                                    text: "Open Frequency Analysis Suite ↗"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Medium
+                                    font.underline: wf2Hov.hovered
+                                    color: wf2Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    HoverHandler { id: wf2Hov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(1) }
+                                }
                             }
                         }
                     }
 
-                    // Workflow 3: Telephony Bandpass
-                    Column {
+                    // Card 3: Telephony Bandpass
+                    Rectangle {
                         width: parent.width
-                        spacing: 8
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Row {
-                            spacing: 8
-                            Rectangle {
-                                width: 3
-                                height: 16
-                                color: theme.accent
-                                radius: 1.5
-                                anchors.verticalCenter: parent.verticalCenter
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                width: parent.width
+                                spacing: 8
+
+                                Rectangle {
+                                    width: tag3Text.implicitWidth + 10
+                                    height: 22
+                                    radius: 4
+                                    color: theme.isDark ? "#1C2D3D" : "#E1EFFF"
+                                    Text {
+                                        id: tag3Text
+                                        anchors.centerIn: parent
+                                        text: "Communications DSP"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Medium
+                                        color: theme.accent
+                                    }
+                                }
+
+                                Text {
+                                    text: "Difficulty: Intermediate  •  Duration: 5 min"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
                             }
-                            Text {
-                                text: "Workflow 3: Voice Telephony Bandpass (ITU-T G.712 Standards)"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 15
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                                anchors.verticalCenter: parent.verticalCenter
+
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "call-incoming"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Workflow 3: Voice Telephony Bandpass (ITU-T G.712)"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
                             }
-                        }
 
-                        Text {
-                            width: parent.width
-                            text: "Design a 300 Hz to 3,400 Hz voice bandpass filter to reject DC drift and out-of-band acoustic noise.\n• Topology: Bandpass (BPF) | Approximation: Chebyshev Type I | Order: 6 | Ripple: 0.5 dB\n• Lower Cutoff: Fc1 = 300 Hz | Upper Cutoff: Fc2 = 3,400 Hz | Fs = 16,000 Hz\n• Expected Result: Minimal delay distortion across the speech formant range (500 - 2,500 Hz)."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.5
-                        }
-
-                        Row {
-                            spacing: 6
-                            Codicon { icon: "link-external"; iconSize: 12; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
                             Text {
-                                text: "Export Production Code ↗"
+                                width: parent.width
+                                text: "Design a 300 Hz to 3,400 Hz voice telephony bandpass filter complying with telecommunications standards to reject DC drift and out-of-band acoustic noise."
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
-                                font.weight: Font.Medium
-                                color: theme.accent
-                                anchors.verticalCenter: parent.verticalCenter
-                                HoverHandler { cursorShape: Qt.PointingHandCursor }
-                                TapHandler { onTapped: root.go(3) }
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            Rectangle {
+                                width: parent.width
+                                height: 48
+                                radius: 4
+                                color: theme.isDark ? "#1A1A1A" : "#F6F8FA"
+                                border.color: theme.borderColor
+                                border.width: 1
+
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.margins: 8
+
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Topology"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Bandpass (BPF)"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Passband Range"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "300 Hz to 3,400 Hz"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Approximation"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Chebyshev Type I"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                    Column {
+                                        width: parent.width * 0.25; spacing: 2
+                                        Text { text: "Order / Ripple"; font.family: "Stack Sans Headline"; font.pixelSize: 11; color: theme.secondaryText }
+                                        Text { text: "Order 6, Ripple 0.5 dB"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Step-by-Step Instructions:\n1. Select Bandpass (BPF) Topology and Chebyshev Type I response.\n2. Set Fc1 = 300 Hz, Fc2 = 3,400 Hz, Order = 6, and Sampling Rate Fs = 16,000 Hz.\n3. Verify Passband Ripple is under 0.5 dB and check Group Delay across the 500-2,500 Hz formant region."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.primaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
+
+                            Row {
+                                spacing: 6
+                                topPadding: 4
+                                Codicon { icon: "link-external"; iconSize: 12; iconColor: wf3Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text {
+                                    text: "Export Production Code ↗"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 13
+                                    font.weight: Font.Medium
+                                    font.underline: wf3Hov.hovered
+                                    color: wf3Hov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    HoverHandler { id: wf3Hov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: root.go(3) }
+                                }
                             }
                         }
                     }
                 }
 
                 // ═════════════════════════════════════════════════════════════════
-                // TAB 3: CONTRIBUTORS & WIKI REFERENCES (Clean, No Tables/Boxes)
+                // TAB 3: CONTRIBUTORS & WIKI (Unified Card Style)
                 // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
-                    spacing: 28
+                    spacing: 20
                     visible: root.activeTab === 3
 
-                    // Title
+                    // Headline
                     Column {
                         width: parent.width
                         spacing: 6
@@ -788,134 +1055,92 @@ Item {
                         }
 
                         Text {
-                            text: "Open-source community links, contribution guidelines, and direct Wikipedia reference articles for digital filter approximations."
+                            text: "Open-source community repository links, contribution pathways, and direct Wikipedia reference articles for digital filter approximations."
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 13
                             color: theme.secondaryText
                         }
                     }
 
-                    // ── 1. Contributors & Community Section ──────────────────────────
-                    Column {
+                    // Card 1: Contributors & Community
+                    Rectangle {
                         width: parent.width
-                        spacing: 14
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Row {
-                            spacing: 8
-                            Codicon {
-                                icon: "organization"
-                                iconSize: 16
-                                iconColor: theme.accent
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                            Text {
-                                text: "Contributors & Community"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 16
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: "Overtune 3 is an open-source project hosted on GitHub. We welcome contributions from digital signal processing researchers, audio engineers, embedded developers, and UI designers."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.45
-                        }
-
-                        // GitHub Links Row
-                        Row {
-                            spacing: 16
-
-                            // GitHub Repository Button
-                            Rectangle {
-                                width: repoBtnText.implicitWidth + 24
-                                height: 32
-                                radius: 4
-                                color: "transparent"
-                                border.color: theme.accent
-                                border.width: 1
-
-                                Row {
-                                    id: repoBtnText
-                                    anchors.centerIn: parent
-                                    spacing: 8
-                                    Codicon {
-                                        icon: "github"
-                                        iconSize: 14
-                                        iconColor: theme.accent
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    Text {
-                                        text: "GitHub Repository"
-                                        font.family: "Stack Sans Headline"
-                                        font.pixelSize: 12
-                                        font.weight: Font.Medium
-                                        color: theme.primaryText
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                }
-
-                                HoverHandler { id: rHov; cursorShape: Qt.PointingHandCursor }
-                                TapHandler { onTapped: Qt.openUrlExternally("https://github.com/shadcy/overtune3") }
-                            }
-
-                            // GitHub Issues Button
-                            Rectangle {
-                                width: issueBtnText.implicitWidth + 24
-                                height: 32
-                                radius: 4
-                                color: "transparent"
-                                border.color: theme.accent
-                                border.width: 1
-
-                                Row {
-                                    id: issueBtnText
-                                    anchors.centerIn: parent
-                                    spacing: 8
-                                    Codicon {
-                                        icon: "issue-opened"
-                                        iconSize: 14
-                                        iconColor: theme.accent
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    Text {
-                                        text: "Report Issues & Feedback"
-                                        font.family: "Stack Sans Headline"
-                                        font.pixelSize: 12
-                                        font.weight: Font.Medium
-                                        color: theme.primaryText
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                }
-
-                                HoverHandler { id: iHov; cursorShape: Qt.PointingHandCursor }
-                                TapHandler { onTapped: Qt.openUrlExternally("https://github.com/shadcy/overtune3/issues") }
-                            }
-                        }
-
-                        // Contribution guidelines list
                         Column {
-                            width: parent.width
-                            spacing: 8
-                            topPadding: 4
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 14
 
-                            Text {
-                                text: "How You Can Contribute:"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 13
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "organization"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Contributors & Community"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
                             }
 
                             Text {
                                 width: parent.width
-                                text: "• DSP Core Algorithms: Implement new analog prototypes (Legendre, Papoulis Optimum L, Gaussian) or FIR Parks-McClellan routines in pure C++20.\n• Numerical Optimization: Improve bilinear transformation precision and high-order SOS stability.\n• Audio Simulation: Enhance multi-channel WAV playback and spectral analysis visualizations.\n• Interactive Tutorials: Author student guides and practical presets via Tutorial Studio."
+                                text: "Overtune 3 is an open-source project hosted on GitHub. We welcome contributions from digital signal processing researchers, audio engineers, embedded developers, and UI designers."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
+                            }
+
+                            // GitHub Action Buttons
+                            Row {
+                                spacing: 14
+
+                                Rectangle {
+                                    width: rBtnText.implicitWidth + 24
+                                    height: 32
+                                    radius: 4
+                                    color: rHov.hovered ? (theme.isDark ? "#2A2D2E" : "#E8E8E8") : "transparent"
+                                    border.color: theme.accent
+                                    border.width: 1
+
+                                    Row {
+                                        id: rBtnText
+                                        anchors.centerIn: parent
+                                        spacing: 8
+                                        Codicon { icon: "github"; iconSize: 14; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                        Text { text: "GitHub Repository"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    }
+
+                                    HoverHandler { id: rHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: Qt.openUrlExternally("https://github.com/shadcy/overtune3") }
+                                }
+
+                                Rectangle {
+                                    width: iBtnText.implicitWidth + 24
+                                    height: 32
+                                    radius: 4
+                                    color: iHov.hovered ? (theme.isDark ? "#2A2D2E" : "#E8E8E8") : "transparent"
+                                    border.color: theme.accent
+                                    border.width: 1
+
+                                    Row {
+                                        id: iBtnText
+                                        anchors.centerIn: parent
+                                        spacing: 8
+                                        Codicon { icon: "issue-opened"; iconSize: 14; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                        Text { text: "Report Issues & Feedback"; font.family: "Stack Sans Headline"; font.pixelSize: 12; font.weight: Font.Medium; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                                    }
+
+                                    HoverHandler { id: iHov; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler { onTapped: Qt.openUrlExternally("https://github.com/shadcy/overtune3/issues") }
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "How You Can Contribute:\n• DSP Core Algorithms: Implement new analog prototypes (Legendre, Papoulis Optimum L, Gaussian) or FIR Parks-McClellan routines in pure C++20.\n• Numerical Optimization: Improve bilinear transformation precision and high-order SOS stability.\n• Audio Simulation: Enhance multi-channel WAV playback and spectral analysis visualizations.\n• Interactive Tutorials: Author student guides and practical presets via Tutorial Studio."
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
                                 color: theme.secondaryText
@@ -924,160 +1149,150 @@ Item {
                             }
 
                             Text {
-                                width: parent.width
-                                text: "Maintainer: shadcy (https://github.com/shadcy)\nRepository: https://github.com/shadcy/overtune3\nBug Reports & Feature Requests: https://github.com/shadcy/overtune3/issues"
+                                text: "Maintainer: shadcy (https://github.com/shadcy)  •  License: MIT"
                                 font.family: "Monospace"
                                 font.pixelSize: 11
                                 color: theme.accent
-                                wrapMode: Text.WordWrap
-                                topPadding: 4
                             }
                         }
                     }
 
-                    // ── 2. Wikipedia Articles & Reference Knowledge Base ─────────────
-                    Column {
+                    // Card 2: Wikipedia Reference Articles
+                    Rectangle {
                         width: parent.width
-                        spacing: 16
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Row {
-                            spacing: 8
-                            Codicon {
-                                icon: "book"
-                                iconSize: 16
-                                iconColor: theme.accent
-                                anchors.verticalCenter: parent.verticalCenter
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 14
+
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "book"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Wikipedia Reference Articles"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
                             }
+
                             Text {
-                                text: "Wikipedia Reference Articles"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 16
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: "Click any article below to read in-depth derivations, frequency response proofs, and historical documentation on Wikipedia:"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                        }
-
-                        Repeater {
-                            model: [
-                                {
-                                    title: "Butterworth Filter",
-                                    desc: "Maximally flat magnitude filter with zero passband ripple and monotonic attenuation (6N dB/octave).",
-                                    url: "https://en.wikipedia.org/wiki/Butterworth_filter"
-                                },
-                                {
-                                    title: "Chebyshev Filter (Type I & II)",
-                                    desc: "Minimizes error between idealized and actual filter response using Chebyshev polynomials with equiripple characteristics.",
-                                    url: "https://en.wikipedia.org/wiki/Chebyshev_filter"
-                                },
-                                {
-                                    title: "Elliptic Filter (Cauer Filter)",
-                                    desc: "Employs Jacobian elliptic rational functions for equiripple behavior in both bands and the sharpest transition rolloff.",
-                                    url: "https://en.wikipedia.org/wiki/Elliptic_filter"
-                                },
-                                {
-                                    title: "Bessel Filter (Thomson Filter)",
-                                    desc: "Optimized for maximally flat group delay and linear phase response, preserving pulses and waveforms without ringing.",
-                                    url: "https://en.wikipedia.org/wiki/Bessel_filter"
-                                },
-                                {
-                                    title: "Bilinear Transform",
-                                    desc: "Conformal mapping of continuous s-plane into discrete z-plane via trapezoidal integration with frequency pre-warping.",
-                                    url: "https://en.wikipedia.org/wiki/Bilinear_transform"
-                                },
-                                {
-                                    title: "Digital Biquad Filter (Direct Form II Transposed)",
-                                    desc: "Second-order IIR biquad section structure with 2 state delays per section, optimizing dynamic range and numerical stability.",
-                                    url: "https://en.wikipedia.org/wiki/Digital_biquad_filter"
-                                },
-                                {
-                                    title: "Group Delay & Phase Delay",
-                                    desc: "Time delay of amplitude envelopes computed as the negative derivative of phase with respect to frequency.",
-                                    url: "https://en.wikipedia.org/wiki/Group_delay_and_phase_delay"
-                                },
-                                {
-                                    title: "Z-Transform & Stability Analysis",
-                                    desc: "Complex discrete-time transform mapping stability to the interior of the unit circle |z| < 1.",
-                                    url: "https://en.wikipedia.org/wiki/Z-transform"
-                                }
-                            ]
-                            delegate: Column {
                                 width: parent.width
-                                spacing: 4
+                                text: "Direct links to Wikipedia documentation for in-depth proofs, historical context, and continuous-to-discrete filter mathematics:"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                            }
 
-                                Row {
-                                    spacing: 8
-                                    Rectangle {
-                                        width: 3
-                                        height: 14
-                                        color: theme.accent
-                                        radius: 1.5
-                                        anchors.verticalCenter: parent.verticalCenter
+                            Repeater {
+                                model: [
+                                    {
+                                        title: "Butterworth Filter",
+                                        desc: "Maximally flat magnitude filter with zero passband ripple and monotonic attenuation (6N dB/octave).",
+                                        url: "https://en.wikipedia.org/wiki/Butterworth_filter"
+                                    },
+                                    {
+                                        title: "Chebyshev Filter (Type I & II)",
+                                        desc: "Minimizes error between idealized and actual filter response using Chebyshev polynomials with equiripple characteristics.",
+                                        url: "https://en.wikipedia.org/wiki/Chebyshev_filter"
+                                    },
+                                    {
+                                        title: "Elliptic Filter (Cauer Filter)",
+                                        desc: "Employs Jacobian elliptic rational functions for equiripple behavior in both bands and the sharpest transition rolloff.",
+                                        url: "https://en.wikipedia.org/wiki/Elliptic_filter"
+                                    },
+                                    {
+                                        title: "Bessel Filter (Thomson Filter)",
+                                        desc: "Optimized for maximally flat group delay and linear phase response, preserving pulses and waveforms without ringing.",
+                                        url: "https://en.wikipedia.org/wiki/Bessel_filter"
+                                    },
+                                    {
+                                        title: "Bilinear Transform",
+                                        desc: "Conformal mapping of continuous s-plane into discrete z-plane via trapezoidal integration with frequency pre-warping.",
+                                        url: "https://en.wikipedia.org/wiki/Bilinear_transform"
+                                    },
+                                    {
+                                        title: "Digital Biquad Filter (Direct Form II Transposed)",
+                                        desc: "Second-order IIR biquad section structure with 2 state delays per section, optimizing dynamic range and numerical stability.",
+                                        url: "https://en.wikipedia.org/wiki/Digital_biquad_filter"
+                                    },
+                                    {
+                                        title: "Group Delay & Phase Delay",
+                                        desc: "Time delay of amplitude envelopes computed as the negative derivative of phase with respect to frequency.",
+                                        url: "https://en.wikipedia.org/wiki/Group_delay_and_phase_delay"
+                                    },
+                                    {
+                                        title: "Z-Transform & Stability Analysis",
+                                        desc: "Complex discrete-time transform mapping stability to the interior of the unit circle |z| < 1.",
+                                        url: "https://en.wikipedia.org/wiki/Z-transform"
                                     }
-                                    Text {
-                                        text: modelData.title
-                                        font.family: "Stack Sans Headline"
-                                        font.pixelSize: 14
-                                        font.weight: Font.DemiBold
-                                        color: theme.primaryText
-                                        anchors.verticalCenter: parent.verticalCenter
+                                ]
+                                delegate: Column {
+                                    width: parent.width
+                                    spacing: 3
+
+                                    Row {
+                                        spacing: 8
+                                        Codicon { icon: "link-external"; iconSize: 12; iconColor: artHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                        Text {
+                                            text: modelData.title + " ↗"
+                                            font.family: "Stack Sans Headline"
+                                            font.pixelSize: 13
+                                            font.weight: Font.DemiBold
+                                            font.underline: artHov.hovered
+                                            color: artHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            HoverHandler { id: artHov; cursorShape: Qt.PointingHandCursor }
+                                            TapHandler { onTapped: Qt.openUrlExternally(modelData.url) }
+                                        }
                                     }
+
                                     Text {
-                                        text: "Read Article ↗"
+                                        width: parent.width
+                                        text: modelData.desc
                                         font.family: "Stack Sans Headline"
                                         font.pixelSize: 12
-                                        font.weight: Font.Medium
-                                        font.underline: wHov.hovered
-                                        color: theme.accent
-                                        anchors.verticalCenter: parent.verticalCenter
-
-                                        HoverHandler { id: wHov; cursorShape: Qt.PointingHandCursor }
-                                        TapHandler { onTapped: Qt.openUrlExternally(modelData.url) }
+                                        color: theme.secondaryText
+                                        wrapMode: Text.WordWrap
+                                        leftPadding: 20
                                     }
-                                }
-
-                                Text {
-                                    width: parent.width
-                                    text: modelData.desc
-                                    font.family: "Stack Sans Headline"
-                                    font.pixelSize: 13
-                                    color: theme.secondaryText
-                                    wrapMode: Text.WordWrap
-                                    leftPadding: 11
                                 }
                             }
                         }
                     }
 
-                    // ── 3. Topologies & Export Formats Reference ─────────────────────
-                    Column {
+                    // Card 3: Topologies & Export Targets
+                    Rectangle {
                         width: parent.width
-                        spacing: 12
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Text {
-                            text: "Synthesis Topologies & Code Exporters"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 16
-                            font.weight: Font.DemiBold
-                            color: theme.primaryText
-                        }
+                        Column {
+                            anchors { left: parent.left; right: parent.right; margins: 18 }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
 
-                        Text {
-                            width: parent.width
-                            text: "• Lowpass (LPF): Passband [0, Fc], N zeros placed at z = -1 (Nyquist).\n• Highpass (HPF): Passband [Fc, Fs/2], N zeros placed at z = +1 (DC cancellation).\n• Bandpass (BPF): Passband [Fc1, Fc2], N zeros at z = +1 and N zeros at z = -1.\n• Bandstop (Notch): Rejection [Fc1, Fc2], zeros placed on unit circle at e^(±jω0).\n\nExport Targets:\n• Embedded C: Direct Form II Transposed biquad function with state struct.\n• Modern C++20: Vectorized biquad class with constexpr coefficient arrays.\n• Python (SciPy): Standalone script with signal.sosfilt and matplotlib verification.\n• JSON Schema: Machine-readable specification and second-order sections."
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.5
+                            Row {
+                                spacing: 8
+                                Codicon { icon: "symbol-parameter"; iconSize: 16; iconColor: theme.accent; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: "Synthesis Topologies & Code Exporter Specifications"; font.family: "Stack Sans Headline"; font.pixelSize: 14; font.weight: Font.DemiBold; color: theme.primaryText; anchors.verticalCenter: parent.verticalCenter }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: "Topologies:\n• Lowpass (LPF): Passband [0, Fc], N zeros placed at z = -1 (Nyquist).\n• Highpass (HPF): Passband [Fc, Fs/2], N zeros placed at z = +1 (DC cancellation).\n• Bandpass (BPF): Passband [Fc1, Fc2], N zeros at z = +1 and N zeros at z = -1.\n• Bandstop (Notch): Rejection [Fc1, Fc2], zeros placed on unit circle at e^(±jω0).\n\nExport Formats:\n• Embedded C: Direct Form II Transposed biquad function with state struct.\n• Modern C++20: Vectorized biquad class with constexpr coefficient arrays.\n• Python (SciPy): Standalone script with signal.sosfilt and matplotlib verification.\n• JSON Schema: Machine-readable specification and second-order sections."
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.5
+                            }
                         }
                     }
                 }

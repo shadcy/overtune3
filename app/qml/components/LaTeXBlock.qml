@@ -2,11 +2,16 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// LaTeXBlock.qml — Clean LaTeX equation renderer with primary blue accents and clean typography
-Item {
+// LaTeXBlock.qml — High-resolution compiled LaTeX equation renderer with raw LaTeX toggle & copy
+Rectangle {
     id: root
     width: parent ? parent.width : 500
-    implicitHeight: mainCol.implicitHeight + 24
+    implicitHeight: mainCol.implicitHeight + 20
+    radius: 6
+    color: theme.isDark ? "#1E1E1E" : "#F8F9FA"
+    border.color: theme.borderColor
+    border.width: 1
+    clip: true
 
     property string eqId: "" // e.g. "eq1", "eq2", etc.
     property string title: ""
@@ -22,23 +27,12 @@ Item {
         onTriggered: root.copiedNotice = false
     }
 
-    // Primary blue vertical indicator line on left
-    Rectangle {
-        id: accentBar
-        width: 3
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        radius: 1.5
-        color: theme.accent
-    }
-
     Column {
         id: mainCol
-        anchors.left: accentBar.right
+        anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.leftMargin: 16
+        anchors.margins: 12
         spacing: 10
 
         // Header bar with Title, Copy button, LaTeX toggle, and Equation number badge
@@ -49,7 +43,7 @@ Item {
             Text {
                 text: root.title
                 font.family: "Stack Sans Headline"
-                font.pixelSize: 13
+                font.pixelSize: 12
                 font.weight: Font.DemiBold
                 color: theme.primaryText
                 visible: root.title.length > 0
@@ -68,8 +62,10 @@ Item {
                 width: copyBtnText.implicitWidth + 14
                 height: 22
                 radius: 4
-                color: "transparent"
-                border.color: theme.accent
+                color: root.copiedNotice
+                    ? (theme.isDark ? "#1C3D27" : "#E6F4EA")
+                    : (copyHov.hovered ? (theme.isDark ? "#2A2D2E" : "#E4E4E4") : "transparent")
+                border.color: root.copiedNotice ? theme.accent : theme.borderColor
                 border.width: 1
 
                 Text {
@@ -79,7 +75,7 @@ Item {
                     font.family: "Stack Sans Headline"
                     font.pixelSize: 11
                     font.weight: Font.Medium
-                    color: root.copiedNotice ? theme.accent : theme.primaryText
+                    color: root.copiedNotice ? theme.accent : theme.secondaryText
                 }
 
                 HoverHandler { id: copyHov; cursorShape: Qt.PointingHandCursor }
@@ -100,8 +96,8 @@ Item {
                 width: toggleText.implicitWidth + 14
                 height: 22
                 radius: 4
-                color: "transparent"
-                border.color: theme.accent
+                color: togHov.hovered ? (theme.isDark ? "#2D3748" : "#E2E8F0") : (theme.isDark ? "#25282A" : "#EDEDED")
+                border.color: theme.borderColor
                 border.width: 1
 
                 Text {
@@ -121,70 +117,91 @@ Item {
             }
 
             // Equation Number Badge e.g. (1)
-            Text {
+            Rectangle {
                 visible: root.equationNumber.length > 0
-                text: root.equationNumber
-                font.family: "Stack Sans Headline"
-                font.pixelSize: 12
-                font.weight: Font.Medium
-                color: theme.secondaryText
-                anchors.verticalCenter: parent.verticalCenter
+                width: eqNumText.implicitWidth + 10
+                height: 22
+                radius: 4
+                color: theme.isDark ? "#25282A" : "#EDEDED"
+                border.color: theme.borderColor
+                border.width: 1
+
+                Text {
+                    id: eqNumText
+                    anchors.centerIn: parent
+                    text: root.equationNumber
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 11
+                    font.weight: Font.Medium
+                    color: theme.secondaryText
+                }
             }
         }
 
-        // Rendered Equation Display
-        Item {
+        // Rendered Equation Container
+        Rectangle {
             width: parent.width
-            implicitHeight: Math.max(eqImg.height, eqHtml.implicitHeight, 40)
+            implicitHeight: root.eqId.length > 0 ? 54 : Math.max(38, renderedText.implicitHeight + 14)
+            color: theme.isDark ? "#161616" : "#FFFFFF"
+            radius: 4
+            border.color: theme.borderColor
+            border.width: 1
+            visible: !root.showLatexSource
+            clip: true
 
-            // High-resolution pre-rendered math PNG
+            // Compiled LaTeX Equation image (300 DPI, transparent, dark/light theme aware)
             Image {
-                id: eqImg
-                visible: !root.showLatexSource && status === Image.Ready
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
+                visible: root.eqId.length > 0
+                anchors.centerIn: parent
+                source: root.eqId.length > 0 ? ("qrc:/FilterDesigner/math/" + root.eqId + "_" + (theme.isDark ? "dark" : "light") + ".png") : ""
                 fillMode: Image.PreserveAspectFit
                 mipmap: true
-                source: root.eqId.length > 0
-                    ? ("qrc:/math/" + root.eqId + "_" + (theme.isDark ? "dark" : "light") + ".png")
-                    : ""
+                smooth: true
+                height: Math.min(parent.height - 10, implicitHeight)
+                width: Math.min(parent.width - 20, implicitWidth)
             }
 
-            // Fallback: Styled HTML math equation
+            // Fallback Rich Text rendering
             Text {
-                id: eqHtml
-                visible: !root.showLatexSource && eqImg.status !== Image.Ready
-                width: parent.width
+                id: renderedText
+                visible: root.eqId.length === 0
+                anchors.centerIn: parent
+                width: parent.width - 24
                 text: root.renderedHtml
                 textFormat: Text.RichText
-                font.family: "Times New Roman, Cambria Math, serif"
-                font.pixelSize: 15
+                font.family: "Stack Sans Headline"
+                font.pixelSize: 14
                 color: theme.primaryText
+                horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
-                lineHeight: 1.4
             }
+        }
 
-            // Raw LaTeX source display
-            Rectangle {
-                visible: root.showLatexSource
-                width: parent.width
-                implicitHeight: latexCode.implicitHeight + 16
-                radius: 4
-                color: theme.isDark ? "#141416" : "#F0F0F2"
-                border.color: theme.accent
-                border.width: 1
+        // Raw LaTeX Code Block
+        Rectangle {
+            width: parent.width
+            implicitHeight: Math.max(38, rawCodeCol.implicitHeight + 14)
+            radius: 4
+            color: theme.isDark ? "#141414" : "#F4F4F4"
+            border.color: theme.borderColor
+            border.width: 1
+            visible: root.showLatexSource
 
-                TextEdit {
-                    id: latexCode
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    readOnly: true
-                    selectByMouse: true
+            Column {
+                id: rawCodeCol
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: 10
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
+
+                Text {
                     text: root.latexSource
                     font.family: "Monospace"
                     font.pixelSize: 12
-                    color: theme.accent
-                    wrapMode: TextEdit.WrapAnywhere
+                    color: theme.isDark ? "#9CDCFE" : "#001080"
+                    wrapMode: Text.WrapAnywhere
+                    width: parent.width
                 }
             }
         }
