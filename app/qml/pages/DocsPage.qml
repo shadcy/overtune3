@@ -142,7 +142,7 @@ Item {
                 spacing: 28
 
                 // ═════════════════════════════════════════════════════════════════
-                // TAB 0: GET STARTED
+                // TAB 0: GET STARTED (VS Code Welcome Screen + Clean Theory on Start)
                 // ═════════════════════════════════════════════════════════════════
                 Column {
                     width: parent.width
@@ -170,55 +170,71 @@ Item {
                         }
                     }
 
-                    // Clean Theory Summary without boxes
-                    Column {
+                    // Clean Theory Provided on Start
+                    Rectangle {
                         width: parent.width
-                        spacing: 12
+                        radius: 8
+                        color: theme.surface
+                        border.color: theme.borderColor
+                        border.width: 1
+                        clip: true
 
-                        Row {
-                            spacing: 8
-                            Codicon {
-                                icon: "info"
-                                iconSize: 16
-                                iconColor: theme.accent
-                                anchors.verticalCenter: parent.verticalCenter
+                        Column {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                margins: 18
                             }
+                            topPadding: 16
+                            bottomPadding: 16
+                            spacing: 12
+
+                            Row {
+                                spacing: 8
+                                Codicon {
+                                    icon: "info"
+                                    iconSize: 16
+                                    iconColor: theme.accent
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: "Theory & Principles at a Glance"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 14
+                                    font.weight: Font.DemiBold
+                                    color: theme.primaryText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
                             Text {
-                                text: "Theory & Principles at a Glance"
+                                width: parent.width
+                                text: "Digital Infinite Impulse Response (IIR) filters compute discrete output samples using feedforward linear combinations of present and past inputs together with feedback from past outputs. In Overtune 3, transfer functions are mapped into the digital domain via the bilinear transformation with frequency pre-warping and decomposed into cascaded Second-Order Sections (SOS biquads) for numerical stability:"
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 15
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                                anchors.verticalCenter: parent.verticalCenter
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.45
                             }
-                        }
 
-                        Text {
-                            width: parent.width
-                            text: "Digital Infinite Impulse Response (IIR) filters compute discrete output samples using feedforward linear combinations of present and past inputs together with feedback from past outputs. In Overtune 3, transfer functions are mapped into the digital domain via the bilinear transformation with frequency pre-warping and decomposed into cascaded Second-Order Sections (SOS biquads) for numerical stability:"
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 13
-                            color: theme.secondaryText
-                            wrapMode: Text.WordWrap
-                            lineHeight: 1.45
-                        }
+                            // LaTeX Mathematical Equation Block on Start
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq1"
+                                title: "Direct Form II Difference Equation"
+                                equationNumber: "(1)"
+                                renderedHtml: "<i>y</i>[<i>n</i>] = &sum;<sub><i>k</i>=0</sub><sup><i>M</i></sup> <i>b</i><sub><i>k</i></sub><i>x</i>[<i>n</i>&minus;<i>k</i>] &minus; &sum;<sub><i>k</i>=1</sub><sup><i>N</i></sup> <i>a</i><sub><i>k</i></sub><i>y</i>[<i>n</i>&minus;<i>k</i>]"
+                                latexSource: "y[n] = \\sum_{k=0}^{M} b_k x[n-k] - \\sum_{k=1}^{N} a_k y[n-k]"
+                            }
 
-                        LaTeXBlock {
-                            width: parent.width
-                            eqId: "eq1"
-                            title: "Direct Form II Difference Equation"
-                            equationNumber: "(1)"
-                            renderedHtml: "<i>y</i>[<i>n</i>] = &sum;<sub><i>k</i>=0</sub><sup><i>M</i></sup> <i>b</i><sub><i>k</i></sub><i>x</i>[<i>n</i>&minus;<i>k</i>] &minus; &sum;<sub><i>k</i>=1</sub><sup><i>N</i></sup> <i>a</i><sub><i>k</i></sub><i>y</i>[<i>n</i>&minus;<i>k</i>]"
-                            latexSource: "y[n] = \\sum_{k=0}^{M} b_k x[n-k] - \\sum_{k=1}^{N} a_k y[n-k]"
-                        }
-
-                        LaTeXBlock {
-                            width: parent.width
-                            eqId: "eq2"
-                            title: "Second-Order Section (SOS) Cascade Transfer Function"
-                            equationNumber: "(2)"
-                            renderedHtml: "<i>H</i>(<i>z</i>) = <i>g</i> &middot; &prod;<sub><i>k</i>=1</sub><sup><i>K</i></sup> <i>H</i><sub><i>k</i></sub>(<i>z</i>)"
-                            latexSource: "H(z) = g \\cdot \\prod_{k=1}^{K} \\frac{b_{0,k} + b_{1,k} z^{-1} + b_{2,k} z^{-2}}{1 + a_{1,k} z^{-1} + a_{2,k} z^{-2}}"
+                            LaTeXBlock {
+                                width: parent.width
+                                eqId: "eq2"
+                                title: "Second-Order Section (SOS) Cascade Transfer Function"
+                                equationNumber: "(2)"
+                                renderedHtml: "<i>H</i>(<i>z</i>) = <i>g</i> &middot; &prod;<sub><i>k</i>=1</sub><sup><i>K</i></sup> <table style=\"display:inline-table;vertical-align:middle;text-align:center;\"><tr><td style=\"border-bottom:1px solid #777;padding:0 4px;\"><i>b</i><sub>0,<i>k</i></sub> + <i>b</i><sub>1,<i>k</i></sub><i>z</i><sup>&minus;1</sup> + <i>b</i><sub>2,<i>k</i></sub><i>z</i><sup>&minus;2</sup></td></tr><tr><td style=\"padding:0 4px;\">1 + <i>a</i><sub>1,<i>k</i></sub><i>z</i><sup>&minus;1</sup> + <i>a</i><sub>2,<i>k</i></sub><i>z</i><sup>&minus;2</sup></td></tr></table>"
+                                latexSource: "H(z) = g \\cdot \\prod_{k=1}^{K} \\frac{b_{0,k} + b_{1,k} z^{-1} + b_{2,k} z^{-2}}{1 + a_{1,k} z^{-1} + a_{2,k} z^{-2}}"
+                            }
                         }
                     }
 
@@ -252,9 +268,7 @@ Item {
                                     { text: "Configure Settings...",        icon: "settings-gear", page: 5 },
                                     { text: "Deep Theory & Mathematics...", icon: "book",         tab: 1 },
                                     { text: "Step-by-Step Tutorials...",    icon: "mortar-board", tab: 2 },
-                                    { text: "Contributors & Wiki...",       icon: "organization", tab: 3 },
-                                    { text: "GitHub Repository (shadcy/overtune3)...", icon: "link-external", url: "https://github.com/shadcy/overtune3" },
-                                    { text: "Report an Issue / Suggestion...", icon: "link-external", url: "https://github.com/shadcy/overtune3/issues" }
+                                    { text: "Contributors & Wiki...",       icon: "organization", tab: 3 }
                                 ]
                                 delegate: Row {
                                     spacing: 10
@@ -263,7 +277,7 @@ Item {
                                     Codicon {
                                         icon: modelData.icon
                                         iconSize: 15
-                                        iconColor: startHov.hovered ? theme.accent : theme.secondaryText
+                                        iconColor: startHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
 
@@ -273,7 +287,7 @@ Item {
                                         font.pixelSize: 13
                                         font.weight: Font.Medium
                                         font.underline: startHov.hovered
-                                        color: startHov.hovered ? theme.accent : theme.primaryText
+                                        color: startHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
                                         anchors.verticalCenter: parent.verticalCenter
 
                                         HoverHandler {
@@ -282,9 +296,7 @@ Item {
                                         }
                                         TapHandler {
                                             onTapped: {
-                                                if (modelData.hasOwnProperty("url")) {
-                                                    Qt.openUrlExternally(modelData.url)
-                                                } else if (modelData.hasOwnProperty("tab")) {
+                                                if (modelData.hasOwnProperty("tab")) {
                                                     root.activeTab = modelData.tab
                                                     docFlick.contentY = 0
                                                 } else {
@@ -329,12 +341,23 @@ Item {
                                         anchors.verticalCenter: parent.verticalCenter
                                         Repeater {
                                             model: modelData.keys
-                                            delegate: Text {
-                                                text: modelData + (index < parent.children.length - 1 ? " +" : "")
-                                                font.family: "Monospace"
-                                                font.pixelSize: 11
-                                                font.weight: Font.Medium
-                                                color: theme.accent
+                                            delegate: Rectangle {
+                                                width: keyText.implicitWidth + 12
+                                                height: 20
+                                                radius: 4
+                                                color: theme.isDark ? "#2A2D2E" : "#E4E4E4"
+                                                border.color: theme.borderColor
+                                                border.width: 1
+
+                                                Text {
+                                                    id: keyText
+                                                    anchors.centerIn: parent
+                                                    text: modelData
+                                                    font.family: "Monospace"
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.Medium
+                                                    color: theme.primaryText
+                                                }
                                             }
                                         }
                                     }
@@ -343,38 +366,50 @@ Item {
                                         text: modelData.label
                                         font.family: "Stack Sans Headline"
                                         font.pixelSize: 13
-                                        color: theme.secondaryText
+                                        color: scHov.hovered ? theme.primaryText : theme.secondaryText
                                         anchors.verticalCenter: parent.verticalCenter
+                                        font.underline: scHov.hovered
+
+                                        HoverHandler {
+                                            id: scHov
+                                            cursorShape: Qt.PointingHandCursor
+                                        }
+                                        TapHandler {
+                                            onTapped: root.go(modelData.page)
+                                        }
                                     }
                                 }
                             }
 
                             Row {
                                 spacing: 6
-                                topPadding: 8
+                                topPadding: 4
 
                                 Codicon {
                                     icon: "link-external"
                                     iconSize: 12
-                                    iconColor: theme.accent
+                                    iconColor: moreHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
 
                                 Text {
-                                    text: "Visit GitHub: shadcy/overtune3"
+                                    text: "More guides & tables..."
                                     font.family: "Stack Sans Headline"
                                     font.pixelSize: 13
                                     font.weight: Font.Medium
-                                    font.underline: ghHov.hovered
-                                    color: theme.accent
+                                    font.underline: moreHov.hovered
+                                    color: moreHov.hovered ? (theme.isDark ? "#4FC1FF" : "#005FB8") : theme.accent
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     HoverHandler {
-                                        id: ghHov
+                                        id: moreHov
                                         cursorShape: Qt.PointingHandCursor
                                     }
                                     TapHandler {
-                                        onTapped: Qt.openUrlExternally("https://github.com/shadcy/overtune3")
+                                        onTapped: {
+                                            root.activeTab = 3
+                                            docFlick.contentY = 0
+                                        }
                                     }
                                 }
                             }
