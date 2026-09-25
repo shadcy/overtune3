@@ -1,18 +1,19 @@
 <div align="center">
 
-# ⚡ Filter Designer
+# ⚡ Filter Designer (Overtune 3)
 
 **Next-Generation Digital Filter Design & Real-Time DSP Studio**
 
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)](https://en.cppreference.com/w/cpp/20)
-[![Qt](https://img.shields.io/badge/Qt-6.4+-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
-[![CMake](https://img.shields.io/badge/CMake-3.24+-064F8C?style=for-the-badge&logo=cmake&logoColor=white)](https://cmake.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=for-the-badge)](#building)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-0A84FF?style=for-the-badge&logo=c%2B%2B&logoColor=white)](https://en.cppreference.com/w/cpp/20)
+[![Qt](https://img.shields.io/badge/Qt-6.4+-0A84FF?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
+[![CMake](https://img.shields.io/badge/CMake-3.24+-0A84FF?style=for-the-badge&logo=cmake&logoColor=white)](https://cmake.org/)
+[![License](https://img.shields.io/badge/License-MIT-0A84FF?style=for-the-badge)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-shadcy%2Fovertune3-0A84FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shadcy/overtune3)
+[![Issues](https://img.shields.io/badge/Issues-Report-0A84FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shadcy/overtune3/issues)
 
-A sleek, Apple-inspired DSP workstation combining a **pure C++20 filter engine** (zero external dependencies) with a reactive **Qt 6 QML** interface. Design IIR filters, drag cutoffs interactively in real time, analyze pole-zero placement, simulate audio playback, study DSP theory with rendered LaTeX equations, and export production-ready C, C++, Python, and JSON code.
+A professional DSP workstation combining a pure C++20 filter engine with zero external dependencies and a reactive Qt 6 QML interface. Design IIR filters, drag cutoffs interactively in real time, analyze pole-zero placement on the unit circle, simulate audio playback, study DSP theory with rendered equations, and export production-ready C, C++, Python, and JSON code.
 
-[Quick Start](#-quick-start) • [Architecture](#-architecture) • [Features](#-key-features) • [Filter Matrix](#-filter-matrix) • [Exporting](#-code-export) • [Standalone DSP](#-standalone-dsp-library)
+[Quick Start](#-quick-start) • [Architecture](#-architecture) • [Features](#-key-features) • [Filter Theory & Wiki](#-filter-approximations--wiki-articles) • [Exporting](#-code-export) • [Contributors](#-contributors--community)
 
 ---
 
@@ -38,114 +39,113 @@ A sleek, Apple-inspired DSP workstation combining a **pure C++20 filter engine**
 # 1. Configure
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
-# 2. Compile (uses all CPU cores)
+# 2. Compile (uses all available CPU cores)
 cmake --build build --parallel
 
 # 3. Launch
 ./build/bin/FilterDesigner
 ```
 
-<details>
-<summary><b>🛠️ Advanced Build Options & Platform Notes</b></summary>
-
-#### Custom Qt Installation Path
-```bash
-# Using the convenience script
-./build.sh --qt /opt/Qt/6.7.0/gcc_64 && ./build/bin/FilterDesigner
-
-# Or with raw CMake
-cmake -S . -B build -DCMAKE_PREFIX_PATH=/opt/Qt/6.7.0/gcc_64 -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
-```
-
-#### Debug Build
-```bash
-./build.sh --debug && ./build/bin/FilterDesigner
-```
-
-#### Windows (MSVC 2022)
-```bat
-cmake -S . -B build -DCMAKE_PREFIX_PATH=C:\Qt\6.7.0\msvc2019_64
-cmake --build build --config Release
-.\build\bin\FilterDesigner.exe
-```
-
-#### Prerequisites
-- **Compiler**: C++20 compatible (GCC 12+, Clang 14+, Apple Clang 15+, MSVC 2022+)
-- **CMake**: >= 3.24
-- **Qt 6**: >= 6.4 (Modules: `Core`, `Gui`, `Qml`, `Quick`, `QuickControls2`, `Multimedia`)
-
-</details>
+### Advanced Options
+- **Debug build:** `./build.sh --debug && ./build/bin/FilterDesigner`
+- **Custom Qt prefix:** `./build.sh --qt /opt/Qt/6.7.0/gcc_64 && ./build/bin/FilterDesigner`
+- **Windows (MSVC 2022):** `cmake -S . -B build -DCMAKE_PREFIX_PATH=C:\Qt\6.7.0\msvc2019_64 && cmake --build build --config Release && .\build\bin\FilterDesigner.exe`
 
 ---
 
 ## 🏛 Architecture
 
-Filter Designer is strictly decoupled into two distinct tiers: an ultra-fast, zero-dependency C++20 DSP engine and a hardware-accelerated declarative QML UI.
+Filter Designer is strictly decoupled into two tiers: an ultra-fast, zero-dependency C++20 DSP engine and a hardware-accelerated declarative QML UI.
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Filter Designer Application                      │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-         ┌──────────────────────────┴──────────────────────────┐
-         ▼                                                     ▼
-┌──────────────────────────────────┐        ┌──────────────────────────────────┐
-│      Qt 6 QML Presentation       │        │        dsp/ Engine Core          │
-│  • Draggable Frequency Response  │        │  • Pure ISO C++20                │
-│  • Interactive Pole-Zero Plot    │        │  • Zero external dependencies    │
-│  • Audio Simulation & Waveforms  │◄──────►│  • Bilinear Transform (s → z)    │
-│  • LaTeX Math & Tutorial Studio  │        │  • SOS Biquad Cascade (DF2T)     │
-│  • Dark / Light Studio Theming   │        │  • Audio & WAV / CSV streaming   │
-└──────────────────────────────────┘        └──────────────────────────────────┘
-                                    ▲
-                                    │
-                         ┌──────────┴──────────┐
-                         │ FilterEngine Bridge │
-                         │  (Qt C++ Adapter)   │
-                         └─────────────────────┘
+                   Filter Designer Application
+                               │
+            ┌──────────────────┴──────────────────┐
+            ▼                                     ▼
+   Qt 6 QML Presentation                 dsp/ Engine Core
+   • Draggable Frequency Response        • Pure ISO C++20
+   • Interactive Pole-Zero Plot          • Zero external dependencies
+   • Audio Simulation & Waveforms        • Bilinear Transform (s → z)
+   • LaTeX Math & Tutorial Studio        • SOS Biquad Cascade (DF2T)
+   • Dark / Light Studio Theming         • Audio & WAV / CSV streaming
+            ▲                                     ▲
+            └──────────────────┬──────────────────┘
+                               │
+                      FilterEngine Bridge
+                       (Qt C++ Adapter)
 ```
 
-> **Standalone Decoupling:** The `dsp/` library has **zero Qt dependencies**. You can extract the `dsp/` folder and drop it into embedded firmware, command-line tools, audio plugins (VST/AU), WebAssembly, or Python bindings via pybind11.
+The `dsp/` library has **zero Qt dependencies**. It can be extracted into embedded firmware, command-line utilities, VST audio plugins, WebAssembly, or Python bindings.
 
 ---
 
 ## ✨ Key Features
 
-### 🎛️ Interactive Filter Design
-- **Direct Graph Manipulation:** Drag cutoff frequencies ($f_c$) and passband edges directly on the interactive Bode plot with tactile visual response.
+### Interactive Filter Synthesis
+- **Direct Graph Manipulation:** Drag cutoff frequencies ($f_c$) and passband boundaries directly on the interactive Bode plot with tactile visual response.
 - **Continuous Recalculation:** Sub-millisecond filter coefficient generation and response recomputation upon every slider touch or mouse drag.
 - **Topology Support:** Low Pass, High Pass, Band Pass, and Band Stop.
 - **Arbitrary Orders:** Seamlessly cascade up to 20+ order filters partitioned into numerically stable Second-Order Sections (SOS).
 
-### 🔬 Deep Signal & System Analysis
+### Signal & System Diagnostics
 - **Magnitude & Phase:** Logarithmic-frequency Bode plots with exact $-3\text{ dB}$ reference indicators and configurable dB scaling.
 - **Group Delay:** Exact phase derivative analysis highlighting transit distortion across critical frequency bands.
 - **Complex Z-Plane Poles & Zeros:** Real-time root visualization showing distance relative to the unit circle with stability detection.
 - **Impulse & Step Response:** Time-domain transient response simulations illustrating settling time and overshoot.
 
-### 🧪 Live Audio & Signal Simulation
+### Live Audio & Signal Simulation
 - **Multi-Format Ingestion:** Load WAV (8, 16, 24, 32-bit integer PCM & IEEE float) and CSV datasets.
 - **Synthetic Signal Generator:** Built-in sine tone and linear frequency sweep (chirp) generators.
 - **Direct A/B Comparison:** Dual-trace waveform overlay comparing raw input signals with filtered output signals.
 - **Audio Output:** Audition raw vs. filtered audio directly through system audio output via Qt Multimedia.
 
-### 📚 Integrated LaTeX Docs & Tutorial Studio
+### Integrated Documentation & Tutorial Studio
 - **Mathematical Foundations:** Fully rendered in-app formulas for Laplace prototypes, bilinear pre-warping, and $z$-domain transfer functions.
 - **Interactive Tutorials:** Guided walk-throughs covering audio anti-aliasing, DC blocking, notch filtering, and biomedical EEG/ECG filtering.
-- **Technical Tables:** Quick reference guides for filter attenuation slopes, phase linearity comparison, and biquad numerical sensitivity.
+- **Theory & Guides:** Quick reference guides for filter attenuation slopes, phase linearity, and biquad numerical sensitivity.
 
 ---
 
-## 📊 Filter Matrix
+## 📖 Filter Approximations & Wiki Articles
 
-| Filter Response | Passband Ripple | Stopband Ripple | Transition Roll-Off | Phase Linearity | Best Suited For |
-|:---|:---:|:---:|:---:|:---:|:---|
-| **Butterworth** | Maximally Flat ($0\text{ dB}$) | Monotonic | Moderate ($6N\text{ dB/oct}$) | Good | General audio, clean crossover networks, measurement |
-| **Chebyshev Type I** | Equiripple ($\varepsilon$) | Monotonic | Steep | Non-linear | High selectivity where passband ripple is tolerable |
-| **Chebyshev Type II** | Maximally Flat | Equiripple ($R_s$) | Steep | Non-linear | Anti-aliasing, systems requiring zero passband distortion |
-| **Elliptic (Cauer)** | Equiripple ($\varepsilon$) | Equiripple ($R_s$) | **Steepest** | Highly non-linear | Severe transition band constraints, steep brick-wall cutoffs |
-| **Bessel** | Monotonic | Monotonic | Gentle | **Maximally Flat Group Delay** | Pulse shaping, communications, audio transient preservation |
+Explore the theoretical foundations and mathematical derivations behind each supported filter approximation:
+
+- **[Butterworth Filter](https://en.wikipedia.org/wiki/Butterworth_filter)**
+  - *Passband:* Maximally flat ($0\text{ dB}$ ripple)
+  - *Stopband:* Monotonic roll-off ($6N\text{ dB/octave}$)
+  - *Phase Response:* Moderate phase linearity
+  - *Best Suited For:* High-fidelity audio crossovers, general-purpose filtering, and measurement systems where passband ripple cannot be tolerated.
+
+- **[Chebyshev Type I Filter](https://en.wikipedia.org/wiki/Chebyshev_filter)**
+  - *Passband:* Equiripple behavior controlled by user ripple tolerance $\varepsilon$
+  - *Stopband:* Monotonic roll-off with steeper transition than Butterworth
+  - *Phase Response:* Non-linear near the cutoff frequency
+  - *Best Suited For:* Channelization and high-selectivity applications where passband ripple is acceptable.
+
+- **[Chebyshev Type II Filter (Inverse Chebyshev)](https://en.wikipedia.org/wiki/Chebyshev_filter#Type_II_Chebyshev_filters)**
+  - *Passband:* Maximally flat passband with zero ripple
+  - *Stopband:* Equiripple attenuation reaching specified stopband dB
+  - *Phase Response:* Non-linear in transition region
+  - *Best Suited For:* Anti-aliasing and ADC front-ends requiring pristine passbands with sharp cutoff.
+
+- **[Elliptic Filter (Cauer Filter)](https://en.wikipedia.org/wiki/Elliptic_filter)**
+  - *Passband:* Equiripple passband
+  - *Stopband:* Equiripple stopband with transmission zeros
+  - *Transition Band:* **Steepest possible roll-off** for a given filter order
+  - *Phase Response:* Highly non-linear
+  - *Best Suited For:* Severe transition band constraints, steep brick-wall cutoffs, and bandwidth-limited communication channels.
+
+- **[Bessel Filter (Thomson Filter)](https://en.wikipedia.org/wiki/Bessel_filter)**
+  - *Group Delay:* **Maximally flat group delay** across passband
+  - *Phase Response:* Linear phase with virtually zero phase distortion
+  - *Transition Band:* Gentle, monotonic roll-off
+  - *Best Suited For:* Audio transient preservation, pulse shaping, radar, and square wave filtering without ringing or overshoot.
+
+### Core Mathematical Concepts
+- **[Bilinear Transform](https://en.wikipedia.org/wiki/Bilinear_transform)**: Conformal mapping transforming the continuous $s$-plane into the discrete $z$-plane via trapezoidal integration with frequency pre-warping.
+- **[Digital Biquad Filter](https://en.wikipedia.org/wiki/Digital_biquad_filter)**: Second-Order Section (SOS) Direct Form II Transposed implementation ensuring robust numerical stability.
+- **[Group Delay & Phase Delay](https://en.wikipedia.org/wiki/Group_delay_and_phase_delay)**: Time delay of amplitude envelopes across frequencies, computed via phase derivatives.
+- **[Z-Transform & Unit Circle Stability](https://en.wikipedia.org/wiki/Z-transform)**: Root constellation criteria for Bounded-Input Bounded-Output (BIBO) stability.
 
 ---
 
@@ -153,29 +153,21 @@ Filter Designer is strictly decoupled into two distinct tiers: an ultra-fast, ze
 
 Export verified, production-grade filter implementations in four industry-standard formats:
 
-### 1. Embedded C (`Direct Form II Transposed`)
-Single-header compatible, zero-allocation C routine ideal for microcontrollers (ARM Cortex-M, ESP32, STM32, PIC):
-```c
-/* Generated by Filter Designer */
-void filter_process(const float* in, float* out, size_t count, BiquadState* state);
-```
+- **Embedded C (`Direct Form II Transposed`)**
+  Single-header compatible, zero-allocation C routine ideal for microcontrollers (ARM Cortex-M, ESP32, STM32):
+  ```c
+  /* Generated by Filter Designer */
+  void filter_process(const float* in, float* out, size_t count, BiquadState* state);
+  ```
 
-### 2. Modern C++ (`constexpr` Biquads)
-Object-oriented C++20 header with `constexpr` coefficients and vectorized processing methods.
+- **Modern C++ (`constexpr` Biquads)**
+  Object-oriented C++20 header with `constexpr` coefficient arrays and vectorized sample processing.
 
-### 3. Python (SciPy / NumPy)
-Self-contained Python script utilizing `scipy.signal.sosfilt` with automatic Matplotlib verification plots:
-```python
-import numpy as np
-from scipy import signal
-import matplotlib.pyplot as plt
+- **Python (SciPy / NumPy)**
+  Self-contained Python script utilizing `scipy.signal.sosfilt` with automatic Matplotlib verification plots.
 
-sos = np.array([...])
-filtered = signal.sosfilt(sos, data)
-```
-
-### 4. Machine-Readable JSON
-Structured interchange format containing complete filter specifications, pole-zero coordinates, and SOS arrays for automated toolchains and test fixtures.
+- **Machine-Readable JSON**
+  Structured interchange schema containing complete filter specifications, pole-zero coordinates, and SOS arrays for automated toolchains and test fixtures.
 
 ---
 
@@ -188,8 +180,6 @@ You can integrate the pure C++20 DSP library into any CMake project without Qt:
 add_subdirectory(overtune3/dsp)
 target_link_libraries(MyEmbeddedApp PRIVATE dsp)
 ```
-
-### C++ Usage Example
 
 ```cpp
 #include <dsp/FilterDesigner.h>
@@ -204,8 +194,8 @@ dsp::FilterSpec spec{
     .order        = 4,
     .sampleRate   = 48000.0,
     .cutoffFreq   = 2500.0,
-    .ripplePass   = 1.0,  // dB (for Chebyshev I / Elliptic)
-    .stopbandAttn = 40.0  // dB (for Chebyshev II / Elliptic)
+    .ripplePass   = 1.0,
+    .stopbandAttn = 40.0
 };
 
 // 2. Synthesize Filter
@@ -215,81 +205,36 @@ dsp::FilterCoefficients coeffs = dsp::designFilter(spec);
 dsp::AnalysisResult analysis = dsp::FilterAnalysis::compute(coeffs, spec.sampleRate);
 
 // 4. Process Samples in Real-Time
-std::vector<float> inputSignal = /* ... */;
-std::vector<float> outputSignal = dsp::SignalProcessor::process(coeffs, inputSignal);
+std::vector<float> input = /* ... */;
+std::vector<float> output = dsp::SignalProcessor::process(coeffs, input);
 
 // 5. Generate Standalone C Code
-std::string cSource = dsp::CodeExporter::generate(coeffs, spec, dsp::ExportFormat::C);
+std::string cCode = dsp::CodeExporter::generate(coeffs, spec, dsp::ExportFormat::C);
 ```
 
 ---
 
-## 📂 Project Directory Structure
+## 🤝 Contributors & Community
 
-```
-overtune3/
-├── CMakeLists.txt               # Master CMake configuration
-├── build.sh                     # Automated build & configuration script
-├── assets/                      # Application icons, fonts, and graphics
-│
-├── dsp/                         # 🧠 Pure C++20 DSP Library (Zero Qt dependency)
-│   ├── CMakeLists.txt
-│   ├── include/dsp/
-│   │   ├── FilterSpec.h         # Specification and parameter structures
-│   │   ├── FilterDesigner.h     # High-level synthesis factory
-│   │   ├── FilterCoefficients.h # Second-Order Section (SOS) representations
-│   │   ├── FilterAnalysis.h     # Bode, phase, group delay & z-plane analysis
-│   │   ├── SignalProcessor.h    # Block and sample-by-sample processing
-│   │   ├── CodeExporter.h       # C, C++, Python, JSON code generators
-│   │   ├── WavReader.h          # Multi-format WAV audio decoder
-│   │   └── CsvReader.h          # Time-series CSV importer
-│   └── src/
-│       ├── BilinearTransform.cpp# s-plane to z-plane bilinear mapping
-│       ├── Butterworth.cpp      # Butterworth analog prototype
-│       ├── Chebyshev.cpp        # Chebyshev Type I & II analog prototype
-│       ├── Elliptic.cpp         # Jacobi elliptic function prototype
-│       └── Bessel.cpp           # Bessel prototype polynomials
-│
-└── app/                         # 🎨 Qt 6 / QML Desktop Application
-    ├── CMakeLists.txt
-    ├── src/
-    │   ├── main.cpp             # Application bootstrap & window management
-    │   ├── FilterEngine.h/.cpp  # C++/QML bridge (reactive data pipeline)
-    │   ├── SimulationModel.h/.cpp# Signal generator & audio playback controller
-    │   ├── ExportModel.h/.cpp   # Real-time code preview provider
-    │   └── ThemeManager.h/.cpp  # Dynamic theme switcher (Dark/Light/System)
-    └── qml/
-        ├── Main.qml             # Main layout, sidebar, and view stack
-        ├── theme/Theme.qml      # Apple-inspired color tokens and typography
-        ├── components/          # Reusable visual widgets
-        │   ├── FrequencyPlot.qml# Draggable Bode response graph
-        │   ├── PoleZeroPlot.qml # Complex z-plane unit-circle canvas
-        │   ├── ImpulseStepPlot.qml# Transient response visualizer
-        │   ├── SignalPlot.qml   # Time-domain waveform oscilloscope
-        │   ├── LaTeXBlock.qml   # Formatted DSP mathematical equation block
-        │   ├── CodeViewer.qml   # Syntax-colored code viewer with copy
-        │   └── TutorialStudio.qml# Interactive step-by-step DSP guide
-        └── pages/               # Primary application views
-            ├── DesignPage.qml   # Synthesis workbench & interactive plot
-            ├── AnalysisPage.qml # Detailed spectral & root analysis
-            ├── SimulationPage.qml# Audio & signal generation studio
-            ├── DocsPage.qml     # LaTeX theory guide & technical tables
-            ├── ExportPage.qml   # Code export center (C, C++, Py, JSON)
-            └── SettingsPage.qml # Theme and audio device preferences
-```
+Filter Designer is an open-source project hosted on GitHub. Community contributions, bug reports, and filter algorithm proposals are welcome!
 
----
+- **Main Repository:** [https://github.com/shadcy/overtune3](https://github.com/shadcy/overtune3)
+- **Issue Tracker & Feature Requests:** [https://github.com/shadcy/overtune3/issues](https://github.com/shadcy/overtune3/issues)
 
-## ⌨️ Navigation & Controls
+### How to Contribute
+1. **Report Bugs & Suggest Features:** Submit an issue on the [Issue Tracker](https://github.com/shadcy/overtune3/issues) describing the behavior, sample rate, filter specifications, and environment.
+2. **Implement DSP Algorithms:** Extend `dsp/src/` with new prototype synthesis routines (e.g. Papoulis Optimum L, Legendre, Gaussian, or FIR Parks-McClellan).
+3. **Enhance User Experience:** Contribute QML improvements, interactive tutorials, or responsive layout polish in `app/qml/`.
+4. **Submit Pull Requests:**
+   - Fork the repository: [https://github.com/shadcy/overtune3](https://github.com/shadcy/overtune3)
+   - Create your feature branch (`git checkout -b feature/my-dsp-filter`)
+   - Commit your changes (`git commit -m "feat: add Gaussian filter prototype"`)
+   - Push to your branch (`git push origin feature/my-dsp-filter`)
+   - Open a Pull Request on GitHub
 
-| View | Description | Key Capabilities |
-|:---|:---|:---|
-| **Design** | Filter Synthesis | Drag cutoff line directly on graph, change order, ripple, & response type |
-| **Analysis** | System Diagnostics | Inspect group delay, phase unwrapping, impulse/step response, and poles/zeros |
-| **Simulation** | Real-Time Testing | Load WAV/CSV, generate sines/chirps, apply filter, and preview audio playback |
-| **Docs & Theory** | Educational Suite | Read mathematical derivations, examine LaTeX formulas, run interactive tutorials |
-| **Export** | Code Generator | Preview and copy C/C++/Python/JSON implementations with 1-click clipboard copy |
-| **Settings** | Configuration | Toggle Dark / Light / System theme, customize plotting fidelity and grid styles |
+### Project Maintainers
+- **shadcy** — Project creator & lead maintainer ([GitHub @shadcy](https://github.com/shadcy))
+- All open-source contributors who have submitted issues, benchmarks, and pull requests!
 
 ---
 
