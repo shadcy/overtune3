@@ -470,3 +470,88 @@ bool FilterEngine::deleteTutorial(const QString& id) {
 QString FilterEngine::tutorialsDirectory() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 }
+
+bool FilterEngine::isStable() const {
+    if (!m_hasResults || !m_coeff.isValid())
+        return true;
+    for (const auto &p : m_coeff.poles) {
+        if (std::abs(p) >= 1.0)
+            return false;
+    }
+    return true;
+}
+
+double FilterEngine::maxPoleRadius() const {
+    if (!m_hasResults || !m_coeff.isValid())
+        return 0.0;
+    double maxR = 0.0;
+    for (const auto &p : m_coeff.poles) {
+        double r = std::abs(p);
+        if (r > maxR)
+            maxR = r;
+    }
+    return maxR;
+}
+
+double FilterEngine::magnitudeDbAt(double freqHz) const {
+    if (!m_hasResults || !m_coeff.isValid() || m_spec.sampleRate <= 0.0)
+        return 0.0;
+    double omega = 2.0 * M_PI * freqHz / m_spec.sampleRate;
+    if (omega < 0.0) omega = 0.0;
+    if (omega > M_PI) omega = M_PI;
+    auto h = m_coeff.evaluate(omega);
+    double mag = std::abs(h);
+    return (mag > 1e-12) ? 20.0 * std::log10(mag) : -240.0;
+}
+
+double FilterEngine::attenuationDbAt(double freqHz) const {
+    return -magnitudeDbAt(freqHz);
+}
+
+double FilterEngine::passbandRippleDb(double fStart, double fEnd) const {
+    if (!m_hasResults || !m_coeff.isValid() || m_spec.sampleRate <= 0.0)
+        return 0.0;
+    if (fStart > fEnd) std::swap(fStart, fEnd);
+
+    double maxMag = -1e9;
+    double minMag = 1e9;
+    const int steps = 40;
+    for (int i = 0; i <= steps; ++i) {
+        double f = fStart + (fEnd - fStart) * (double(i) / steps);
+        double db = magnitudeDbAt(f);
+        if (db > maxMag) maxMag = db;
+        if (db < minMag) minMag = db;
+    }
+    return (maxMag > minMag) ? (maxMag - minMag) : 0.0;
+}
+
+QVariantMap FilterEngine::evaluateLab(double passbandFreq, double stopbandFreq,
+                                      double minStopbandAttenDb, double maxPassbandRippleDb,
+                                      int maxOrder) const {
+    QVariantMap res;
+    bool stable = isStable();
+    double maxR = maxPoleRadius();
+    double attenStop = attenuationDbAt(stopbandFreq);
+    double ripPass = passbandRippleDb(10.0, passbandFreq);
+    bool stopSat = (attenStop >= minStopbandAttenDb);
+    bool passSat = (ripPass <= maxPassbandRippleDb);
+    bool orderSat = (m_spec.order <= maxOrder);
+
+    int score = 0;
+    if (passSat) score++;
+    if (stopSat) score++;
+    if (stable) score++;
+    if (orderSat) score++;
+
+    res["passbandSatisfied"] = passSat;
+    res["stopbandSatisfied"] = stopSat;
+    res["stabilitySatisfied"] = stable;
+    res["orderSatisfied"] = orderSat;
+    res["attenuationAtStop"] = attenStop;
+    res["rippleInPass"] = ripPass;
+    res["maxPoleRadius"] = maxR;
+    res["currentOrder"] = m_spec.order;
+    res["score"] = score;
+    res["allPassed"] = (score == 4);
+    return res;
+}

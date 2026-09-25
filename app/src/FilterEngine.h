@@ -96,6 +96,16 @@ public:
   Q_INVOKABLE bool deleteTutorial(const QString &id);
   Q_INVOKABLE QString tutorialsDirectory() const;
 
+  // Interactive Learning & Lab Challenge Evaluator
+  Q_INVOKABLE bool isStable() const;
+  Q_INVOKABLE double maxPoleRadius() const;
+  Q_INVOKABLE double magnitudeDbAt(double freqHz) const;
+  Q_INVOKABLE double attenuationDbAt(double freqHz) const;
+  Q_INVOKABLE double passbandRippleDb(double fStart, double fEnd) const;
+  Q_INVOKABLE QVariantMap evaluateLab(double passbandFreq, double stopbandFreq,
+                                      double minStopbandAttenDb, double maxPassbandRippleDb,
+                                      int maxOrder) const;
+
 signals:
   void specChanged();
   void resultsChanged();

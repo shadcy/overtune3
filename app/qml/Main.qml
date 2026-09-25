@@ -235,6 +235,9 @@ Window {
         onActivated: root.doClear()
     }
 
+    // ── Tutorial & Interactive Learning Engine ───────────────────────────────
+    TutorialEngine { id: tutEngine }
+
     // ── Main layout ───────────────────────────────────────────────────────────
     Item {
         anchors.fill: parent
@@ -242,10 +245,21 @@ Window {
         opacity: root.fontsReady ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
+        // Top Navigation & 3-Mode Switcher [DESIGN | LEARN | CHALLENGE]
+        ModeHeaderBar {
+            id: headerBar
+            tutEngine: tutEngine
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
+        }
+
         Sidebar {
             id: sidebar
             anchors {
-                top: parent.top
+                top: headerBar.bottom
                 left: parent.left
                 bottom: parent.bottom
             }
@@ -261,24 +275,44 @@ Window {
         Item {
             id: contentHost
             anchors {
-                top: parent.top
+                top: headerBar.bottom
                 left: sidebar.right
                 right: parent.right
                 bottom: parent.bottom
             }
             clip: true
 
-            StackLayout {
-                id: pageStack
+            ColumnLayout {
                 anchors.fill: parent
-                currentIndex: 0
+                spacing: 0
 
-                DesignPage     { id: designPage;     Layout.fillWidth: true; Layout.fillHeight: true }
-                AnalysisPage   { id: analysisPage;   Layout.fillWidth: true; Layout.fillHeight: true }
-                SimulationPage { id: simulationPage; Layout.fillWidth: true; Layout.fillHeight: true }
-                ExportPage     { id: exportPage;     Layout.fillWidth: true; Layout.fillHeight: true }
-                DocsPage       { id: docsPage;       Layout.fillWidth: true; Layout.fillHeight: true }
-                SettingsPage   { id: settingsPage;   Layout.fillWidth: true; Layout.fillHeight: true }
+                // Real-time DSP Lab Challenge Evaluator Bar (visible in CHALLENGE mode)
+                ChallengeStudio {
+                    id: challengeStudio
+                    tutEngine: tutEngine
+                    Layout.fillWidth: true
+                }
+
+                StackLayout {
+                    id: pageStack
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    currentIndex: 0
+
+                    DesignPage     { id: designPage;     Layout.fillWidth: true; Layout.fillHeight: true }
+                    AnalysisPage   { id: analysisPage;   Layout.fillWidth: true; Layout.fillHeight: true }
+                    SimulationPage { id: simulationPage; Layout.fillWidth: true; Layout.fillHeight: true }
+                    ExportPage     { id: exportPage;     Layout.fillWidth: true; Layout.fillHeight: true }
+                    DocsPage       { id: docsPage;       Layout.fillWidth: true; Layout.fillHeight: true }
+                    SettingsPage   { id: settingsPage;   Layout.fillWidth: true; Layout.fillHeight: true }
+                }
+            }
+
+            // Interactive Tutorial Step & Spotlight Overlay (visible in LEARN mode)
+            SpotlightOverlay {
+                id: spotlightOverlay
+                tutEngine: tutEngine
+                anchors.fill: parent
             }
         }
     }
