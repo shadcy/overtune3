@@ -18,6 +18,57 @@ Item {
     readonly property bool narrowLayout: width < 680
     readonly property int pageMargin: width < 700 ? 10 : 16
 
+    property bool hasPendingChanges: false
+    property int pendingType: filterEngine.filterType
+    property int pendingResponse: filterEngine.filterResponse
+    property int pendingOrder: filterEngine.order
+    property double pendingSampleRate: filterEngine.sampleRate
+    property double pendingCutoff: filterEngine.cutoffFreq
+    property double pendingCutoff2: filterEngine.cutoffFreq2
+    property double pendingRipple: filterEngine.rippleDb
+    property double pendingStopband: filterEngine.stopbandDb
+
+    function syncPendingWithEngine() {
+        pendingType = filterEngine.filterType
+        pendingResponse = filterEngine.filterResponse
+        pendingOrder = filterEngine.order
+        pendingSampleRate = filterEngine.sampleRate
+        pendingCutoff = filterEngine.cutoffFreq
+        pendingCutoff2 = filterEngine.cutoffFreq2
+        pendingRipple = filterEngine.rippleDb
+        pendingStopband = filterEngine.stopbandDb
+        hasPendingChanges = false
+    }
+
+    function applyPendingChanges() {
+        filterEngine.filterType = pendingType
+        filterEngine.filterResponse = pendingResponse
+        filterEngine.order = pendingOrder
+        filterEngine.sampleRate = pendingSampleRate
+        filterEngine.cutoffFreq = pendingCutoff
+        filterEngine.cutoffFreq2 = pendingCutoff2
+        filterEngine.rippleDb = pendingRipple
+        filterEngine.stopbandDb = pendingStopband
+        filterEngine.design()
+        hasPendingChanges = false
+        if (freqPlot) {
+            freqPlot.refreshPoints()
+            freqPlot.schedulePaint()
+            freqPlot.showPlotToast("Manual configuration applied")
+        }
+    }
+
+    Connections {
+        target: filterEngine
+        function onSpecChanged() {
+            if (!root.hasPendingChanges) {
+                root.syncPendingWithEngine()
+            }
+        }
+    }
+
+    Component.onCompleted: syncPendingWithEngine()
+
     property alias freqPlot: freqPlot
 
     function setPlotMode(m) {
@@ -53,25 +104,52 @@ Item {
         Rectangle {
             id: titleStrip
             anchors { top: parent.top; left: parent.left; right: parent.right }
-            height: 35
+            height: 60
             color: "transparent"
             z: 2
 
-            Text {
+            // Medium-sized Squircle Logo
+            Rectangle {
+                id: logoSquircle
                 anchors {
                     left: parent.left
                     leftMargin: 14
                     verticalCenter: parent.verticalCenter
-                    right: parent.right
-                    rightMargin: 14
                 }
-                text: "OVERTUNE 3"
-                font.family: "Stack Sans Headline"
-                font.pixelSize: 11
-                font.weight: Font.DemiBold
-                font.letterSpacing: 0.6
-                color: theme.secondaryText
-                elide: Text.ElideRight
+                width: 44
+                height: 44
+                radius: 12
+                color: "#000000"
+                clip: true
+                border.color: theme.isDark ? "rgba(255, 255, 255, 0.18)" : "rgba(0, 0, 0, 0.14)"
+                border.width: 1
+
+                Image {
+                    anchors.fill: parent
+                    anchors.margins: 3
+                    source: "qrc:/FilterDesigner/icons/logo.png"
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    mipmap: true
+                }
+
+                ToolTip.visible: logoHover.hovered
+                ToolTip.text: "Overtune 3 Studio"
+                ToolTip.delay: 300
+
+                HoverHandler {
+                    id: logoHover
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                TapHandler {
+                    onTapped: {
+                        const w = Window.window
+                        if (w && typeof w.showWhatsNew === "function") {
+                            w.showWhatsNew()
+                        }
+                    }
+                }
             }
 
             Rectangle {
@@ -89,7 +167,7 @@ Item {
                 top: titleStrip.bottom
                 left: parent.left
                 right: parent.right
-                bottom: parent.bottom
+                bottom: stickyApplyBar.top
             }
             clip: true
             contentWidth: width
@@ -168,6 +246,7 @@ Item {
                                 filterEngine.sampleRate = 48000; filterEngine.filterType = 1; filterEngine.filterResponse = 0;
                                 filterEngine.order = 4; filterEngine.cutoffFreq = 10000;
                             }
+                            root.syncPendingWithEngine()
                         }
                     }
                 }
@@ -181,8 +260,11 @@ Item {
                     StyledCombo {
                         width: parent.width
                         model: root.typeNames
-                        currentIndex: filterEngine.filterType
-                        onActivated: filterEngine.filterType = currentIndex
+                        currentIndex: root.hasPendingChanges ? root.pendingType : filterEngine.filterType
+                        onActivated: {
+                            root.pendingType = currentIndex
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -192,8 +274,11 @@ Item {
                     StyledCombo {
                         width: parent.width
                         model: root.responseNames
-                        currentIndex: filterEngine.filterResponse
-                        onActivated: filterEngine.filterResponse = currentIndex
+                        currentIndex: root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse
+                        onActivated: {
+                            root.pendingResponse = currentIndex
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -206,11 +291,18 @@ Item {
                     StyledSlider {
                         width: parent.width
                         from: 1
-                        to: filterEngine.filterResponse === 4 ? 10 : 16
-                        value: filterEngine.order
+                        to: (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 4 ? 10 : 16
+                        value: root.hasPendingChanges ? root.pendingOrder : filterEngine.order
                         stepSize: 1
                         valueDecimals: 0
-                        onMoved: filterEngine.order = Math.round(value)
+                        onMoved: {
+                            root.pendingOrder = Math.round(value)
+                            root.hasPendingChanges = true
+                        }
+                        onManualValueEntered: function(val) {
+                            root.pendingOrder = Math.round(val)
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -222,10 +314,14 @@ Item {
                         model: ["8000", "22050", "44100", "48000", "96000", "192000"]
                         currentIndex: {
                             const rates = [8000, 22050, 44100, 48000, 96000, 192000]
-                            const i = rates.indexOf(Math.round(filterEngine.sampleRate))
+                            const curSR = root.hasPendingChanges ? root.pendingSampleRate : filterEngine.sampleRate
+                            const i = rates.indexOf(Math.round(curSR))
                             return i >= 0 ? i : 3
                         }
-                        onActivated: filterEngine.sampleRate = parseFloat(model[currentIndex])
+                        onActivated: {
+                            root.pendingSampleRate = parseFloat(model[currentIndex])
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -235,12 +331,19 @@ Item {
                     StyledSlider {
                         width: parent.width
                         from: 10
-                        to: Math.max(20, filterEngine.sampleRate / 2 - 1)
-                        value: Math.min(filterEngine.cutoffFreq, filterEngine.sampleRate / 2 - 1)
+                        to: Math.max(20, (root.hasPendingChanges ? root.pendingSampleRate : filterEngine.sampleRate) / 2 - 1)
+                        value: root.hasPendingChanges ? root.pendingCutoff : Math.min(filterEngine.cutoffFreq, filterEngine.sampleRate / 2 - 1)
                         stepSize: 1
                         valueSuffix: " Hz"
                         valueDecimals: 0
-                        onMoved: filterEngine.cutoffFreq = value
+                        onMoved: {
+                            root.pendingCutoff = Math.round(value)
+                            root.hasPendingChanges = true
+                        }
+                        onManualValueEntered: function(val) {
+                            root.pendingCutoff = Math.round(val * 10) / 10
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -252,13 +355,20 @@ Item {
                     label: "Fc High"
                     StyledSlider {
                         width: parent.width
-                        from: Math.min(filterEngine.cutoffFreq + 10, filterEngine.sampleRate / 2 - 2)
-                        to: Math.max(filterEngine.cutoffFreq + 20, filterEngine.sampleRate / 2 - 1)
-                        value: Math.max(filterEngine.cutoffFreq2, filterEngine.cutoffFreq + 10)
+                        from: Math.min((root.hasPendingChanges ? root.pendingCutoff : filterEngine.cutoffFreq) + 10, (root.hasPendingChanges ? root.pendingSampleRate : filterEngine.sampleRate) / 2 - 2)
+                        to: Math.max((root.hasPendingChanges ? root.pendingCutoff : filterEngine.cutoffFreq) + 20, (root.hasPendingChanges ? root.pendingSampleRate : filterEngine.sampleRate) / 2 - 1)
+                        value: root.hasPendingChanges ? root.pendingCutoff2 : Math.max(filterEngine.cutoffFreq2, filterEngine.cutoffFreq + 10)
                         stepSize: 1
                         valueSuffix: " Hz"
                         valueDecimals: 0
-                        onMoved: filterEngine.cutoffFreq2 = value
+                        onMoved: {
+                            root.pendingCutoff2 = Math.round(value)
+                            root.hasPendingChanges = true
+                        }
+                        onManualValueEntered: function(val) {
+                            root.pendingCutoff2 = Math.round(val * 10) / 10
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -276,20 +386,26 @@ Item {
                         anchors.centerIn: parent
                         spacing: 12
                         Text {
-                            text: "f₀: " + Math.round(Math.sqrt(filterEngine.cutoffFreq * filterEngine.cutoffFreq2)) + " Hz"
+                            readonly property real fc1: root.hasPendingChanges ? root.pendingCutoff : filterEngine.cutoffFreq
+                            readonly property real fc2: root.hasPendingChanges ? root.pendingCutoff2 : filterEngine.cutoffFreq2
+                            text: "f₀: " + Math.round(Math.sqrt(fc1 * fc2)) + " Hz"
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 11
                             color: theme.primaryText
                         }
                         Text {
-                            text: "BW: " + Math.round(filterEngine.cutoffFreq2 - filterEngine.cutoffFreq) + " Hz"
+                            readonly property real fc1: root.hasPendingChanges ? root.pendingCutoff : filterEngine.cutoffFreq
+                            readonly property real fc2: root.hasPendingChanges ? root.pendingCutoff2 : filterEngine.cutoffFreq2
+                            text: "BW: " + Math.round(fc2 - fc1) + " Hz"
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 11
                             color: theme.secondaryText
                         }
                         Text {
-                            readonly property real bw: Math.max(1, filterEngine.cutoffFreq2 - filterEngine.cutoffFreq)
-                            readonly property real f0: Math.sqrt(filterEngine.cutoffFreq * filterEngine.cutoffFreq2)
+                            readonly property real fc1: root.hasPendingChanges ? root.pendingCutoff : filterEngine.cutoffFreq
+                            readonly property real fc2: root.hasPendingChanges ? root.pendingCutoff2 : filterEngine.cutoffFreq2
+                            readonly property real bw: Math.max(1, fc2 - fc1)
+                            readonly property real f0: Math.sqrt(fc1 * fc2)
                             text: "Q: " + (f0 / bw).toFixed(2)
                             font.family: "Stack Sans Headline"
                             font.pixelSize: 11
@@ -301,35 +417,49 @@ Item {
 
                 ParameterRow {
                     width: parent.width
-                    visible: filterEngine.filterResponse === 1 || filterEngine.filterResponse === 3
+                    visible: (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 1 || (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 3
                     height: visible ? implicitHeight : 0
                     label: "Ripple"
                     StyledSlider {
                         width: parent.width
                         from: 0.1
                         to: 5.0
-                        value: filterEngine.rippleDb
+                        value: root.hasPendingChanges ? root.pendingRipple : filterEngine.rippleDb
                         stepSize: 0.1
                         valueSuffix: " dB"
                         valueDecimals: 1
-                        onMoved: filterEngine.rippleDb = value
+                        onMoved: {
+                            root.pendingRipple = Math.round(value * 10) / 10
+                            root.hasPendingChanges = true
+                        }
+                        onManualValueEntered: function(val) {
+                            root.pendingRipple = Math.round(val * 10) / 10
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
                 ParameterRow {
                     width: parent.width
-                    visible: filterEngine.filterResponse === 2 || filterEngine.filterResponse === 3
+                    visible: (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 2 || (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 3
                     height: visible ? implicitHeight : 0
                     label: "Stopband"
                     StyledSlider {
                         width: parent.width
                         from: 20
                         to: 120
-                        value: filterEngine.stopbandDb
+                        value: root.hasPendingChanges ? root.pendingStopband : filterEngine.stopbandDb
                         stepSize: 1
                         valueSuffix: " dB"
                         valueDecimals: 0
-                        onMoved: filterEngine.stopbandDb = value
+                        onMoved: {
+                            root.pendingStopband = Math.round(value)
+                            root.hasPendingChanges = true
+                        }
+                        onManualValueEntered: function(val) {
+                            root.pendingStopband = Math.round(val)
+                            root.hasPendingChanges = true
+                        }
                     }
                 }
 
@@ -372,69 +502,327 @@ Item {
                     }
                 }
 
-                Item { width: 1; height: 8 }
-                Rectangle {
+                ParameterRow {
                     width: parent.width
-                    height: 1
-                    color: theme.borderColor
-                    opacity: 0.5
-                }
-                Item { width: 1; height: 4 }
+                    label: "Verifier"
+                    Rectangle {
+                        width: parent.width
+                        height: 26
+                        radius: 6
+                        color: verBtnMouse.pressed ? "#0071E3" : (verBtnMouse.containsMouse ? theme.accent : (theme.isDark ? "#25272B" : "#E4E7EB"))
+                        border.color: theme.borderColor
+                        border.width: 1
 
-                // Stability & Pole Radius Status Card (Clean, minimal and balanced)
-                Rectangle {
-                    width: parent.width
-                    height: 44
-                    radius: 6
-                    color: theme.surfaceHigh
-                    border.color: theme.borderColor
-                    border.width: 1
-
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: 9
-                        Rectangle {
-                            width: 7; height: 7; radius: 3.5
-                            color: filterEngine.isStable() ? "#34C759" : theme.danger
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 1
-                            Text {
-                                text: filterEngine.isStable() ? "System Stable (|p| < 1)" : "System Unstable (|p| ≥ 1)"
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 12
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 5
+                            Codicon {
+                                icon: "shield"
+                                iconSize: 11
+                                iconColor: verBtnMouse.containsMouse ? "#FFFFFF" : theme.accent
+                                anchors.verticalCenter: parent.verticalCenter
                             }
                             Text {
-                                text: "Max Pole Radius |p| = " + filterEngine.maxPoleRadius().toFixed(4)
+                                text: "Verify Design"
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 11
-                                color: theme.secondaryText
+                                font.weight: Font.DemiBold
+                                color: verBtnMouse.containsMouse ? "#FFFFFF" : theme.primaryText
+                                anchors.verticalCenter: parent.verticalCenter
                             }
+                        }
+
+                        MouseArea {
+                            id: verBtnMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: verifierModal.openVerification()
                         }
                     }
                 }
 
-                Text {
+                Item { width: 1; height: 2 }
+
+                // ── Filter Inspector (flat, matches Configuration panel style) ──
+                Item {
+                    id: inspectorWrap
                     width: parent.width
-                    text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName()
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 14
-                    font.weight: Font.DemiBold
-                    color: theme.primaryText
-                    wrapMode: Text.WordWrap
+                    height: inspToggleRow.height + (inspOpen ? inspCol.implicitHeight : 0)
+                    clip: true
+                    property bool inspOpen: false
+                    Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+
+                    // Toggle header — same styling as SectionHeader
+                    Item {
+                        id: inspToggleRow
+                        width: parent.width
+                        height: 32
+
+                        Text {
+                            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                            text: "Filter Inspector"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                            color: theme.primaryText
+                        }
+
+                        Codicon {
+                            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                            icon: inspectorWrap.inspOpen ? "chevron-up" : "chevron-down"
+                            iconSize: 11
+                            iconColor: theme.secondaryText
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: inspectorWrap.inspOpen = !inspectorWrap.inspOpen
+                        }
+                    }
+
+                    // Body — flat rows, no background, no borders
+                    Column {
+                        id: inspCol
+                        width: parent.width
+                        anchors.top: inspToggleRow.bottom
+                        spacing: 0
+
+                        // Flat spec row — 34px, 13px text, matches ParameterRow
+                        component FlatRow: Item {
+                            property string lbl: ""
+                            property string val: ""
+                            property color  valColor: theme.primaryText
+                            width: parent.width
+                            height: 34
+                            Text {
+                                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                                text: lbl
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                color: theme.secondaryText
+                            }
+                            Text {
+                                anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                                text: val
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 13
+                                font.weight: Font.DemiBold
+                                color: valColor
+                                elide: Text.ElideLeft
+                                maximumLineCount: 1
+                            }
+                        }
+
+                        // Sub-section label — same style as SectionHeader
+                        component SubHeader: Text {
+                            width: parent.width
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 12
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: 0.8
+                            color: theme.secondaryText
+                            topPadding: 8
+                            bottomPadding: 2
+                        }
+
+                        // ── Design ───────────────────────────────────────────
+                        SubHeader { text: "DESIGN" }
+
+                        FlatRow {
+                            lbl: "Response"
+                            val: filterEngine.filterResponseName()
+                        }
+                        FlatRow {
+                            lbl: "Topology"
+                            val: filterEngine.filterTypeName()
+                        }
+                        FlatRow {
+                            lbl: "Order"
+                            val: filterEngine.order + (filterEngine.order === 1 ? "st"
+                                 : filterEngine.order === 2 ? "nd"
+                                 : filterEngine.order === 3 ? "rd" : "th")
+                        }
+                        FlatRow {
+                            lbl: "Sample Rate"
+                            val: filterEngine.sampleRate >= 1000
+                                 ? (filterEngine.sampleRate / 1000).toFixed(1) + " kHz"
+                                 : filterEngine.sampleRate + " Hz"
+                        }
+                        FlatRow {
+                            lbl: filterEngine.filterType >= 2 ? "Fc Low" : "Cutoff (\u22123 dB)"
+                            val: filterEngine.cutoffFreq >= 1000
+                                 ? (filterEngine.cutoffFreq / 1000).toFixed(3) + " kHz"
+                                 : filterEngine.cutoffFreq.toFixed(1) + " Hz"
+                        }
+                        FlatRow {
+                            visible: filterEngine.filterType >= 2; height: visible ? 34 : 0
+                            lbl: "Fc High"
+                            val: filterEngine.cutoffFreq2 >= 1000
+                                 ? (filterEngine.cutoffFreq2 / 1000).toFixed(3) + " kHz"
+                                 : filterEngine.cutoffFreq2.toFixed(1) + " Hz"
+                        }
+                        FlatRow {
+                            visible: filterEngine.filterType >= 2; height: visible ? 34 : 0
+                            lbl: "Centre (f\u2080)"
+                            val: {
+                                const f0 = Math.sqrt(filterEngine.cutoffFreq * filterEngine.cutoffFreq2)
+                                return f0 >= 1000 ? (f0/1000).toFixed(3)+" kHz" : f0.toFixed(1)+" Hz"
+                            }
+                        }
+                        FlatRow {
+                            visible: filterEngine.filterType >= 2; height: visible ? 34 : 0
+                            lbl: "Bandwidth"
+                            val: {
+                                const bw = filterEngine.cutoffFreq2 - filterEngine.cutoffFreq
+                                return bw >= 1000 ? (bw/1000).toFixed(3)+" kHz" : Math.round(bw)+" Hz"
+                            }
+                        }
+                        FlatRow {
+                            visible: filterEngine.filterType >= 2; height: visible ? 34 : 0
+                            lbl: "Q Factor"
+                            val: {
+                                const bw = Math.max(1, filterEngine.cutoffFreq2 - filterEngine.cutoffFreq)
+                                const f0 = Math.sqrt(filterEngine.cutoffFreq * filterEngine.cutoffFreq2)
+                                return (f0/bw).toFixed(3)
+                            }
+                        }
+                        FlatRow {
+                            visible: filterEngine.filterResponse === 1 || filterEngine.filterResponse === 3
+                            height: visible ? 34 : 0
+                            lbl: "Passband Ripple"
+                            val: filterEngine.rippleDb.toFixed(2) + " dB"
+                        }
+                        FlatRow {
+                            visible: filterEngine.filterResponse === 2 || filterEngine.filterResponse === 3
+                            height: visible ? 34 : 0
+                            lbl: "Stopband Atten."
+                            val: filterEngine.stopbandDb.toFixed(1) + " dB"
+                        }
+
+                        // ── Analysis ─────────────────────────────────────────
+                        SubHeader { text: "ANALYSIS" }
+
+                        FlatRow {
+                            lbl: "System"
+                            val: filterEngine.isStable() ? "Stable" : "Unstable"
+                            valColor: filterEngine.isStable() ? theme.accent : theme.danger
+                        }
+                        FlatRow {
+                            lbl: "Max Pole Radius"
+                            val: filterEngine.maxPoleRadius().toFixed(5)
+                            valColor: filterEngine.isStable() ? theme.primaryText : theme.danger
+                        }
+                        FlatRow {
+                            lbl: "Stability Margin"
+                            val: filterEngine.hasResults ? filterEngine.stabilityMargin.toFixed(4) : "\u2014"
+                        }
+                        FlatRow {
+                            lbl: "Peak Gain"
+                            val: filterEngine.hasResults ? filterEngine.peakGainDb.toFixed(3) + " dB" : "\u2014"
+                        }
+                        FlatRow {
+                            lbl: "Peak Frequency"
+                            val: {
+                                if (!filterEngine.hasResults) return "\u2014"
+                                const f = filterEngine.peakFreqHz
+                                return f >= 1000 ? (f/1000).toFixed(3)+" kHz" : f.toFixed(1)+" Hz"
+                            }
+                        }
+                        FlatRow {
+                            lbl: "DC Gain"
+                            val: filterEngine.hasResults ? filterEngine.steadyStateGain.toFixed(5) : "\u2014"
+                        }
+
+                        // ── Step Response ────────────────────────────────────
+                        SubHeader { text: "STEP RESPONSE" }
+
+                        FlatRow {
+                            lbl: "Overshoot"
+                            val: {
+                                if (!filterEngine.hasResults) return "\u2014"
+                                const m = filterEngine.stepMetrics
+                                return m && m.overshootPct !== undefined ? m.overshootPct.toFixed(2)+" %" : "\u2014"
+                            }
+                        }
+                        FlatRow {
+                            lbl: "Settling Time (2%)"
+                            val: {
+                                if (!filterEngine.hasResults) return "\u2014"
+                                const m = filterEngine.stepMetrics
+                                return m && m.settlingTimeSamples !== undefined ? m.settlingTimeSamples+" smp" : "\u2014"
+                            }
+                        }
+                        FlatRow {
+                            lbl: "Rise Time (10\u201390%)"
+                            val: {
+                                if (!filterEngine.hasResults) return "\u2014"
+                                const m = filterEngine.stepMetrics
+                                return m && m.riseTimeSamples !== undefined ? m.riseTimeSamples+" smp" : "\u2014"
+                            }
+                        }
+
+                        Item { height: 8; width: 1 }
+                    }
                 }
-                Text {
-                    width: parent.width
-                    text: "Order " + filterEngine.order + "  ·  Fs = " +
-                          Number(filterEngine.sampleRate).toLocaleString(Qt.locale(), "f", 0) + " Hz"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 12
-                    color: theme.secondaryText
-                    wrapMode: Text.WordWrap
+            }
+        }
+
+        // Sticky Apply Button (Appears when manual configurations are pending)
+        Rectangle {
+            id: stickyApplyBar
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            height: root.hasPendingChanges ? 52 : 0
+            color: theme.isDark ? "#1C1E22" : "#F4F5F8"
+            border.color: theme.borderColor
+            border.width: 1
+            z: 30
+            clip: true
+            visible: height > 0
+            Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+            Item {
+                anchors.centerIn: parent
+                width: parent.width - 24
+                height: 30
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 7
+                    color: applyMouse.pressed ? "#0071E3" : (applyMouse.containsMouse ? theme.accent : theme.accent)
+                    Behavior on color { ColorAnimation { duration: 100 } }
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        Codicon {
+                            icon: "check"
+                            iconSize: 12
+                            iconColor: "#FFFFFF"
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: "Apply Changes"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 12
+                            font.weight: Font.DemiBold
+                            color: "#FFFFFF"
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+
+                    MouseArea {
+                        id: applyMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.applyPendingChanges()
+                    }
                 }
             }
         }
@@ -589,15 +977,14 @@ Item {
                 }
             }
 
-            // Real-time readout metric on the right of sticky bar
+            // Real-time readout metric & window opener on the right of sticky bar
             Row {
                 anchors {
                     right: parent.right
-                    rightMargin: 14
+                    rightMargin: 10
                     verticalCenter: parent.verticalCenter
                 }
-                spacing: 8
-                visible: stickyTabBar.width > 560
+                spacing: 10
 
                 Text {
                     text: {
@@ -611,9 +998,47 @@ Item {
                     font.family: "Stack Sans Headline"
                     font.pixelSize: 12
                     color: theme.secondaryText
+                    visible: stickyTabBar.width > 560
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                // New Window Opener Icon Button
+                Rectangle {
+                    width: 26
+                    height: 24
+                    radius: 4
+                    color: popTabMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : (theme.isDark ? "#2A2D2E" : "#EAEAEA")
+                    border.color: theme.borderColor
+                    border.width: 1
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Codicon {
+                        anchors.centerIn: parent
+                        icon: "link-external"
+                        iconSize: 12
+                        iconColor: popTabMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                    }
+
+                    ToolTip.visible: popTabMouse.containsMouse
+                    ToolTip.text: "Open Frequency Plot in Dedicated Window"
+                    ToolTip.delay: 300
+
+                    MouseArea {
+                        id: popTabMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            const w = Window.window
+                            if (w && typeof w.openStandalonePlot === "function") {
+                                w.openStandalonePlot(0, { displayMode: freqPlot.displayMode })
+                            }
+                        }
+                    }
                 }
             }
         }
+
 
         // Plot canvas connected seamlessly below sticky tab bar
         FrequencyPlot {
@@ -625,5 +1050,9 @@ Item {
                 bottom: parent.bottom
             }
         }
+    }
+
+    DesignVerifierModal {
+        id: verifierModal
     }
 }

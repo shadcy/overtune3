@@ -27,7 +27,7 @@ if [[ -n "${QT_PREFIX}" ]]; then
 fi
 
 echo "──────────────────────────────────────────"
-echo "  Filter Designer  —  ${BUILD_TYPE} Build"
+echo "  Overtune 3 (ot3)  —  ${BUILD_TYPE} Build"
 echo "──────────────────────────────────────────"
 echo
 
@@ -38,4 +38,4 @@ cmake -S . -B "${BUILD_DIR}" "${CMAKE_ARGS[@]}"
 cmake --build "${BUILD_DIR}" --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 4)"
 
 echo
-echo "✓ Build complete. Binary: ${BUILD_DIR}/bin/FilterDesigner"
+echo "✓ Build complete. Binary: ${BUILD_DIR}/bin/ot3"

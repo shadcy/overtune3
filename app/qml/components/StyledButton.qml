@@ -1,45 +1,62 @@
 import QtQuick
 import QtQuick.Controls
 
-// StyledButton.qml — overflow-safe button with tactile feedback and pointing hand cursor
+// StyledButton.qml — Squircle-style button, consistent with the What's New "Got it" design
 Button {
     id: root
     implicitHeight: 30
     implicitWidth: 100
     font.family: "Stack Sans Headline"
-    font.pixelSize: 13
-    padding: 8
-    leftPadding: 10
-    rightPadding: 10
+    font.pixelSize: 12
+    font.weight: Font.DemiBold
+    padding: 0
+    leftPadding: 14
+    rightPadding: 14
     clip: true
 
+    // true  → blue filled  (#0A84FF family)
+    // false → ghost        (border only, theme-adaptive)
     property bool primary: true
 
-    scale: root.pressed ? 0.95 : (hov.hovered && root.enabled ? 1.02 : 1.0)
-    Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+    // Subtle press-down scale
+    scale: root.pressed ? 0.96 : 1.0
+    Behavior on scale { NumberAnimation { duration: 80; easing.type: Easing.OutQuad } }
 
     background: Rectangle {
-        radius: 8
+        radius: 7   // squircle radius — matches "Got it" button exactly
         color: {
             if (!root.enabled)
-                return root.primary ? "#0A84FF55" : theme.surface
+                return root.primary ? "#0A84FF44" : "transparent"
             if (root.primary)
-                return root.pressed ? "#0070E0" : (hov.hovered ? "#1890FF" : "#0A84FF")
-            return root.pressed || hov.hovered ? theme.surfaceHigh : theme.surface
+                return root.pressed ? "#0061C3"
+                     : hov.hovered  ? "#0071E3"
+                     :                "#0A84FF"
+            // Ghost (secondary)
+            return root.pressed ? (theme.isDark ? "#2A2A36" : "#E8E8EE")
+                 : hov.hovered  ? (theme.isDark ? "#1E1E28" : "#F0F0F6")
+                 :                "transparent"
         }
-        border.color: root.primary ? "transparent" : theme.borderColor
-        border.width: 1
-        Behavior on color { ColorAnimation { duration: 120 } }
+        border.color: {
+            if (!root.enabled)
+                return root.primary ? "transparent" : theme.borderColor
+            return root.primary ? "transparent" : theme.borderColor
+        }
+        border.width: root.primary ? 0 : 1
+        Behavior on color { ColorAnimation { duration: 110 } }
     }
 
     contentItem: Text {
         text: root.text
         font: root.font
-        color: root.primary ? "#FFFFFF" : theme.primaryText
+        color: {
+            if (!root.enabled)
+                return root.primary ? "#FFFFFF88" : theme.secondaryText
+            return root.primary ? "#FFFFFF" : theme.primaryText
+        }
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        verticalAlignment:   Text.AlignVCenter
         elide: Text.ElideRight
-        opacity: root.enabled ? 1 : 0.5
+        Behavior on color { ColorAnimation { duration: 110 } }
     }
 
     HoverHandler {

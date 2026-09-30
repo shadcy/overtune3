@@ -973,6 +973,34 @@ Rectangle {
                 MenuSeparator {}
 
                 StyledMenuItem {
+                    text: "What's New in Overtune 3"
+                    onTriggered: {
+                        if (typeof rootWindow.showWhatsNew === "function") {
+                            rootWindow.showWhatsNew()
+                        }
+                    }
+                }
+
+                StyledMenuItem {
+                    text: "Check for Updates..."
+                    shortcutText: "v3.0.0"
+                    onTriggered: {
+                        if (rootWindow && typeof rootWindow.checkUpdatesNow === "function") {
+                            rootWindow.checkUpdatesNow()
+                        }
+                    }
+                }
+
+                StyledMenuItem {
+                    text: "System Installer & Shortcuts..."
+                    onTriggered: {
+                        if (rootWindow && typeof rootWindow.showInstallerUpdater === "function") {
+                            rootWindow.showInstallerUpdater(1)
+                        }
+                    }
+                }
+
+                StyledMenuItem {
                     text: "About Overtune 3 DSP Filter Designer"
                     onTriggered: {
                         rootWindow.showNotification("Overtune 3 — Professional Digital Filter Design & Live Simulation Studio", false)
@@ -1001,6 +1029,107 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
         spacing: 6
+
+        // Update / Installer Quick Button
+        Rectangle {
+            id: updateBtn
+            height: 22
+            implicitWidth: updateRow.implicitWidth + 14
+            radius: 6
+            color: updateMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : (updateInstaller.hasUpdate ? Qt.darker(theme.accent, 1.3) : "transparent")
+            border.color: updateInstaller.hasUpdate ? theme.accent : (theme.isDark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.12))
+            border.width: 1
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 120 } }
+
+            Row {
+                id: updateRow
+                anchors.centerIn: parent
+                spacing: 5
+
+                Codicon {
+                    icon: updateInstaller.hasUpdate ? "cloud-download" : "package"
+                    iconSize: 11
+                    iconColor: updateInstaller.hasUpdate ? theme.accent : theme.secondaryText
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    text: updateInstaller.hasUpdate ? "Update Ready" : "Installer"
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                    color: updateInstaller.hasUpdate ? "#FFFFFF" : theme.secondaryText
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            ToolTip.visible: updateMouse.containsMouse
+            ToolTip.text: updateInstaller.hasUpdate ? "Update v" + updateInstaller.latestVersion + " is available!" : "Open Installer & Update Manager"
+            ToolTip.delay: 350
+
+            MouseArea {
+                id: updateMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (rootWindow && typeof rootWindow.showInstallerUpdater === "function") {
+                        rootWindow.showInstallerUpdater(updateInstaller.hasUpdate ? 0 : 1)
+                    }
+                }
+            }
+        }
+
+        // Accent-colored squircle "What's New" button
+        Rectangle {
+            id: whatsNewBtn
+            height: 22
+            implicitWidth: whatsNewRow.implicitWidth + 14
+            radius: 6
+            color: whatsNewMouse.containsMouse ? Qt.darker(theme.accent, 1.15) : theme.accent
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 120 } }
+
+            Row {
+                id: whatsNewRow
+                anchors.centerIn: parent
+                spacing: 5
+
+                Codicon {
+                    icon: "info"
+                    iconSize: 11
+                    iconColor: "#FFFFFF"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    text: "What's New"
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                    color: "#FFFFFF"
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+
+            ToolTip.visible: whatsNewMouse.containsMouse
+            ToolTip.text: "See What's New in Overtune 3"
+            ToolTip.delay: 350
+
+            MouseArea {
+                id: whatsNewMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (rootWindow && typeof rootWindow.showWhatsNew === "function") {
+                        rootWindow.showWhatsNew()
+                    }
+                }
+            }
+        }
 
         // Auto Scale / Fit View quick button
         Rectangle {

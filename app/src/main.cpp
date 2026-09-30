@@ -8,6 +8,7 @@
 #include "SimulationModel.h"
 #include "ExportModel.h"
 #include "ThemeManager.h"
+#include "UpdateInstallerEngine.h"
 
 int main(int argc, char* argv[]) {
     // Avoid GTK theme crash on Ubuntu Wayland/GNOME
@@ -35,18 +36,34 @@ int main(int argc, char* argv[]) {
     app.setFont(defaultFont);
 
     // Instantiate backend objects
-    FilterEngine    engine;
-    SimulationModel simulation;
-    ExportModel     exportModel;
-    ThemeManager    theme;
+    FilterEngine           engine;
+    SimulationModel        simulation;
+    ExportModel            exportModel;
+    ThemeManager           theme;
+    UpdateInstallerEngine  updateInstaller;
+
+    // Check CLI arguments for installer or update launch modes
+    bool launchInstaller = false;
+    bool launchUpdater = false;
+    for (int i = 1; i < argc; ++i) {
+        QString arg = QString::fromLocal8Bit(argv[i]);
+        if (arg == QStringLiteral("--install") || arg == QStringLiteral("-i")) {
+            launchInstaller = true;
+        } else if (arg == QStringLiteral("--update") || arg == QStringLiteral("--check-updates") || arg == QStringLiteral("-u")) {
+            launchUpdater = true;
+        }
+    }
 
     QQmlApplicationEngine qml;
 
     // Expose C++ objects to QML
-    qml.rootContext()->setContextProperty("filterEngine",  &engine);
-    qml.rootContext()->setContextProperty("simulation",    &simulation);
-    qml.rootContext()->setContextProperty("exportModel",   &exportModel);
-    qml.rootContext()->setContextProperty("theme",         &theme);
+    qml.rootContext()->setContextProperty("filterEngine",      &engine);
+    qml.rootContext()->setContextProperty("simulation",        &simulation);
+    qml.rootContext()->setContextProperty("exportModel",       &exportModel);
+    qml.rootContext()->setContextProperty("theme",             &theme);
+    qml.rootContext()->setContextProperty("updateInstaller",   &updateInstaller);
+    qml.rootContext()->setContextProperty("cliLaunchInstaller", launchInstaller);
+    qml.rootContext()->setContextProperty("cliLaunchUpdater",   launchUpdater);
 
     const QUrl url(u"qrc:/FilterDesigner/qml/Main.qml"_qs);
     QObject::connect(&qml, &QQmlApplicationEngine::objectCreated,

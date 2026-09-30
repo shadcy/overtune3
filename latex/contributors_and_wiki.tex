@@ -1,0 +1,123 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.8in,top=0.85in,bottom=0.85in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+% Clean, airy typography with generous breathing room
+\linespread{1.06}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4.5pt plus 1pt minus 1pt}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\footnotesize Page \thepage\ of 2}
+\lfoot{\footnotesize \textit{IIT Bombay --- Department of Electrical Engineering --- EE 603: Digital Signal Processing}}
+
+\begin{document}
+
+% ═════════════════════════════════════════════════════════════════
+% IIT BOMBAY EE 603 DEPARTMENTAL HEADER
+% ═════════════════════════════════════════════════════════════════
+\noindent
+\begin{tabular*}{\textwidth}{@{}l @{\extracolsep{\fill}} r@{}}
+\textbf{\large INDIAN INSTITUTE OF TECHNOLOGY BOMBAY} & \textbf{Autumn 2026} \\
+Department of Electrical Engineering & Filter Design Laboratory \\
+\textbf{EE 603: Digital Signal Processing} & Wiki \& Contributor Guide
+\end{tabular*}
+
+\vspace{6pt}
+\hrule height 1.4pt \vspace{2pt} \hrule height 0.5pt
+\vspace{20pt}
+
+\begin{center}
+{\LARGE \textbf{Overtune 3: Architecture, Wiki \& Contributor Guide}}\\[8pt]
+{\large \textsc{DSP Engine Internals, Numerical Stability Guidelines, and Development Protocol}}
+\end{center}
+
+\vspace{18pt}
+
+\section*{1. Project Architecture \& Repository Layout}
+
+Overtune~3 is developed with a strict decoupling between the mathematical DSP synthesis engine (pure C++20) and the desktop presentation layer (Qt~6 QML and Modern C++ wrapper classes).
+
+\vspace{4pt}
+\begin{verbatim}
+overtune3/
+|-- dsp/                     <-- Pure C++20 signal processing library (no GUI dependencies)
+|   |-- include/overtune/    <-- Public headers (FilterDesigner, Biquad, ComplexPoly)
+|   +-- src/                 <-- Mathematical implementations and code generators
+|-- app/                     <-- Desktop GUI application (Qt 6.4+, QML, Quick Controls)
+|   |-- src/                 <-- C++ QObject models (FilterEngine, ExportModel, ThemeManager)
+|   +-- qml/                 <-- Declarative UI (Pages, Controls, Custom Canvas Plots)
+|-- latex/                   <-- Authoritative documentation sources and compiled PDFs
++-- tests/                   <-- Numerical test suites verified against SciPy benchmarks
+\end{verbatim}
+
+\vspace{6pt}
+\section*{2. The Core DSP Engine (\texttt{dsp/})}
+
+The synthesis pipeline is encapsulated within the \texttt{overtune::FilterDesigner} class:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Prototype Synthesizer:} Generates analog prototype poles and zeros for normalized low-pass prototypes in the continuous $s$-domain.
+\item \textbf{Frequency Transformation:} Performs LP-to-HP, LP-to-BP, or LP-to-BS conformal mapping.
+\item \textbf{Bilinear Transform ($s \to z$):} Maps poles and zeros to discrete coordinates using pre-warped angular frequencies $\Omega = 2 f_s \tan(\omega / 2)$.
+\item \textbf{SOS Pairing \& Ordering:} Decomposes the high-order transfer function into Second-Order Sections (SOS). Complex conjugate pole pairs with the highest $Q$ are paired with nearest transmission zeros and placed downstream to maximize dynamic range and minimize register overflow.
+\end{itemize}
+
+\section*{3. Implementing a New Filter Family}
+
+To contribute a new filter approximation (e.g., Papoulis 'L' filter, Legendre, or Halpern):
+\begin{enumerate}[leftmargin=20pt,itemsep=2pt]
+\item Define the analog prototype root-finding algorithm in \texttt{dsp/src/Prototypes.cpp}.
+\item Return a \texttt{std::vector<std::complex<double>>} of normalized $s$-plane poles and zeros.
+\item Register the prototype enum identifier in \texttt{dsp/include/overtune/Types.h}.
+\item Expose the property binding in \texttt{app/src/FilterEngine.h} and add the corresponding selector option in \texttt{app/qml/pages/DesignPage.qml}.
+\item Write a unit test in \texttt{tests/test\_prototypes.cpp} verifying magnitude response error $\le 10^{-5}$ relative to SciPy reference vectors.
+\end{enumerate}
+
+\section*{4. Numerical Accuracy \& Stability Standards}
+
+All contributions must adhere to the following numerical standards:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Double-Precision Computation:} All internal prototype polynomials, matrix inversions, and root-finding iterations must use IEEE 754 64-bit double precision (\texttt{double}).
+\item \textbf{SOS Decomposition:} High-order filters must never be exported as single high-degree rational transfer functions $B(z)/A(z)$ due to root ill-conditioning for $N > 6$.
+\item \textbf{Jury Stability Verification:} Every synthesized filter must pass $|p_k| < 1 - 10^{-7}$ for all poles before being emitted to the UI or code exporter.
+\item \textbf{Zero Heap Allocation in Audio Thread:} Processing callbacks in \texttt{processBlock()} must execute in strictly bounded deterministic time with zero memory allocations or system calls.
+\end{itemize}
+
+\section*{5. Canonical DSP Literature References}
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lll}
+\toprule
+\textbf{Author(s)} & \textbf{Title} & \textbf{Core Topic} \\
+\midrule
+A.~V.~Oppenheim \& R.~W.~Schafer & \textit{Discrete-Time Signal Processing} & Canonical LTI theory, Bilinear transform \\
+S.~K.~Mitra & \textit{Digital Signal Processing} & Comprehensive filter realization structures \\
+L.~R.~Rabiner \& B.~Gold & \textit{Theory and Application of DSP} & Filter approximation algorithms \\
+A.~Antoniou & \textit{Digital Signal Processing} & Elliptic rational filter synthesis \\
+R.~Bristow-Johnson & \textit{Audio EQ Cookbook} & Biquad parametric EQ derivations \\
+\bottomrule
+\end{tabular}
+\caption{Foundational reference literature for Overtune 3 developers.}
+\end{table}
+
+\section*{6. Git Workflow \& Contribution Protocol}
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Branching Model:} Create feature branches branching from \texttt{main} named \texttt{feature/<filter-name>} or \texttt{fix/<issue-number>}.
+\item \textbf{Formatting:} Format all C++ code with \texttt{clang-format -style=file} adhering to the repository `.clang-format`.
+\item \textbf{Continuous Integration:} Automated GitHub Actions build on Linux, macOS, and Windows with clang and gcc. All regression unit tests must pass.
+\item \textbf{Pull Requests:} PRs must include a clear mathematical description of any proposed filter topology, accompanied by comparison plots generated from the test suite.
+\end{itemize}
+
+\end{document}

@@ -4,6 +4,7 @@
 #include "dsp/FilterSpec.h"
 #include <QObject>
 #include <QString>
+#include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
 
@@ -37,6 +38,11 @@ class FilterEngine : public QObject {
   Q_PROPERTY(QVariantList poleZeroData READ poleZeroData NOTIFY resultsChanged)
   Q_PROPERTY(QVariantList impulseData READ impulseData NOTIFY resultsChanged)
   Q_PROPERTY(QVariantList stepData READ stepData NOTIFY resultsChanged)
+  Q_PROPERTY(double steadyStateGain READ steadyStateGain NOTIFY resultsChanged)
+  Q_PROPERTY(double peakGainDb READ peakGainDb NOTIFY resultsChanged)
+  Q_PROPERTY(double peakFreqHz READ peakFreqHz NOTIFY resultsChanged)
+  Q_PROPERTY(double stabilityMargin READ stabilityMargin NOTIFY resultsChanged)
+  Q_PROPERTY(QVariantMap stepMetrics READ stepMetrics NOTIFY resultsChanged)
   Q_PROPERTY(bool hasResults READ hasResults NOTIFY resultsChanged)
 
 public:
@@ -58,6 +64,11 @@ public:
   QVariantList poleZeroData() const { return m_poleZeroData; }
   QVariantList impulseData() const { return m_impulseData; }
   QVariantList stepData() const { return m_stepData; }
+  double steadyStateGain() const { return m_steadyStateGain; }
+  double peakGainDb() const { return m_peakGainDb; }
+  double peakFreqHz() const { return m_peakFreqHz; }
+  double stabilityMargin() const { return m_stabilityMargin; }
+  QVariantMap stepMetrics() const { return m_stepMetrics; }
   bool hasResults() const { return m_hasResults; }
   const dsp::FilterCoefficients& coefficients() const { return m_coeff; }
 
@@ -73,6 +84,7 @@ public:
 
   // QML-invokable methods
   Q_INVOKABLE void design();
+  Q_INVOKABLE QVariantMap verifyDesign();
   Q_INVOKABLE QString exportCode(int format); // 0=C, 1=C++, 2=Python, 3=JSON
   Q_INVOKABLE QString filterTypeName() const;
   Q_INVOKABLE QString filterResponseName() const;
@@ -103,6 +115,7 @@ public:
   Q_INVOKABLE double magnitudeDbAt(double freqHz) const;
   Q_INVOKABLE double attenuationDbAt(double freqHz) const;
   Q_INVOKABLE double passbandRippleDb(double fStart, double fEnd) const;
+  Q_INVOKABLE QVariantMap evaluateResponseAt(double freqHz) const;
   Q_INVOKABLE QVariantMap evaluateLab(double passbandFreq, double stopbandFreq,
                                       double minStopbandAttenDb, double maxPassbandRippleDb,
                                       int maxOrder) const;
@@ -119,8 +132,11 @@ signals:
   void errorOccurred(const QString &message);
 
 private:
+  void scheduleDesign();
+  void designInternal();
   void publishResults(const dsp::AnalysisResult &result);
 
+  QTimer m_debounceTimer;
   dsp::FilterSpec m_spec;
   dsp::FilterCoefficients m_coeff;
   bool m_hasResults{false};
@@ -131,4 +147,10 @@ private:
   QVariantList m_poleZeroData;
   QVariantList m_impulseData;
   QVariantList m_stepData;
+
+  double m_steadyStateGain{1.0};
+  double m_peakGainDb{0.0};
+  double m_peakFreqHz{0.0};
+  double m_stabilityMargin{1.0};
+  QVariantMap m_stepMetrics;
 };

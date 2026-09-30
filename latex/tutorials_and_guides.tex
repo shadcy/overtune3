@@ -1,0 +1,153 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.8in,top=0.85in,bottom=0.85in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+% Clean, airy typography with generous breathing room
+\linespread{1.10}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.5pt plus 1.5pt minus 1pt}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\footnotesize Page \thepage\ of 3}
+\lfoot{\footnotesize \textit{IIT Bombay --- Department of Electrical Engineering --- EE 603: Digital Signal Processing}}
+
+\begin{document}
+
+% ═════════════════════════════════════════════════════════════════
+% IIT BOMBAY EE 603 DEPARTMENTAL HEADER
+% ═════════════════════════════════════════════════════════════════
+\noindent
+\begin{tabular*}{\textwidth}{@{}l @{\extracolsep{\fill}} r@{}}
+\textbf{\large INDIAN INSTITUTE OF TECHNOLOGY BOMBAY} & \textbf{Autumn 2026} \\
+Department of Electrical Engineering & Filter Design Laboratory \\
+\textbf{EE 603: Digital Signal Processing} & Lab Tutorial 01
+\end{tabular*}
+
+\vspace{6pt}
+\hrule height 1.4pt \vspace{2pt} \hrule height 0.5pt
+\vspace{20pt}
+
+\begin{center}
+{\LARGE \textbf{Step-by-Step DSP Implementation \& Synthesis Guide}}\\[8pt]
+{\large \textsc{Design Workflows, Interactive Bode Analysis, and Embedded C/C++ Code Generation}}
+\end{center}
+
+\vspace{18pt}
+
+\section*{1. Objective \& Pedagogical Goals}
+
+This laboratory tutorial provides a comprehensive guide for synthesizing, analyzing, and deploying digital filters using Overtune~3 in conjunction with the EE~603 curriculum. Students will translate continuous frequency specifications into discrete filter prototypes, verify system stability in the complex $z$-plane, and export production C/C++ Second-Order Section routines for real-time DSP hardware.
+
+\vspace{8pt}
+\section*{2. Filter Synthesis Workflow}
+
+\subsection*{Step 1: Formulate Boundary Specifications}
+Define the target sampling rate $f_s$ and boundary frequencies:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Sampling Rate ($f_s$):} Standard rates include $44.1\text{ kHz}$ (audio CD), $48.0\text{ kHz}$ (professional studio), and $96.0\text{ kHz}$ (high-resolution audio).
+\item \textbf{Passband Edge ($f_p$) \& Cutoff ($f_c$):} The $-3.01\text{ dB}$ point or maximum allowable passband ripple boundary $A_p$ (dB).
+\item \textbf{Stopband Edge ($f_s$) \& Attenuation ($A_s$):} The minimum out-of-band rejection threshold (e.g., $-40\text{ dB}$ to $-80\text{ dB}$).
+\end{itemize}
+
+\subsection*{Step 2: Prototype Selection Strategy}
+Consult the decision criteria below to select the optimal approximation:
+\begin{enumerate}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Butterworth:} Recommended when monotonic passband gain and absence of ripple are paramount (e.g., measurement instrumentation, audio crossovers).
+\item \textbf{Chebyshev Type I:} Recommended when sharp transition roll-off is required and passband equiripple (e.g., $\le 0.5\text{ dB}$) is acceptable.
+\item \textbf{Chebyshev Type II (Inverse):} Recommended when the passband must remain strictly flat, but sharp roll-off with stopband equiripple is acceptable.
+\item \textbf{Elliptic (Cauer):} Recommended when transition width must be minimized for a fixed order $N$, tolerating equiripple in both passband and stopband.
+\item \textbf{Bessel-Thomson:} Recommended for pulse processing, biomedical signals, or audio transients where linear phase and zero group delay distortion are mandatory.
+\end{enumerate}
+
+\subsection*{Step 3: Parameter Configuration in Overtune 3}
+\begin{enumerate}[leftmargin=20pt,itemsep=2pt]
+\item Open the \textbf{Design} workspace tab (\texttt{Ctrl+1}).
+\item Select the filter family from the prototype dropdown: \texttt{Butterworth}, \texttt{Chebyshev I}, \texttt{Chebyshev II}, \texttt{Elliptic}, or \texttt{Bessel}.
+\item Set the filter order $N \in [1, 20]$ and cutoff frequency $f_c$ using the interactive sliders or numeric entries.
+\item For Chebyshev/Elliptic filters, configure passband ripple $R_p \in [0.1, 3.0]\text{ dB}$ and stopband attenuation $A_s \in [20, 100]\text{ dB}$.
+\end{enumerate}
+
+\section*{3. Interactive Analysis \& Verification}
+
+\subsection*{3.1 Bode Frequency Response Inspection}
+Navigate to the \textbf{Analysis} tab (\texttt{Ctrl+2}) to evaluate frequency metrics:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Magnitude Plot:} Confirm passband ripple complies with $A_p$ and the stopband achieves required rejection $A_s$. Hover the cursor to read exact values.
+\item \textbf{Phase Plot:} Examine the phase curve for discontinuities. Automatic unwrap highlights steepness of $d\theta/d\omega$ near cutoff.
+\end{itemize}
+
+\subsection*{3.2 Pole-Zero Constellation Analysis}
+Switch to the \textbf{Poles \& Zeros} view (\texttt{Alt+2}):
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item Verify that all poles (marked with $\times$) reside strictly inside the unit circle $|z| = 1$. The distance to $|z| = 1$ dictates resonance $Q$:
+\begin{equation}
+Q \approx \frac{1}{2(1 - |p|)}
+\end{equation}
+Poles positioned near $|z| = 1$ produce sharp resonance peaks and high sensitivity to coefficient rounding.
+\item Observe transmission zeros (marked with $\circ$). Chebyshev Type II and Elliptic designs place zeros on $|z|=1$, providing infinite attenuation notches.
+\end{itemize}
+
+\subsection*{3.3 Transient Impulse and Step Response}
+Switch to the \textbf{Impulse \& Step} response plot (\texttt{Alt+3}):
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+\item \textbf{Impulse Response $h[n]$:} Measure decay envelope and settling time. Ensure the response settles within the target sample budget without limit cycles.
+\item \textbf{Step Response $s[n]$:} Observe percentage overshoot $M_p = (s_{\max} - s_{\infty})/s_{\infty} \times 100\%$. Bessel filters display negligible overshoot ($< 1\%$), whereas high-order Chebyshev filters may exhibit ringing exceeding $25\%$.
+\end{itemize}
+
+\section*{4. Canonical Audio EQ Filter Recipes}
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lll}
+\toprule
+\textbf{Filter Type} & \textbf{Transfer Function Characteristic} & \textbf{Typical Audio Application} \\
+\midrule
+Low-Pass (LPF) & $H(0) = 1, \; H(\pi) = 0$ & Anti-aliasing, subwoofer crossover \\
+High-Pass (HPF) & $H(0) = 0, \; H(\pi) = 1$ & DC blocking, vocal rumble filter \\
+Band-Pass (BPF) & Zero at $z = \pm 1$, peak at $\omega_0$ & Instrument resonance, telecommunications \\
+Notch (Band-Stop) & Unit zeros on $e^{\pm j\omega_0}$, $H(\omega_0)=0$ & 50/60 Hz mains hum removal \\
+Peaking EQ & Adjustable gain $A$ at center $\omega_0$ & Parametric equalizer, vocal presence \\
+Low/High Shelf & Transition between gain $1$ and $A$ & Bass / Treble tone controls \\
+\bottomrule
+\end{tabular}
+\caption{Canonical audio biquad filter topologies and usage patterns.}
+\end{table}
+
+\section*{5. Exporting Production C/C++ Code}
+The exported Direct Form II Transposed execution loop is organized as follows:
+\begin{verbatim}
+typedef struct { float b0, b1, b2, a1, a2, w1, w2; } BiquadSOS;
+
+void process_sos_cascade(BiquadSOS* s, int count, const float* in, float* out, int N) {
+    for (int n = 0; n < N; ++n) {
+        float x = in[n];
+        for (int k = 0; k < count; ++k) {
+            float y = s[k].b0 * x + s[k].w1;
+            s[k].w1 = s[k].b1 * x - s[k].a1 * y + s[k].w2;
+            s[k].w2 = s[k].b2 * x - s[k].a2 * y;
+            x = y;
+        }
+        out[n] = x;
+    }
+}
+\end{verbatim}
+
+\section*{6. Laboratory Exercises}
+\begin{enumerate}[leftmargin=20pt,itemsep=2pt]
+\item Synthesize an 8th-order Butterworth low-pass filter with $f_c = 1.0\text{ kHz}$ at $f_s = 48\text{ kHz}$. Observe the 4 biquad sections and record the pole radii.
+\item Replace the prototype with an 8th-order Chebyshev Type I filter with $0.5\text{ dB}$ ripple. Compare the $-40\text{ dB}$ stopband attenuation frequency against the Butterworth design.
+\item Design a $50\text{ Hz}$ notch filter with $Q = 30$. Export the C code and verify zero DC and Nyquist attenuation in the generated frequency response.
+\end{enumerate}
+
+\end{document}

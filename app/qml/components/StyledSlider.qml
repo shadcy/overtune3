@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-// StyledSlider.qml — compact slider with adaptive value label and pointing hand cursor
+// StyledSlider.qml — compact slider with adaptive value label, manual numeric entry and pointing hand cursor
 Item {
     id: root
     implicitWidth: 200
@@ -17,13 +17,15 @@ Item {
     property alias pressed: sl.pressed
     property string valueSuffix: ""
     property int   valueDecimals: 1
+    property bool  allowManualEntry: true
 
     readonly property real valueLabelWidth: {
         const sample = Number(sl.value).toFixed(valueDecimals) + valueSuffix
-        return Math.min(Math.max(40, sample.length * 7.2), Math.max(40, width * 0.38))
+        return Math.min(Math.max(48, sample.length * 7.5 + 8), Math.max(48, width * 0.42))
     }
 
     signal moved()
+    signal manualValueEntered(real val)
 
     Slider {
         id: sl
@@ -32,7 +34,7 @@ Item {
         onMoved: root.moved()
         anchors {
             left: parent.left
-            right: valText.left
+            right: valBox.left
             rightMargin: 6
             top: parent.top
             bottom: parent.bottom
@@ -79,19 +81,79 @@ Item {
         }
     }
 
-    Text {
-        id: valText
+    // Interactive Manual Entry Box
+    Rectangle {
+        id: valBox
         anchors {
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
-        text: Number(sl.value).toFixed(root.valueDecimals) + root.valueSuffix
-        font.family: "Stack Sans Headline"
-        font.pixelSize: root.width < 110 ? 10 : 12
-        font.weight: Font.Medium
-        color: theme.accent
         width: root.valueLabelWidth
-        elide: Text.ElideRight
-        horizontalAlignment: Text.AlignRight
+        height: 22
+        radius: 4
+        color: valInput.activeFocus 
+                ? (theme.isDark ? "#1C2D42" : "#E1EFFF")
+                : (valBoxMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent")
+        border.color: valInput.activeFocus ? theme.accent : (valBoxMouse.containsMouse ? theme.borderColor : "transparent")
+        border.width: 1
+
+        TextInput {
+            id: valInput
+            anchors.fill: parent
+            anchors.leftMargin: 3
+            anchors.rightMargin: 3
+            verticalAlignment: TextInput.AlignVCenter
+            horizontalAlignment: TextInput.AlignRight
+            font.family: "Stack Sans Headline"
+            font.pixelSize: root.width < 110 ? 10 : 11
+            font.weight: Font.DemiBold
+            color: theme.accent
+            selectByMouse: true
+            clip: true
+
+            property bool userEditing: false
+
+            text: userEditing ? text : (Number(sl.value).toFixed(root.valueDecimals) + root.valueSuffix)
+
+            onActiveFocusChanged: {
+                if (activeFocus) {
+                    userEditing = true
+                    text = String(sl.value)
+                    selectAll()
+                } else {
+                    commitInput()
+                    userEditing = false
+                }
+            }
+
+            onAccepted: {
+                commitInput()
+                valInput.focus = false
+            }
+
+            function commitInput() {
+                const cleaned = text.toString().replace(/[^0-9.-]/g, "")
+                const num = parseFloat(cleaned)
+                if (!isNaN(num) && isFinite(num)) {
+                    const clamped = Math.max(sl.from, Math.min(sl.to, num))
+                    sl.value = clamped
+                    root.manualValueEntered(clamped)
+                }
+            }
+        }
+
+        MouseArea {
+            id: valBoxMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.IBeamCursor
+            onClicked: {
+                valInput.forceActiveFocus()
+            }
+        }
+
+        ToolTip.visible: valBoxMouse.containsMouse && !valInput.activeFocus
+        ToolTip.text: "Click to enter exact value manually"
+        ToolTip.delay: 350
     }
 }

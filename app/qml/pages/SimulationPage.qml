@@ -52,48 +52,57 @@ Item {
         anchors.margins: root.pageMargin
         spacing: 12
 
-        RowLayout {
+        // ── Consistent Tab Page Headline ──────────────────────────────────────
+        PageHeader {
             Layout.fillWidth: true
-            spacing: 12
+            title: "Signal Simulation Studio"
+            badgeText: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName() + " (" + filterEngine.order + "th order)"
 
-            Text {
-                text: "Signal Simulation Studio"
-                font.family: "Stack Sans Headline"
-                font.pixelSize: 22
-                font.weight: Font.DemiBold
-                color: theme.primaryText
-                Layout.fillWidth: true
-                elide: Text.ElideRight
-            }
 
+            // Standalone Scope Window Opener
             Rectangle {
                 implicitHeight: 28
-                implicitWidth: filterBadgeRow.implicitWidth + 16
-                radius: 6
-                color: theme.surfaceHigh
+                implicitWidth: popScopeRow.implicitWidth + 16
+                radius: 5
+                color: popScopeMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : theme.surfaceHigh
                 border.color: theme.borderColor
                 border.width: 1
 
                 Row {
-                    id: filterBadgeRow
+                    id: popScopeRow
                     anchors.centerIn: parent
                     spacing: 6
-                    Rectangle {
-                        width: 7; height: 7; radius: 3.5
-                        color: theme.accent
+                    Codicon {
+                        icon: "link-external"
+                        iconSize: 12
+                        iconColor: theme.primaryText
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     Text {
-                        text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName() + " (" + filterEngine.order + "th order)"
+                        text: "Pop-out Scope"
                         font.family: "Stack Sans Headline"
-                        font.pixelSize: 12
+                        font.pixelSize: 11
                         font.weight: Font.Medium
                         color: theme.primaryText
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
+
+                MouseArea {
+                    id: popScopeMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        const w = Window.window
+                        if (w && typeof w.openStandalonePlot === "function") {
+                            w.openStandalonePlot(3, {})
+                        }
+                    }
+                }
             }
         }
+
 
         // Signal Generator Toolbar
         Flickable {
@@ -223,7 +232,44 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
+
+            Rectangle {
+                anchors.right: parent.right
+                anchors.rightMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                width: 26
+                height: 22
+                radius: 4
+                color: popStripMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : "transparent"
+                border.color: theme.borderColor
+                border.width: 1
+
+                Codicon {
+                    anchors.centerIn: parent
+                    icon: "link-external"
+                    iconSize: 11
+                    iconColor: popStripMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                }
+
+                ToolTip.visible: popStripMouse.containsMouse
+                ToolTip.text: "Open Oscilloscope in Dedicated Window"
+                ToolTip.delay: 300
+
+                MouseArea {
+                    id: popStripMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        const w = Window.window
+                        if (w && typeof w.openStandalonePlot === "function") {
+                            w.openStandalonePlot(3, {})
+                        }
+                    }
+                }
+            }
         }
+
 
         FilterCard {
             Layout.fillWidth: true

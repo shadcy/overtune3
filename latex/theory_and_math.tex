@@ -1,0 +1,159 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.8in,top=0.85in,bottom=0.85in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+% Clean, airy typography with generous breathing room
+\linespread{1.10}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.5pt plus 1.5pt minus 1pt}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\footnotesize Page \thepage\ of 3}
+\lfoot{\footnotesize \textit{IIT Bombay --- Department of Electrical Engineering --- EE 603: Digital Signal Processing}}
+
+\begin{document}
+
+% ═════════════════════════════════════════════════════════════════
+% IIT BOMBAY EE 603 DEPARTMENTAL HEADER
+% ═════════════════════════════════════════════════════════════════
+\noindent
+\begin{tabular*}{\textwidth}{@{}l @{\extracolsep{\fill}} r@{}}
+\textbf{\large INDIAN INSTITUTE OF TECHNOLOGY BOMBAY} & \textbf{Autumn 2026} \\
+Department of Electrical Engineering & Filter Design Laboratory \\
+\textbf{EE 603: Digital Signal Processing} & Reference Note 01
+\end{tabular*}
+
+\vspace{6pt}
+\hrule height 1.4pt \vspace{2pt} \hrule height 0.5pt
+\vspace{20pt}
+
+\begin{center}
+{\LARGE \textbf{Digital Filter Theory \& Mathematical Formulations}}\\[8pt]
+{\large \textsc{Continuous Prototypes, Bilinear Mapping, and Second-Order Sections (SOS)}}
+\end{center}
+
+\vspace{18pt}
+
+\section*{1. Theoretical Foundations \& Overview}
+
+Linear time-invariant (LTI) digital filtering is a foundational subject in discrete-time signal processing. Classical infinite impulse response (IIR) filter synthesis translates well-understood continuous-time prototype transfer functions into numerically stable discrete-time difference equations.
+
+In practice, the modern synthesis pipeline comprises three systematic stages:
+\begin{enumerate}[leftmargin=24pt,itemsep=3pt]
+\item \textbf{Analog Prototype Approximation:} Deriving an all-pole or pole-zero continuous transfer function $H_a(s)$ satisfying magnitude and phase specifications in the normalized continuous frequency domain.
+\item \textbf{Continuous-to-Discrete Mapping:} Applying the bilinear transformation with non-linear tangent frequency pre-warping to preserve critical passband and stopband boundaries.
+\item \textbf{Second-Order Section (SOS) Decomposition:} Factoring high-order polynomials into cascaded biquads to eliminate coefficient quantization sensitivity in real-time execution.
+\end{enumerate}
+
+\vspace{10pt}
+\section*{2. Continuous-Time Prototype Filter Families}
+
+\subsection*{2.1 Butterworth Approximation (Maximally Flat)}
+The Butterworth filter is characterized by a maximally flat magnitude response in the passband. The squared-magnitude frequency response is given by:
+\begin{equation}
+|H(j\Omega)|^2 = \frac{1}{1 + \left(\frac{\Omega}{\Omega_c}\right)^{2N}}
+\end{equation}
+where $N$ denotes the filter order and $\Omega_c$ is the $-3.01\text{ dB}$ cutoff frequency. The poles of $H(s)H(-s)$ are distributed symmetrically along a circle of radius $\Omega_c$ in the complex $s$-plane. Causality and stability require selecting the $N$ left-half plane poles:
+\begin{equation}
+s_k = \Omega_c \exp\left(j \frac{\pi (2k + N - 1)}{2N}\right), \quad k = 1, 2, \dots, N
+\end{equation}
+
+\subsection*{2.2 Chebyshev Approximations (Equiripple Designs)}
+Chebyshev approximations minimize the peak absolute error across the specified band by utilizing Chebyshev polynomials of the first kind, $T_N(x)$, generated via the recurrence relation $T_0(x) = 1$, $T_1(x) = x$, and $T_{n+1}(x) = 2x T_n(x) - T_{n-1}(x)$.
+
+\textbf{Type I (Passband Equiripple):}
+\begin{equation}
+|H(j\Omega)|^2 = \frac{1}{1 + \epsilon^2 T_N^2\left(\frac{\Omega}{\Omega_p}\right)}
+\end{equation}
+where $\epsilon = \sqrt{10^{R_p/10} - 1}$ parametrizes passband ripple $R_p$ (dB). The poles reside on an ellipse in the complex $s$-plane.
+
+\textbf{Type II (Inverse Chebyshev, Stopband Equiripple):}
+\begin{equation}
+|H(j\Omega)|^2 = \frac{1}{1 + \left[\delta^2 T_N^2\left(\frac{\Omega_s}{\Omega}\right)\right]^{-1}}
+\end{equation}
+The passband is maximally flat, while the stopband exhibits equiripple behavior with transmission zeros placed directly on the imaginary axis $s = \pm j \Omega_{z,k}$.
+
+\subsection*{2.3 Elliptic (Cauer) Rational Filters}
+Elliptic filters achieve optimal transition steepness for a prescribed order $N$ by permitting equiripple behavior in both passband and stopband:
+\begin{equation}
+|H(j\Omega)|^2 = \frac{1}{1 + \epsilon^2 R_N^2\left(\xi, \frac{\Omega}{\Omega_p}\right)}
+\end{equation}
+where $R_N(\xi, x)$ is the Chebyshev rational function with selectivity parameter $\xi = \Omega_s / \Omega_p > 1$.
+
+\subsection*{2.4 Bessel-Thomson Linear Phase Filters}
+Bessel filters approximate constant group delay $\tau_g(\Omega) = -d\theta/d\Omega \approx \tau_0$ using reverse Bessel polynomials $B_N(s)$:
+\begin{equation}
+H(s) = \frac{B_N(0)}{B_N(s/\Omega_0)}, \quad B_N(s) = \sum_{k=0}^{N} \frac{(2N - k)!}{2^{N-k} k! (N-k)!} s^k
+\end{equation}
+Because the phase response is linear across the passband, Bessel filters eliminate transient ringing in step and pulse responses.
+
+\vspace{6pt}
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lllll}
+\toprule
+\textbf{Filter Prototype} & \textbf{Passband} & \textbf{Stopband} & \textbf{Transition Width} & \textbf{Group Delay} \\
+\midrule
+Butterworth & Maximally Flat & Monotonic & Moderate & Moderately Linear \\
+Chebyshev Type I & Equiripple & Monotonic & Sharp & Non-linear near edge \\
+Chebyshev Type II & Maximally Flat & Equiripple & Sharp & Moderate Distortion \\
+Elliptic (Cauer) & Equiripple & Equiripple & Optimal (Sharpest) & Highly Non-linear \\
+Bessel-Thomson & Monotonic & Monotonic & Gradual & Maximally Flat \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of canonical continuous-time prototype approximations.}
+\end{table}
+
+\section*{3. Bilinear Transformation \& Frequency Pre-Warping}
+
+The bilinear transform maps the entire left-half continuous $s$-plane into the interior of the discrete unit circle $|z| < 1$ via trapezoidal integration:
+\begin{equation}
+s = \frac{2}{T_s} \frac{1 - z^{-1}}{1 + z^{-1}} \iff z = \frac{1 + \frac{T_s}{2} s}{1 - \frac{T_s}{2} s}
+\end{equation}
+where $T_s = 1/f_s$ is the sampling interval. Evaluating along $s = j\Omega$ and $z = e^{j\omega}$ yields the non-linear frequency warping relation:
+\begin{equation}
+\Omega = \frac{2}{T_s} \tan\left(\frac{\omega}{2}\right) \iff \omega = 2 \arctan\left(\frac{\Omega T_s}{2}\right)
+\end{equation}
+To ensure synthesized discrete cutoff frequencies $\omega_0$ match the engineering targets, continuous prototype frequencies must be pre-warped prior to polynomial transformation:
+\begin{equation}
+\Omega_{\text{pre}} = 2 f_s \tan\left(\frac{\pi f_{\text{target}}}{f_s}\right)
+\end{equation}
+
+\section*{4. Second-Order Sections (SOS) Cascading}
+
+High-order rational transfer functions $H(z) = B(z)/A(z)$ exhibit extreme coefficient sensitivity, where slight numerical rounding causes catastrophic pole displacement outside the unit circle. Therefore, $H(z)$ is decomposed into a cascade of $K = \lceil N/2 \rceil$ second-order sections:
+\begin{equation}
+H(z) = g \cdot \prod_{k=1}^{K} \frac{b_{0,k} + b_{1,k} z^{-1} + b_{2,k} z^{-2}}{1 + a_{1,k} z^{-1} + a_{2,k} z^{-2}}
+\end{equation}
+
+\subsection*{4.1 Direct Form II Transposed Difference Equations}
+Each biquad section is implemented using the Direct Form II Transposed topology:
+\begin{align}
+y_k[n] &= b_{0,k} x_k[n] + w_{1,k}[n-1] \\
+w_{1,k}[n] &= b_{1,k} x_k[n] - a_{1,k} y_k[n] + w_{2,k}[n-1] \\
+w_{2,k}[n] &= b_{2,k} x_k[n] - a_{2,k} y_k[n]
+\end{align}
+This topology requires only two delay state registers ($w_1, w_2$) per biquad and minimizes internal accumulator overflow in real-time execution.
+
+\vspace{6pt}
+\section*{5. Canonical References}
+\begin{enumerate}[label={[\arabic*]},leftmargin=22pt,itemsep=2pt]
+\item A.~V.~Oppenheim and R.~W.~Schafer, \textit{Discrete-Time Signal Processing}, 3rd ed., Prentice Hall, 2009.
+\item J.~G.~Proakis and D.~G.~Manolakis, \textit{Digital Signal Processing: Principles, Algorithms, and Applications}, 4th ed., Pearson, 2007.
+\item S.~K.~Mitra, \textit{Digital Signal Processing: A Computer-Based Approach}, 4th ed., McGraw-Hill, 2011.
+\item U.~Z\"olzer, \textit{DAFX: Digital Audio Effects}, 2nd ed., John Wiley \& Sons, 2011.
+\end{enumerate}
+
+\end{document}

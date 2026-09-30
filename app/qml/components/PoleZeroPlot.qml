@@ -18,11 +18,21 @@ Item {
     property bool showCrosshair: false // Opt-in Data Cursor / Inspector (+) (Default: OFF)
     property bool showPolarGrid: true
     property bool showStabilityRegion: true
+    property bool isDetached: false
+
+
+    function openInNewWindow() {
+        const w = Window.window
+        if (w && typeof w.openStandalonePlot === "function") {
+            w.openStandalonePlot(1, {})
+        }
+    }
 
     // Viewport Zoom & Pan State (Desmos Complex Plane Engine)
     property real zoomScale: 1.0
     property real panOffsetX: 0.0
     property real panOffsetY: 0.0
+
     property bool isCustomView: false
     property bool isPanning: false
     property real lastMouseX: 0
@@ -259,6 +269,8 @@ Item {
                 const py = cy - im * r
                 const kind = String(pt["kind"])
                 const isHovered = (root.showCrosshair && root.hoverIndex === i && root.hoverType === kind)
+                const mult = pt["multiplicity"] ? Number(pt["multiplicity"]) : 1
+                const isPrimary = (pt["isPrimary"] !== undefined) ? Boolean(pt["isPrimary"]) : true
 
                 if (kind === "pole") {
                     // Pole: Cross 'x'
@@ -297,28 +309,51 @@ Item {
                         ctx.stroke()
                     }
                 }
+
+                // MATLAB zplane Multiplicity Badge
+                if (isPrimary && mult > 1) {
+                    ctx.fillStyle = (kind === "pole") ? (isHovered ? "#FF453A" : theme.danger) : (isHovered ? "#0A84FF" : theme.accent)
+                    ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
+                    ctx.textAlign = "left"
+                    ctx.textBaseline = "bottom"
+                    ctx.fillText(String(mult), px + 7, py - 4)
+                }
             }
 
             ctx.restore()
 
             // 6) Hover Inspection HUD Badge
             if (root.showCrosshair && root.hoverIndex >= 0 && root.hoverIndex < n) {
+                const targetPt = pts[root.hoverIndex]
                 const kind = root.hoverType
                 const sign = root.hoverIm >= 0 ? "+" : "-"
+                const mult = (targetPt && targetPt["multiplicity"]) ? Number(targetPt["multiplicity"]) : 1
+                const multStr = mult > 1 ? (" (×" + mult + ")") : ""
+
+                const fs = filterEngine.sampleRate
+                const freqHz = (root.hoverThetaDeg <= 180 ? root.hoverThetaDeg : 360 - root.hoverThetaDeg) * fs / 360.0
+
                 const zStr = (kind === "pole" ? "Pole: z = " : "Zero: z = ") +
-                             root.hoverRe.toFixed(4) + " " + sign + " j" + Math.abs(root.hoverIm).toFixed(4)
-                const polarStr = "r = " + root.hoverR.toFixed(4) + ", θ = " + root.hoverThetaDeg.toFixed(1) + "°"
-                const stabStr = root.hoverR < 0.999 ? "Stable (r < 1)" : (root.hoverR > 1.001 ? "UNSTABLE (r > 1)" : "Marginal (r = 1)")
+                             root.hoverRe.toFixed(4) + " " + sign + " j" + Math.abs(root.hoverIm).toFixed(4) + multStr
+
+                let polarStr = "r = " + root.hoverR.toFixed(4) + ", θ = " + root.hoverThetaDeg.toFixed(1) + "° (f ≈ " + Math.round(freqHz) + " Hz)"
+                if (kind === "pole" && root.hoverR > 0.5 && root.hoverR < 0.9999) {
+                    const qEst = 1.0 / (2.0 * Math.max(0.0001, 1.0 - root.hoverR))
+                    polarStr += " [Q ≈ " + qEst.toFixed(1) + "]"
+                }
+
+                const stabStr = root.hoverR < 0.999 ? ("Stable (Margin: " + (1.0 - root.hoverR).toFixed(4) + ")") :
+                                (root.hoverR > 1.001 ? "UNSTABLE (r > 1)" : "Marginally Stable (r ≈ 1)")
 
                 ctx.font = "bold 10px 'Stack Sans Headline', monospace"
                 const w1 = ctx.measureText(zStr).width
                 const w2 = ctx.measureText(polarStr).width
-                const bw = Math.max(w1, w2) + 16
-                const bh = 46
+                const bw = Math.max(w1, w2) + 18
+                const bh = 48
                 const bx = 10
                 const by = height - bh - 8
 
-                ctx.fillStyle = theme.isDark ? "rgba(25, 25, 25, 0.92)" : "rgba(255, 255, 255, 0.92)"
+                ctx.fillStyle = theme.isDark ? "rgba(25, 25, 25, 0.94)" : "rgba(255, 255, 255, 0.94)"
                 ctx.strokeStyle = theme.borderColor
                 ctx.lineWidth = 1
                 ctx.beginPath()
@@ -332,10 +367,10 @@ Item {
                 ctx.fillText(zStr, bx + 8, by + 5)
 
                 ctx.fillStyle = theme.primaryText
-                ctx.fillText(polarStr, bx + 8, by + 18)
+                ctx.fillText(polarStr, bx + 8, by + 19)
 
                 ctx.fillStyle = root.hoverR < 1.001 ? "#30D158" : theme.danger
-                ctx.fillText(stabStr, bx + 8, by + 31)
+                ctx.fillText(stabStr, bx + 8, by + 33)
             }
         }
     }
@@ -551,7 +586,37 @@ Item {
                 }
             }
 
+            // Pop out in New Window Button
+            Rectangle {
+                width: 26
+                height: 22
+                radius: 4
+                visible: !root.isDetached
+                color: popoutPzMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
+                border.color: theme.borderColor
+                border.width: 1
+
+                Codicon {
+                    anchors.centerIn: parent
+                    icon: "link-external"
+                    iconSize: 12
+                    iconColor: popoutPzMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                }
+                ToolTip.visible: popoutPzMouse.containsMouse
+                ToolTip.text: "Open Z-Plane in Dedicated Window"
+                ToolTip.delay: 400
+
+                MouseArea {
+                    id: popoutPzMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.openInNewWindow()
+                }
+            }
+
             // MATLAB Context Menu Button
+
             Rectangle {
                 width: 24
                 height: 22

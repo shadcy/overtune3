@@ -8,7 +8,7 @@ import "pages"
 // Main.qml — Root application window with global shortcuts & toast notifications
 Window {
     id: root
-    title:         "Overtune 3"
+    title:         "Overtune 3 (beta)"
     width:         1280
     height:        800
     minimumWidth:  860
@@ -123,6 +123,26 @@ Window {
             simulationPage.signalPlot.zoomCenter(1.25)
         }
     }
+
+    Component {
+        id: standalonePlotComp
+        StandalonePlotWindow {}
+    }
+
+    function openStandalonePlot(type, props) {
+        var w = standalonePlotComp.createObject(root, {
+            plotType: (type !== undefined ? type : 0),
+            extraProps: (props || {})
+        });
+        if (w) {
+            w.show();
+            w.raise();
+            w.requestActivate();
+            root.showNotification("Opened plot in dedicated high-res window", false);
+        }
+        return w;
+    }
+
 
     // ── Global Toast / Snackbar Notification ──────────────────────────────────
     Rectangle {
@@ -382,5 +402,37 @@ Window {
         }
     }
 
+    function showWhatsNew() {
+        whatsNewWindow.openWindow()
+    }
+
+    function showInstallerUpdater(tabIndex) {
+        installerUpdaterWindow.openWindow(tabIndex)
+    }
+
+    function checkUpdatesNow() {
+        installerUpdaterWindow.checkUpdatesNow()
+    }
+
+    WhatsNewWindow {
+        id: whatsNewWindow
+    }
+
+    InstallerUpdaterWindow {
+        id: installerUpdaterWindow
+    }
+
+    Component.onCompleted: {
+        if (typeof cliLaunchInstaller !== "undefined" && cliLaunchInstaller) {
+            Qt.callLater(function() { installerUpdaterWindow.openWindow(1) })
+        } else if (typeof cliLaunchUpdater !== "undefined" && cliLaunchUpdater) {
+            Qt.callLater(function() { installerUpdaterWindow.checkUpdatesNow() })
+        } else {
+            // Auto-open What's New on every launch
+            Qt.callLater(function() { whatsNewWindow.openWindow() })
+        }
+    }
+
     Behavior on color { ColorAnimation { duration: 300 } }
 }
+

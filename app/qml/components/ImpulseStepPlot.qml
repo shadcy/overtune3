@@ -19,6 +19,15 @@ Item {
     property bool normalize: false
     property bool showGrid: true
     property bool showCrosshair: false // Opt-in Data Cursor / Inspector (+) (Default: OFF)
+    property bool isDetached: false
+
+    function openInNewWindow() {
+        const w = Window.window
+        if (w && typeof w.openStandalonePlot === "function") {
+            w.openStandalonePlot(2, { mode: root.mode })
+        }
+    }
+
 
     // Hover / Cursor state
     property int hoverIndex: -1
@@ -312,6 +321,29 @@ Item {
                 }
             }
 
+            // 4) Step Response Theoretical Steady-State Asymptote y = H(1)
+            if (root.mode === 1) {
+                const yInf = root.normalize ? (filterEngine.steadyStateGain / peakAbs) : filterEngine.steadyStateGain
+                const yInfPos = toY(yInf)
+                if (yInfPos >= mT && yInfPos <= mT + pH) {
+                    ctx.save()
+                    ctx.strokeStyle = "#30D158"
+                    ctx.lineWidth = 1.2
+                    ctx.setLineDash([4, 4])
+                    ctx.beginPath()
+                    ctx.moveTo(mL, yInfPos)
+                    ctx.lineTo(mL + pW, yInfPos)
+                    ctx.stroke()
+                    ctx.restore()
+
+                    ctx.fillStyle = "#30D158"
+                    ctx.font = "bold 10px 'Stack Sans Headline', sans-serif"
+                    ctx.textAlign = "right"
+                    ctx.textBaseline = "bottom"
+                    ctx.fillText("y_ss = " + filterEngine.steadyStateGain.toFixed(3), mL + pW - 6, yInfPos - 2)
+                }
+            }
+
             // Hover indicator & crosshair
             if (root.showCrosshair && root.hoverIndex >= 0 && root.hoverIndex < count) {
                 const hi = root.hoverIndex
@@ -326,24 +358,39 @@ Item {
                 ctx.stroke()
 
                 // Floating precision HUD badge
-                const valStr = "n=" + hi + " | " + (root.mode === 0 ? "h[" : "s[") + hi + "]=" + rawPts[hi].toFixed(5)
-                ctx.font = "bold 10px 'Stack Sans Headline', monospace"
-                const tw = ctx.measureText(valStr).width + 14
-                const badgeX = Math.max(mL + 4, Math.min(mL + pW - tw - 4, hx - tw / 2))
-                const badgeY = hy > mT + 34 ? (hy - 24) : (hy + 12)
+                let line1 = "n=" + hi + " | " + (root.mode === 0 ? "h[" : "s[") + hi + "]=" + rawPts[hi].toFixed(5)
+                let line2 = ""
+                if (root.mode === 1) {
+                    const sm = filterEngine.stepMetrics
+                    const os = sm && sm["overshootPercent"] !== undefined ? Number(sm["overshootPercent"]) : 0
+                    const st = sm && sm["settlingTimeSamples"] !== undefined ? Number(sm["settlingTimeSamples"]) : 0
+                    line2 = "Overshoot: " + os.toFixed(1) + "% | Settling: " + st + " smp"
+                }
 
-                ctx.fillStyle = theme.isDark ? "rgba(30, 30, 30, 0.92)" : "rgba(255, 255, 255, 0.92)"
+                ctx.font = "bold 10px 'Stack Sans Headline', monospace"
+                const tw1 = ctx.measureText(line1).width
+                const tw2 = line2 ? ctx.measureText(line2).width : 0
+                const tw = Math.max(tw1, tw2) + 16
+                const th = line2 ? 34 : 20
+                const badgeX = Math.max(mL + 4, Math.min(mL + pW - tw - 4, hx - tw / 2))
+                const badgeY = hy > mT + th + 10 ? (hy - th - 4) : (hy + 10)
+
+                ctx.fillStyle = theme.isDark ? "rgba(30, 30, 30, 0.94)" : "rgba(255, 255, 255, 0.94)"
                 ctx.strokeStyle = theme.borderColor
                 ctx.lineWidth = 1
                 ctx.beginPath()
-                ctx.rect(badgeX, badgeY, tw, 20)
+                ctx.rect(badgeX, badgeY, tw, th)
                 ctx.fill()
                 ctx.stroke()
 
                 ctx.fillStyle = theme.primaryText
                 ctx.textAlign = "left"
-                ctx.textBaseline = "middle"
-                ctx.fillText(valStr, badgeX + 7, badgeY + 10)
+                ctx.textBaseline = line2 ? "top" : "middle"
+                ctx.fillText(line1, badgeX + 8, line2 ? (badgeY + 4) : (badgeY + 10))
+                if (line2) {
+                    ctx.fillStyle = theme.accent
+                    ctx.fillText(line2, badgeX + 8, badgeY + 18)
+                }
             }
         }
     }
@@ -440,7 +487,8 @@ Item {
                         model: [
                             { name: "32", count: 32 },
                             { name: "64", count: 64 },
-                            { name: "All", count: 256 }
+                            { name: "128", count: 128 },
+                            { name: "All", count: 512 }
                         ]
                         delegate: Rectangle {
                             required property int index
@@ -626,7 +674,38 @@ Item {
                 }
             }
 
+            // Pop out in New Window Button
+            Rectangle {
+                width: 26
+                height: 22
+                radius: 4
+                visible: !root.isDetached
+                color: popoutMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
+                border.color: theme.borderColor
+                border.width: 1
+
+                Codicon {
+                    anchors.centerIn: parent
+                    icon: "link-external"
+                    iconSize: 12
+                    iconColor: popoutMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                }
+
+                ToolTip.visible: popoutMouse.containsMouse
+                ToolTip.text: "Open in Dedicated Window"
+                ToolTip.delay: 400
+
+                MouseArea {
+                    id: popoutMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.openInNewWindow()
+                }
+            }
+
             // MATLAB Context Menu Button
+
             Rectangle {
                 width: 24
                 height: 22
@@ -801,6 +880,12 @@ Item {
                 checkable: true
                 checked: root.sampleWindow === 256
                 onTriggered: { root.sampleWindow = 256; root.schedulePaint() }
+            }
+            MenuItem {
+                text: "512 Samples (All)"
+                checkable: true
+                checked: root.sampleWindow === 512
+                onTriggered: { root.sampleWindow = 512; root.schedulePaint() }
             }
         }
 

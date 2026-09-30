@@ -62,8 +62,18 @@ static QJsonArray defaultPresets() {
 }
 
 FilterEngine::FilterEngine(QObject *parent) : QObject(parent) {
-  // Design with defaults on construction
-  design();
+  m_debounceTimer.setSingleShot(true);
+  m_debounceTimer.setInterval(35); // 35ms stabilization threshold for rapid scrubbing
+  connect(&m_debounceTimer, &QTimer::timeout, this, [this]() {
+    designInternal();
+  });
+
+  // Initial design calculation on startup
+  designInternal();
+}
+
+void FilterEngine::scheduleDesign() {
+  m_debounceTimer.start(); // Restarts 35ms single-shot timer during continuous scrubbing
 }
 
 void FilterEngine::setFilterType(int v) {
@@ -72,7 +82,7 @@ void FilterEngine::setFilterType(int v) {
     qDebug() << "[FilterEngine] setFilterType:" << v;
     m_spec.type = t;
     emit specChanged();
-    design();
+    design(); // Discrete type change runs immediately
   }
 }
 void FilterEngine::setFilterResponse(int v) {
@@ -81,7 +91,7 @@ void FilterEngine::setFilterResponse(int v) {
     qDebug() << "[FilterEngine] setFilterResponse:" << v;
     m_spec.response = r;
     emit specChanged();
-    design();
+    design(); // Discrete response change runs immediately
   }
 }
 void FilterEngine::setOrder(int v) {
@@ -89,7 +99,7 @@ void FilterEngine::setOrder(int v) {
     qDebug() << "[FilterEngine] setOrder:" << v;
     m_spec.order = v;
     emit specChanged();
-    design();
+    design(); // Order change runs immediately
   }
 }
 void FilterEngine::setSampleRate(double v) {
@@ -97,55 +107,84 @@ void FilterEngine::setSampleRate(double v) {
     qDebug() << "[FilterEngine] setSampleRate:" << v;
     m_spec.sampleRate = v;
     emit specChanged();
-    design();
+    scheduleDesign();
   }
 }
 void FilterEngine::setCutoffFreq(double v) {
   if (m_spec.cutoffFreq != v) {
-    qDebug() << "[FilterEngine] setCutoffFreq:" << v;
     m_spec.cutoffFreq = v;
     emit specChanged();
-    design();
+    scheduleDesign();
   }
 }
 void FilterEngine::setCutoffFreq2(double v) {
   if (m_spec.cutoffFreq2 != v) {
-    qDebug() << "[FilterEngine] setCutoffFreq2:" << v;
     m_spec.cutoffFreq2 = v;
     emit specChanged();
-    design();
+    scheduleDesign();
   }
 }
 void FilterEngine::setRippleDb(double v) {
   if (m_spec.rippleDb != v) {
-    qDebug() << "[FilterEngine] setRippleDb:" << v;
     m_spec.rippleDb = v;
     emit specChanged();
-    design();
+    scheduleDesign();
   }
 }
 void FilterEngine::setStopbandDb(double v) {
   if (m_spec.stopbandDb != v) {
-    qDebug() << "[FilterEngine] setStopbandDb:" << v;
     m_spec.stopbandDb = v;
     emit specChanged();
-    design();
+    scheduleDesign();
   }
 }
 
 void FilterEngine::design() {
-  qDebug() << "[FilterEngine] design() running...";
+  if (m_debounceTimer.isActive()) {
+    m_debounceTimer.stop();
+  }
+  designInternal();
+}
+
+QVariantMap FilterEngine::verifyDesign() {
+  auto analysis = dsp::FilterAnalysis::compute(
+      m_coeff, m_spec.sampleRate, 2048, m_spec.cutoffFreq, m_spec.cutoffFreq2);
+  auto ver = dsp::FilterAnalysis::verify(m_spec, m_coeff, analysis);
+
+  QVariantMap map;
+  map["passed"] = ver.passed;
+  map["stage1Passed"] = ver.stage1Passed;
+  map["stage2Passed"] = ver.stage2Passed;
+  map["maxPoleRadius"] = ver.maxPoleRadius;
+  map["stabilityMargin"] = ver.stabilityMargin;
+  map["conjugateSymmetryOk"] = ver.conjugateSymmetryOk;
+  map["poleUnitCircleOk"] = ver.poleUnitCircleOk;
+  map["stage1Details"] = QString::fromStdString(ver.stage1Details);
+  map["parsevalEnergyError"] = ver.parsevalEnergyError;
+  map["parsevalEnergyOk"] = ver.parsevalEnergyOk;
+  map["maxTransientPeak"] = ver.maxTransientPeak;
+  map["biboStabilityOk"] = ver.biboStabilityOk;
+  map["referenceModelVerified"] = ver.referenceModelVerified;
+  map["matchedPoints"] = ver.matchedPoints;
+  map["totalPoints"] = ver.totalPoints;
+  map["maxPointMagnitudeErrorDb"] = ver.maxPointMagnitudeErrorDb;
+  map["maxImpulseError"] = ver.maxImpulseError;
+  map["stage2Details"] = QString::fromStdString(ver.stage2Details);
+  map["summary"] = QString::fromStdString(ver.summary);
+  return map;
+}
+
+void FilterEngine::designInternal() {
   try {
     m_coeff = dsp::designFilter(m_spec);
-    auto result =
-        dsp::FilterAnalysis::compute(m_coeff, m_spec.sampleRate, 1024);
+    auto result = dsp::FilterAnalysis::compute(
+        m_coeff, m_spec.sampleRate, 3072, m_spec.cutoffFreq, m_spec.cutoffFreq2);
     m_hasResults = true;
     publishResults(result);
-    qDebug() << "[FilterEngine] design() succeeded, freq points:"
-             << m_magnitudeData.size();
+    emit resultsChanged();
   } catch (const std::exception &e) {
     m_hasResults = false;
-    qWarning() << "[FilterEngine] design() failed:" << e.what();
+    qWarning() << "[FilterEngine] designInternal() failed:" << e.what();
     emit errorOccurred(QString::fromStdString(e.what()));
   }
 }
@@ -158,6 +197,9 @@ void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
   m_stepData.clear();
   m_poleZeroData.clear();
 
+  double maxMag = -1e9;
+  double peakF = 0.0;
+
   for (const auto &p : r.frequencyResponse) {
     QVariantMap mag, ph, gd;
     mag["x"] = p.frequency;
@@ -169,7 +211,19 @@ void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
     m_magnitudeData.append(mag);
     m_phaseData.append(ph);
     m_groupDelayData.append(gd);
+
+    if (p.magnitude > maxMag) {
+      maxMag = p.magnitude;
+      peakF = p.frequency;
+    }
   }
+
+  m_peakGainDb = (maxMag > -250.0) ? maxMag : 0.0;
+  m_peakFreqHz = peakF;
+
+  // DC / Steady-State Transfer Function
+  auto hDc = m_coeff.evaluate(0.0);
+  m_steadyStateGain = hDc.real();
 
   for (size_t i = 0; i < r.impulseResponse.size(); ++i) {
     QVariantMap pt;
@@ -177,26 +231,114 @@ void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
     pt["y"] = r.impulseResponse[i];
     m_impulseData.append(pt);
   }
+
+  double stepPeak = 0.0;
+  int peakIdx = 0;
   for (size_t i = 0; i < r.stepResponse.size(); ++i) {
     QVariantMap pt;
+    double y = r.stepResponse[i];
     pt["x"] = static_cast<double>(i);
-    pt["y"] = r.stepResponse[i];
+    pt["y"] = y;
     m_stepData.append(pt);
+
+    if (std::abs(y) > std::abs(stepPeak)) {
+      stepPeak = y;
+      peakIdx = static_cast<int>(i);
+    }
   }
 
-  // Poles = red, Zeros = blue
+  // Calculate stepinfo metrics (MATLAB equivalent)
+  double yFinal = r.stepResponse.empty() ? 0.0 : r.stepResponse.back();
+  double overshoot = 0.0;
+  if (std::abs(yFinal) > 1e-6) {
+    overshoot = ((stepPeak - yFinal) / std::abs(yFinal)) * 100.0;
+    if (overshoot < 0.0) overshoot = 0.0;
+  }
+
+  int rise10 = -1, rise90 = -1;
+  int settlingSamples = 0;
+  if (std::abs(yFinal) > 1e-6) {
+    double t10 = 0.1 * yFinal;
+    double t90 = 0.9 * yFinal;
+    for (size_t i = 0; i < r.stepResponse.size(); ++i) {
+      double y = r.stepResponse[i];
+      if (rise10 < 0 && (yFinal >= 0 ? y >= t10 : y <= t10)) rise10 = static_cast<int>(i);
+      if (rise90 < 0 && (yFinal >= 0 ? y >= t90 : y <= t90)) rise90 = static_cast<int>(i);
+    }
+    const double tol = 0.02 * std::abs(yFinal);
+    for (int i = static_cast<int>(r.stepResponse.size()) - 1; i >= 0; --i) {
+      if (std::abs(r.stepResponse[i] - yFinal) > tol) {
+        settlingSamples = i + 1;
+        break;
+      }
+    }
+  }
+
+  m_stepMetrics.clear();
+  m_stepMetrics["steadyState"] = yFinal;
+  m_stepMetrics["peakValue"] = stepPeak;
+  m_stepMetrics["peakTime"] = peakIdx;
+  m_stepMetrics["overshootPercent"] = overshoot;
+  m_stepMetrics["riseTimeSamples"] = (rise90 >= 0 && rise10 >= 0) ? (rise90 - rise10) : 0;
+  m_stepMetrics["settlingTimeSamples"] = settlingSamples;
+
+  // Stability margin
+  double maxR = 0.0;
   for (const auto &p : r.poles) {
+    double rad = std::abs(p);
+    if (rad > maxR) maxR = rad;
+  }
+  m_stabilityMargin = 1.0 - maxR;
+
+  // Calculate multiplicities for poles (MATLAB zplane convention)
+  const size_t numPoles = r.poles.size();
+  std::vector<int> poleMult(numPoles, 1);
+  std::vector<bool> polePrimary(numPoles, true);
+  for (size_t i = 0; i < numPoles; ++i) {
+    if (!polePrimary[i]) continue;
+    int count = 1;
+    for (size_t j = i + 1; j < numPoles; ++j) {
+      if (std::abs(r.poles[i] - r.poles[j]) < 0.02) {
+        count++;
+        polePrimary[j] = false;
+      }
+    }
+    poleMult[i] = count;
+  }
+
+  for (size_t i = 0; i < numPoles; ++i) {
     QVariantMap pt;
-    pt["re"] = p.real();
-    pt["im"] = p.imag();
+    pt["re"] = r.poles[i].real();
+    pt["im"] = r.poles[i].imag();
     pt["kind"] = "pole";
+    pt["multiplicity"] = poleMult[i];
+    pt["isPrimary"] = static_cast<bool>(polePrimary[i]);
     m_poleZeroData.append(pt);
   }
-  for (const auto &z : r.zeros) {
+
+  // Calculate multiplicities for zeros (MATLAB zplane convention)
+  const size_t numZeros = r.zeros.size();
+  std::vector<int> zeroMult(numZeros, 1);
+  std::vector<bool> zeroPrimary(numZeros, true);
+  for (size_t i = 0; i < numZeros; ++i) {
+    if (!zeroPrimary[i]) continue;
+    int count = 1;
+    for (size_t j = i + 1; j < numZeros; ++j) {
+      if (std::abs(r.zeros[i] - r.zeros[j]) < 0.02) {
+        count++;
+        zeroPrimary[j] = false;
+      }
+    }
+    zeroMult[i] = count;
+  }
+
+  for (size_t i = 0; i < numZeros; ++i) {
     QVariantMap pt;
-    pt["re"] = z.real();
-    pt["im"] = z.imag();
+    pt["re"] = r.zeros[i].real();
+    pt["im"] = r.zeros[i].imag();
     pt["kind"] = "zero";
+    pt["multiplicity"] = zeroMult[i];
+    pt["isPrimary"] = static_cast<bool>(zeroPrimary[i]);
     m_poleZeroData.append(pt);
   }
 
@@ -527,6 +669,60 @@ double FilterEngine::passbandRippleDb(double fStart, double fEnd) const {
         if (db < minMag) minMag = db;
     }
     return (maxMag > minMag) ? (maxMag - minMag) : 0.0;
+}
+
+QVariantMap FilterEngine::evaluateResponseAt(double freqHz) const {
+    QVariantMap res;
+    if (!m_hasResults || !m_coeff.isValid() || m_spec.sampleRate <= 0.0) {
+        res["freq"] = freqHz;
+        res["magDb"] = 0.0;
+        res["magLin"] = 1.0;
+        res["phase"] = 0.0;
+        res["phaseWrapped"] = 0.0;
+        res["phaseUnwrapped"] = 0.0;
+        res["groupDelay"] = 0.0;
+        return res;
+    }
+
+    auto pt = dsp::FilterAnalysis::evaluatePoint(m_coeff, m_spec.sampleRate, freqHz);
+    res["freq"] = pt.frequency;
+    res["magDb"] = pt.magnitude;
+    res["magLin"] = (pt.magnitude > -250.0) ? std::pow(10.0, pt.magnitude / 20.0) : 0.0;
+    res["phase"] = pt.phase;
+
+    double wrappedP = std::fmod(pt.phase + 180.0, 360.0);
+    if (wrappedP < 0.0) wrappedP += 360.0;
+    wrappedP -= 180.0;
+    res["phaseWrapped"] = wrappedP;
+
+    // Continuous unwrapped phase interpolation from verified grid
+    if (!m_phaseData.isEmpty()) {
+        const int maxIdx = static_cast<int>(m_phaseData.size()) - 1;
+        int low = 0, high = maxIdx;
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            double fMid = m_phaseData[mid].toMap()["x"].toDouble();
+            if (fMid < pt.frequency) low = mid + 1;
+            else high = mid - 1;
+        }
+        int idx1 = std::clamp(low - 1, 0, maxIdx);
+        int idx2 = std::clamp(low, 0, maxIdx);
+        if (idx1 == idx2) {
+            res["phaseUnwrapped"] = m_phaseData[idx1].toMap()["y"].toDouble();
+        } else {
+            double f1 = m_phaseData[idx1].toMap()["x"].toDouble();
+            double f2 = m_phaseData[idx2].toMap()["x"].toDouble();
+            double p1 = m_phaseData[idx1].toMap()["y"].toDouble();
+            double p2 = m_phaseData[idx2].toMap()["y"].toDouble();
+            double t = (f2 > f1) ? (pt.frequency - f1) / (f2 - f1) : 0.0;
+            res["phaseUnwrapped"] = p1 + t * (p2 - p1);
+        }
+    } else {
+        res["phaseUnwrapped"] = pt.phase;
+    }
+
+    res["groupDelay"] = pt.groupDelay;
+    return res;
 }
 
 QVariantMap FilterEngine::evaluateLab(double passbandFreq, double stopbandFreq,

@@ -26,9 +26,12 @@ QtObject {
     readonly property int radiusM: 12
     readonly property int radiusL: 16
 
-    readonly property int animFast:   150
-    readonly property int animNormal: 250
-    readonly property int animSlow:   400
+    readonly property bool animationsEnabled: theme.animationsEnabled
+    readonly property int animFast:   theme.animationsEnabled ? 150 : 0
+    readonly property int animNormal: theme.animationsEnabled ? 250 : 0
+    readonly property int animSlow:   theme.animationsEnabled ? 400 : 0
+
+    readonly property real defaultPlotLineWidth: theme.plotLineWidth
 
     readonly property int sidebarWidth: 200
     readonly property int activityBarWidth: 48
@@ -38,3 +41,4 @@ QtObject {
     readonly property string plotImpulse:    "#BF5AF2"
     readonly property string plotStep:       "#FF375F"
 }
+

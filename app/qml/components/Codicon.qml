@@ -57,8 +57,15 @@ Text {
             "new-file":         "\uEA7B",
             "more":             "\uEA7C",
             "ellipsis":         "\uEA7C",
-            "kebab-vertical":   "\uEB60"
+            "kebab-vertical":   "\uEB60",
+            "screen-full":      "\uEB50",
+            "screen-normal":    "\uEB4E",
+            "zoom-in":          "\uEB81",
+            "zoom-out":         "\uEB82",
+            "window":           "\uEB7B",
+            "close":            "\uEA76"
         }
         return map[name] || map["question"]
     }
 }
+

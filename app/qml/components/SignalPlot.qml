@@ -20,6 +20,15 @@ Item {
     // Notification toast state
     property string toastMessage: ""
     property bool toastVisible: false
+    property bool isDetached: false
+
+    function openInNewWindow() {
+        const w = Window.window
+        if (w && typeof w.openStandalonePlot === "function") {
+            w.openStandalonePlot(3, {})
+        }
+    }
+
 
     readonly property real marginLeft:   52
     readonly property real marginRight:  18
@@ -844,7 +853,38 @@ Item {
                 }
             }
 
+            // Pop out in New Window Button
+            Rectangle {
+                width: 26
+                height: 22
+                radius: 4
+                visible: !root.isDetached
+                color: popoutSigMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
+                border.color: theme.borderColor
+                border.width: 1
+
+                Codicon {
+                    anchors.centerIn: parent
+                    icon: "link-external"
+                    iconSize: 12
+                    iconColor: popoutSigMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                }
+
+                ToolTip.visible: popoutSigMouse.containsMouse
+                ToolTip.text: "Open Signal Scope in Dedicated Window"
+                ToolTip.delay: 400
+
+                MouseArea {
+                    id: popoutSigMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.openInNewWindow()
+                }
+            }
+
             // Options Menu Button
+
             Rectangle {
                 width: 24
                 height: 22

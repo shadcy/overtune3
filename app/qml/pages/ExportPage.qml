@@ -26,43 +26,26 @@ Item {
         anchors.fill: parent
         anchors.margins: root.pageMargin
 
-        // ── Header Title & Subtitle ───────────────────────────────────────────
-        Row {
-            id: headerRow
+        // ── Consistent Tab Page Headline ──────────────────────────────────────
+        PageHeader {
+            id: pageHeader
             anchors {
                 top: parent.top
                 left: parent.left
                 right: parent.right
             }
-            spacing: 12
-
-            Column {
-                width: parent.width
-                spacing: 2
-                Text {
-                    text: "Production Code Exporter"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 18
-                    font.weight: Font.DemiBold
-                    color: theme.primaryText
-                }
-                Text {
-                    text: "Export synthesized biquad coefficients into zero-allocation embedded C, modern C++20, Python SciPy, or JSON"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 12
-                    color: theme.secondaryText
-                    elide: Text.ElideRight
-                    width: parent.width
-                }
-            }
+            title: "Production Code Exporter"
+            badgeText: filterEngine.filterResponseName() + " (" + filterEngine.order + "th order)"
         }
+
 
         // ── Main VS Code Editor Container ─────────────────────────────────────
         Rectangle {
             anchors {
-                top: headerRow.bottom
+                top: pageHeader.bottom
                 topMargin: 10
                 left: parent.left
+
                 right: parent.right
                 bottom: parent.bottom
             }

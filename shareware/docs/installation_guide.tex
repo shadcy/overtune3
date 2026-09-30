@@ -1,0 +1,149 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.8in,top=0.85in,bottom=0.85in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+% Clean, airy typography
+\linespread{1.10}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.5pt plus 1.5pt minus 1pt}
+
+% Code Listings styling
+\lstset{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  rulecolor=\color{gray!30},
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=2
+}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\footnotesize Page \thepage}
+\lfoot{\footnotesize \textit{Overtune 3 Studio --- Cross-Platform Deployment \& Installation Manual}}
+
+\begin{document}
+
+% ═════════════════════════════════════════════════════════════════
+% DEPARTMENTAL / PROJECT HEADER
+% ═════════════════════════════════════════════════════════════════
+\noindent
+\begin{tabular*}{\textwidth}{@{}l @{\extracolsep{\fill}} r@{}}
+\textbf{\large OVERTUNE DSP RESEARCH \& ENGINEERING} & \textbf{Release 3.0 (2026)} \\
+Digital Filter Synthesis \& Real-Time DSP Studio & Architecture: x86\_64 \\
+\textbf{Executable: \texttt{ot3}} & Deployment Note 04
+\end{tabular*}
+
+\vspace{6pt}
+\hrule height 1.4pt \vspace{2pt} \hrule height 0.5pt
+\vspace{16pt}
+
+\begin{center}
+{\LARGE \textbf{Overtune 3 (\texttt{ot3}) --- System Installation Guide}}\\[6pt]
+{\large \textsc{Native Deployment, In-App Auto-Updater, and Portable Shareware Bundles}}
+\end{center}
+
+\vspace{14pt}
+
+\section*{1. System Overview \& Hardware Requirements}
+
+\textbf{Overtune 3} (\texttt{ot3}) is a high-precision digital filter design and live audio simulation workstation built on pure C++20 and Qt 6. It features automated Stage 2 compliance mathematical audits, sub-millidecibel magnitude precision, and SIMD-accelerated cascaded biquad evaluation.
+
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+  \item \textbf{Linux Requirements:} Any modern 64-bit Linux distribution (Ubuntu 22.04+, Fedora 38+, Arch Linux, Debian 12+) with GLIBC 2.34+ and Qt 6.4+ libraries.
+  \item \textbf{Windows Requirements:} Windows 10 (64-bit, 1809+) or Windows 11 (x64) with Microsoft Visual C++ 2022 Redistributable.
+  \item \textbf{Display:} Minimum recommended display resolution of $1280 \times 800$ with HiDPI display scaling support.
+\end{itemize}
+
+\section*{2. Linux Installation \& Execution}
+
+Overtune 3 provides three straightforward deployment methods on Linux platforms:
+
+\subsection*{Method A: Native Automated Setup (\texttt{install\_linux.sh})}
+The interactive installer integrates \texttt{ot3} into your desktop environment, creates desktop and application menu entries, registers icons, and links the CLI binary:
+\begin{lstlisting}[language=bash]
+# User-level installation (No root required - installs to ~/.local/share/overtune3)
+./scripts/install_linux.sh
+
+# System-wide installation (Installs to /opt/overtune3 and /usr/local/bin)
+sudo ./scripts/install_linux.sh
+\end{lstlisting}
+Once completed, launch Overtune 3 from your application menu or directly run \texttt{ot3} from any terminal.
+
+\subsection*{Method B: Standalone Portable Shareware Bundle}
+For zero-install portable deployment (e.g., from a USB drive or local directory):
+\begin{lstlisting}[language=bash]
+tar -xzf overtune3-linux-x86_64.tar.gz
+cd overtune3-linux-x86_64
+./ot3.sh
+\end{lstlisting}
+
+\subsection*{Method C: Building from Source}
+\begin{lstlisting}[language=bash]
+./build.sh                  # Builds optimized release binary in ./build/bin/ot3
+./build/bin/ot3             # Direct launch
+\end{lstlisting}
+
+\newpage
+
+\section*{3. Windows Installation \& Execution}
+
+Overtune 3 provides native PowerShell and NSIS installer packaging for Windows:
+
+\subsection*{Method A: PowerShell Automated Setup (\texttt{install\_windows.ps1})}
+Runs natively on any standard Windows 10/11 system without requiring external package managers:
+\begin{lstlisting}
+powershell -ExecutionPolicy Bypass -File .\scripts\install_windows.ps1
+\end{lstlisting}
+This installs \texttt{ot3.exe} to \texttt{\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3}, creates Start Menu and Desktop shortcuts, registers the uninstaller in Windows Settings / Control Panel, and configures the background updater helper.
+
+\subsection*{Method B: Modern NSIS Setup Executable}
+Run \texttt{Overtune3-Setup-x64.exe} and follow the graphical setup wizard. Silent unattended deployment is supported with the \texttt{/S} switch.
+
+\subsection*{Method C: Standalone Portable ZIP}
+Extract \texttt{overtune3-windows-x64.zip} and double-click \texttt{bin\textbackslash ot3.exe}.
+
+\section*{4. In-App Auto-Updater \& In-Place Atomic Updates}
+
+Overtune 3 features a unified OLED modal updater window matching the What's New and Stage 2 Verifier interfaces. It handles live patch updates seamlessly:
+
+\begin{itemize}[leftmargin=20pt,itemsep=3pt]
+  \item \textbf{Accessing Updates:} Select \textbf{Help $\rightarrow$ Check for Updates...} or click the \textbf{Installer / Update Ready} badge in the titlebar.
+  \item \textbf{Linux Atomic Patching:} Leverages POSIX atomic \texttt{unlink}/\texttt{rename} semantics. The running application binary is replaced smoothly in place without requiring process termination before write.
+  \item \textbf{Windows Detached Updater:} Bypasses Windows executable file-locking by spawning a detached helper script (\texttt{overtune\_update.bat}) that waits for the parent process PID to exit cleanly, replaces \texttt{ot3.exe} with \texttt{ot3.exe.new}, and restarts the updated studio application.
+  \item \textbf{Cryptographic SHA-256 Audit:} All downloaded payload chunks are validated against release cryptographic checksums before application.
+\end{itemize}
+
+\section*{5. Command-Line Options \& Essential Shortcuts}
+
+\begin{center}
+\small
+\begin{tabular}{llp{7.5cm}}
+\toprule
+\textbf{Option / Key} & \textbf{Type} & \textbf{Functionality} \\
+\midrule
+\texttt{ot3 --install} & CLI Flag & Launch directly into the native System Installation manager. \\
+\texttt{ot3 --update} & CLI Flag & Query release server and display available version patches. \\
+\texttt{Ctrl + 1} .. \texttt{6} & Keyboard & Navigate directly between Design, Analysis, Simulation, Export, Docs, Settings. \\
+\texttt{Ctrl + 0} & Keyboard & Auto-scale and reset frequency, pole-zero, and impulse response plots. \\
+\texttt{F5} / \texttt{Space} & Keyboard & Start or pause the live real-time audio and DSP simulation engine. \\
+\texttt{Ctrl + T} & Keyboard & Toggle between OLED Dark and Studio Light visual themes. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{8pt}
+\noindent\textit{For support, bug reports, and full DSP mathematical derivations, refer to the in-app documentation page or open the \texttt{theory\_and\_math.pdf} manual.}
+
+\end{document}

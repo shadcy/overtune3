@@ -2,124 +2,176 @@
 #include "BilinearTransform.h"
 #include <cmath>
 #include <numbers>
-#include <stdexcept>
-
-// Elliptic (Cauer) filter design using Landen's transformation and
-// Jacobi elliptic functions — computed numerically to arbitrary precision.
+#include <vector>
+#include <algorithm>
 
 namespace dsp::internal {
 
-static constexpr int LANDEN_ITER = 16;
 static constexpr double PI = std::numbers::pi;
 
-// Complete elliptic integral of the first kind K(k) via AGM
+// Complete elliptic integral of the first kind K(k) via Arithmetic-Geometric Mean (AGM)
 static double ellipticK(double k) {
-    if (std::abs(k) >= 1.0) throw std::domain_error("ellipticK: |k| must be < 1");
-    double a = 1.0, b = std::sqrt(1.0 - k * k);
-    for (int i = 0; i < 64; ++i) {
+    k = std::clamp(std::abs(k), 0.0, 1.0 - 1e-15);
+    double a = 1.0;
+    double b = std::sqrt(std::max(0.0, 1.0 - k * k));
+    for (int i = 0; i < 24; ++i) {
         const double an = (a + b) / 2.0;
-        b = std::sqrt(a * b);
+        const double bn = std::sqrt(a * b);
         a = an;
+        b = bn;
         if (std::abs(a - b) < 1e-15) break;
     }
     return PI / (2.0 * a);
 }
 
-// Jacobi elliptic sn(u, k) via descending Landen transformation
-static double jacobiSn(double u, double k) {
-    if (std::abs(k) < 1e-15) return std::sin(u);
-    if (std::abs(k - 1.0) < 1e-15) return std::tanh(u);
+// Jacobi elliptic functions sn(u, k), cn(u, k), dn(u, k) via descending Landen / AGM
+struct JacobiResult {
+    double sn{0.0};
+    double cn{1.0};
+    double dn{1.0};
+};
 
-    std::vector<double> ks;
-    ks.push_back(k);
-    double kn = k;
-    for (int i = 0; i < LANDEN_ITER; ++i) {
-        const double kp = std::sqrt(1.0 - kn * kn);
-        kn = (1.0 - kp) / (1.0 + kp);
-        ks.push_back(kn);
-        if (kn < 1e-15) break;
+static JacobiResult jacobiEllipj(double u, double k) {
+    k = std::clamp(std::abs(k), 0.0, 1.0 - 1e-15);
+    if (k < 1e-12) {
+        return { std::sin(u), std::cos(u), 1.0 };
     }
 
-    double phi = std::pow(2.0, static_cast<double>(ks.size() - 1)) * u * ks.back();
-    for (int i = static_cast<int>(ks.size()) - 2; i >= 0; --i) {
-        phi = (phi + std::asin(ks[i] * std::sin(phi))) / 2.0;
+    std::vector<double> a, b, c;
+    a.push_back(1.0);
+    b.push_back(std::sqrt(std::max(0.0, 1.0 - k * k)));
+    c.push_back(k);
+
+    for (int i = 0; i < 24; ++i) {
+        const double an = (a.back() + b.back()) / 2.0;
+        const double bn = std::sqrt(a.back() * b.back());
+        const double cn = (a.back() - b.back()) / 2.0;
+        a.push_back(an);
+        b.push_back(bn);
+        c.push_back(cn);
+        if (std::abs(cn) < 1e-15) break;
     }
-    return std::sin(phi);
+
+    const size_t N = a.size() - 1;
+    double phi = std::pow(2.0, static_cast<double>(N)) * a[N] * u;
+
+    for (size_t i = N; i > 0; --i) {
+        const double ratio = (c[i] / a[i]) * std::sin(phi);
+        phi = 0.5 * (phi + std::asin(std::clamp(ratio, -1.0, 1.0)));
+    }
+
+    const double sn = std::sin(phi);
+    const double cn = std::cos(phi);
+    const double dn = std::sqrt(std::max(0.0, 1.0 - k * k * sn * sn));
+    return { sn, cn, dn };
 }
 
-static Complex jacobiCd(double u, double k) {
-    // cd(u,k) = sn(K-u, k) / ... ≈ cos-like function
-    const double K = ellipticK(k);
-    return Complex{ jacobiSn(K - u, k), 0.0 };
+// Solve degree equation for elliptic modulus k:
+// K(k) / K'(k) = n * (K(k1) / K'(k1))
+static double solveEllipticK(int n, double k1) {
+    const double K1 = ellipticK(k1);
+    const double K1p = ellipticK(std::sqrt(std::max(0.0, 1.0 - k1 * k1)));
+    const double targetRatio = static_cast<double>(n) * (K1 / K1p);
+
+    double lo = 1e-12;
+    double hi = 1.0 - 1e-12;
+    for (int iter = 0; iter < 80; ++iter) {
+        const double mid = (lo + hi) / 2.0;
+        const double K = ellipticK(mid);
+        const double Kp = ellipticK(std::sqrt(std::max(0.0, 1.0 - mid * mid)));
+        const double ratio = K / Kp;
+        if (ratio < targetRatio) {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    return (lo + hi) / 2.0;
 }
 
 FilterCoefficients designElliptic(const FilterSpec& spec) {
-    const int n        = spec.order;
-    const double Rp    = spec.rippleDb;
-    const double Rs    = spec.stopbandDb;
+    const int n = std::clamp(spec.order, 1, 16);
+    const double Rp = std::max(0.01, spec.rippleDb);
+    const double Rs = std::max(Rp + 1.0, spec.stopbandDb);
 
-    // Selectivity factor and modular constant
-    const double eps_p = std::sqrt(std::pow(10.0, Rp / 10.0) - 1.0);
-    const double eps_s = std::sqrt(std::pow(10.0, Rs / 10.0) - 1.0);
-    const double k1    = eps_p / eps_s;
-    // Minimal selectivity k such that K(k1')/K(k1) = n * K(k')/K(k)
-    // We solve numerically.
-    const double k1p   = std::sqrt(1.0 - k1 * k1);
-    const double K1    = ellipticK(k1);
-    const double K1p   = ellipticK(k1p);
-    const double ratio = static_cast<double>(n) * K1 / K1p;
+    const double eps_sq = std::pow(10.0, 0.1 * Rp) - 1.0;
+    const double k1_sq = eps_sq / (std::pow(10.0, 0.1 * Rs) - 1.0);
+    const double k1 = std::sqrt(std::clamp(k1_sq, 1e-12, 1.0 - 1e-12));
+    const double k1p = std::sqrt(std::max(0.0, 1.0 - k1 * k1));
 
-    // Bisect for k such that K(k) / K(k') == ratio
-    double klo = 0.0, khi = 1.0 - 1e-10;
-    for (int iter = 0; iter < 200; ++iter) {
-        const double km  = (klo + khi) / 2.0;
-        const double kmp = std::sqrt(1.0 - km * km);
-        const double r   = ellipticK(km) / ellipticK(kmp);
-        if (r < ratio) klo = km; else khi = km;
-        if (khi - klo < 1e-12) break;
-    }
-    const double k  = (klo + khi) / 2.0;
-    const double kp = std::sqrt(1.0 - k * k);
-    const double K  = ellipticK(k);
-    const double Kp = ellipticK(kp);
+    const double k = solveEllipticK(n, k1);
+    const double kp = std::sqrt(std::max(0.0, 1.0 - k * k));
+    const double capK = ellipticK(k);
+    const double K1 = ellipticK(k1);
+    const double K1p = ellipticK(k1p);
 
-    // Place poles and zeros using elliptic cd function
-    const int L  = n / 2;
-    const int r  = n % 2; // 1 if odd order
-    ComplexVec poles, zeros;
-
-    for (int i = 1; i <= L; ++i) {
-        const double u  = (2.0 * i - 1.0) * K / static_cast<double>(n);
-        // Zero in s-domain: z_i = j / (k * cd(u, k))
-        const double cd = jacobiCd(u, k).real();
-        if (std::abs(cd * k) > 1e-15) {
-            const double zImag = 1.0 / (k * cd);
-            zeros.push_back(Complex{ 0.0,  zImag });
-            zeros.push_back(Complex{ 0.0, -zImag });
+    // Solve for r where sn(r, k1p) = 1.0 / sqrt(1 + eps^2)
+    const double targetSn = 1.0 / std::sqrt(1.0 + eps_sq);
+    double rLo = 0.0;
+    double rHi = K1p;
+    for (int iter = 0; iter < 60; ++iter) {
+        const double mid = (rLo + rHi) / 2.0;
+        const auto res = jacobiEllipj(mid, k1p);
+        if (res.sn < targetSn) {
+            rLo = mid;
+        } else {
+            rHi = mid;
         }
+    }
+    const double r = (rLo + rHi) / 2.0;
+    const double v0 = capK * r / (static_cast<double>(n) * K1);
+    const auto vRes = jacobiEllipj(v0, kp);
+    const double sv = vRes.sn;
+    const double cv = vRes.cn;
+    const double dv = vRes.dn;
 
-        // Pole in s-domain using Jacobi elliptic functions
-        const double v0 = -Kp / K * std::atanh(1.0 / eps_p) / static_cast<double>(n);
-        const double snV = jacobiSn(v0, kp);
-        // sn(u + jv0, k) — approximation via addition formula
-        const Complex jv{ 0.0, -1.0 };
-        const double  snu = jacobiSn(u, k);
-        const double  cdu = jacobiCd(u, k).real();
-        // Simplified: p_i = ±j * Omega_s * sn(u_i + j*v0, k)
-        // Use the product formula approximation
-        const double re = -snV * std::sqrt(1.0 - snu * snu * k * k);
-        const double im =  cdu * std::sqrt(1.0 - snV * snV);
-        poles.push_back(Complex{ re,  im });
-        poles.push_back(Complex{ re, -im });
+    ComplexVec poles;
+    ComplexVec zeros;
+    poles.reserve(n);
+    zeros.reserve(n);
+
+    const int jStart = 1 - (n % 2);
+    for (int j = jStart; j < n; j += 2) {
+        if (j == 0) {
+            // Real pole for odd order: p0 = -sv / cv
+            const double p0 = (std::abs(cv) > 1e-15) ? (-sv / cv) : -1.0;
+            poles.push_back(Complex{ p0, 0.0 });
+        } else {
+            const double u = static_cast<double>(j) * capK / static_cast<double>(n);
+            const auto uRes = jacobiEllipj(u, k);
+            const double s = uRes.sn;
+            const double c = uRes.cn;
+            const double d = uRes.dn;
+
+            // Finite transmission zeros on imaginary axis: ±j / (k * s)
+            if (std::abs(k * s) > 1e-12) {
+                const double zImag = 1.0 / (k * s);
+                zeros.push_back(Complex{ 0.0,  zImag });
+                zeros.push_back(Complex{ 0.0, -zImag });
+            }
+
+            // Complex-conjugate pole pair
+            const double denom = 1.0 - (d * sv) * (d * sv);
+            if (std::abs(denom) > 1e-15) {
+                const double pReal = -(c * d * sv * cv) / denom;
+                const double pImag = (s * dv) / denom;
+                poles.push_back(Complex{ pReal,  pImag });
+                poles.push_back(Complex{ pReal, -pImag });
+            }
+        }
     }
 
-    if (r == 1) {
-        // Real pole for odd order
-        const double v0 = -Kp / K * std::atanh(1.0 / eps_p) / static_cast<double>(n);
-        poles.push_back(Complex{ -jacobiSn(v0, kp), 0.0 });
+    // DC gain normalization: H(0) = 1.0 for odd order, or 10^(-Rp/20) for even order
+    double numGain = 1.0;
+    for (const auto& p : poles) numGain *= std::abs(p);
+    double denGain = 1.0;
+    for (const auto& z : zeros) denGain *= std::abs(z);
+    double analogGain = (denGain > 1e-12) ? (numGain / denGain) : numGain;
+    if (n % 2 == 0) {
+        analogGain /= std::sqrt(1.0 + eps_sq);
     }
 
-    return bilinearTransform(poles, zeros, 1.0, spec);
+    return bilinearTransform(poles, zeros, analogGain, spec);
 }
 
 } // namespace dsp::internal

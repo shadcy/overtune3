@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 // FrequencyPlot.qml — Interactive, mathematically precise DSP frequency response plot
+// Optimized for ultra-high throughput, 144 FPS rendering and zero-lag mouse tracking
 Item {
     id: root
     implicitWidth: 600
@@ -16,19 +17,39 @@ Item {
     property bool   isBandFilter: filterEngine.filterType >= 2
     property var    points: []
 
+    // High-performance typed array buffers for ultra-low latency plot math & culling
+    property var _cachedX: null
+    property var _cachedY: null
+    property int _cachedCount: 0
+    property var _screenX: null
+    property var _screenY: null
+
     // DSP Frequency Settings
     property int  freqScale: 0        // 0=Logarithmic (Hz), 1=Linear (Hz), 2=Normalized (ω/π rad/s), 3=Normalized (f/fs)
     property int  magScaleMode: 0     // 0=dB scale, 1=Linear |H|
     property int  phaseWrapMode: 0    // 0=Unwrapped, 1=Wrapped [-180°, 180°]
     property bool showDspGuides: false // Default: OFF (clean view)
     property bool showCrosshair: false // Opt-in Data Cursor / + Inspector (Default: OFF)
-    property real plotLineWidth: 2.2
+    property real plotLineWidth: theme.plotLineWidth
+    property bool isDetached: false
+
+    // ── Responsive Layout Breakpoints ─────────────────────────────────────────
+    readonly property bool compactMode: width < 540
+    readonly property bool ultraCompactMode: width < 420
+
+    function openInNewWindow() {
+        const w = Window.window
+        if (w && typeof w.openStandalonePlot === "function") {
+            w.openStandalonePlot(0, { displayMode: root.displayMode })
+        }
+    }
 
     // Interactive Hover & Cursor state
     property real hoverFreq: -1
     property real hoverVal: 0
     property real hoverLinMag: 0
     property real hoverPhaseDeg: 0
+    property real hoverPhaseUnwrapped: 0
     property real hoverGd: 0
     property real cursorCanvasX: -1
     property real cursorCanvasY: -1
@@ -38,10 +59,10 @@ Item {
     property string toastMessage: ""
     property bool toastVisible: false
 
-    readonly property real marginLeft:   58
+    readonly property real marginLeft:   64
     readonly property real marginRight:  20
     readonly property real marginTop:    48
-    readonly property real marginBottom: 42
+    readonly property real marginBottom: 46
     readonly property real plotW: Math.max(1, width  - marginLeft - marginRight)
     readonly property real plotH: Math.max(1, height - marginTop  - marginBottom)
 
@@ -55,15 +76,28 @@ Item {
     function autoScale() {
         isCustomView = false
         const nyquist = sampleRate / 2.0
-        viewXMin = (freqScale === 0 ? 10 : 0)
-        viewXMax = nyquist
+        if (freqScale === 0) {
+            let minF = 10
+            const fc = filterEngine.cutoffFreq
+            if (fc > 0 && fc < 100) {
+                minF = Math.max(0.05, Math.pow(10, Math.floor(Math.log10(fc)) - 1))
+            }
+            viewXMin = minF
+            viewXMax = nyquist
+        } else {
+            viewXMin = 0
+            viewXMax = nyquist
+        }
+
+        const cnt = root._cachedCount
+        const cy = root._cachedY
 
         if (displayMode === 0) {
             if (magScaleMode === 0) {
                 let minDb = 999, maxDb = -999
-                if (points && points.length > 0) {
-                    for (let i = 0; i < points.length; ++i) {
-                        const y = Number(points[i]["y"])
+                if (cnt > 0 && cy) {
+                    for (let i = 0; i < cnt; ++i) {
+                        const y = cy[i]
                         if (!isNaN(y) && isFinite(y)) {
                             if (y < minDb) minDb = y
                             if (y > maxDb) maxDb = y
@@ -71,7 +105,7 @@ Item {
                     }
                 }
                 if (minDb > maxDb) { minDb = -80; maxDb = 5; }
-                viewYMin = Math.max(-140, Math.floor(minDb / 10) * 10 - 10)
+                viewYMin = Math.max(-160, Math.floor(minDb / 10) * 10 - 10)
                 viewYMax = Math.min(40, Math.ceil(maxDb / 5) * 5 + 5)
             } else {
                 viewYMin = 0.0
@@ -83,29 +117,52 @@ Item {
                 viewYMax = 180
             } else {
                 let minP = 0, maxP = 0
-                if (points && points.length > 0) {
-                    minP = Number(points[0]["y"]); maxP = minP
-                    for (let i = 1; i < points.length; ++i) {
-                        const y = Number(points[i]["y"])
-                        if (y < minP) minP = y
-                        if (y > maxP) maxP = y
+                if (cnt > 0 && cy) {
+                    minP = cy[0]; maxP = minP
+                    for (let i = 1; i < cnt; ++i) {
+                        const y = cy[i]
+                        if (!isNaN(y) && isFinite(y)) {
+                            if (y < minP) minP = y
+                            if (y > maxP) maxP = y
+                        }
                     }
                 }
                 viewYMin = Math.min(-90, Math.floor((minP - 15) / 45) * 45)
                 viewYMax = Math.max(0,   Math.ceil((maxP + 15) / 45) * 45)
             }
         } else {
-            let maxGd = 10
-            if (points && points.length > 0) {
-                for (let i = 0; i < points.length; ++i) {
-                    const y = Number(points[i]["y"])
-                    if (y > maxGd) maxGd = y
+            let minGd = 0, maxGd = 5
+            if (cnt > 0 && cy) {
+                for (let i = 0; i < cnt; ++i) {
+                    const y = cy[i]
+                    if (!isNaN(y) && isFinite(y) && Math.abs(y) < 1000) {
+                        if (y < minGd) minGd = y
+                        if (y > maxGd) maxGd = y
+                    }
                 }
             }
-            viewYMin = 0
-            viewYMax = Math.max(5, Math.ceil(maxGd * 1.25 / 5) * 5)
+            viewYMin = Math.floor(minGd / 5) * 5
+            viewYMax = Math.max(5, Math.ceil(maxGd * 1.25 / 5) * 5 + 5)
         }
         schedulePaint()
+    }
+
+    function findClosestPointIndex(targetF) {
+        const cnt = root._cachedCount
+        const cx = root._cachedX
+        if (cnt <= 0 || !cx) return -1
+        let low = 0, high = cnt - 1
+        while (low <= high) {
+            const mid = (low + high) >> 1
+            const fMid = cx[mid]
+            if (fMid < targetF) low = mid + 1
+            else high = mid - 1
+        }
+        if (low >= cnt) return cnt - 1
+        if (low <= 0) return 0
+        const d1 = Math.abs(cx[low] - targetF)
+        const d0 = Math.abs(cx[low - 1] - targetF)
+        return (d0 <= d1) ? (low - 1) : low
     }
 
     function zoomAt(mx, my, factor) {
@@ -145,7 +202,6 @@ Item {
             viewYMin = newYMin
             viewYMax = newYMax
         }
-
         schedulePaint()
     }
 
@@ -169,11 +225,9 @@ Item {
             viewXMin -= dF
             viewXMax -= dF
         }
-
         const dV = (dy / pH) * (viewYMax - viewYMin)
         viewYMin += dV
         viewYMax += dV
-
         schedulePaint()
     }
 
@@ -181,11 +235,11 @@ Item {
         const pW = root.plotW
         const norm = Math.max(0, Math.min(1, (mx - root.marginLeft) / pW))
         if (root.freqScale === 0) {
-            const logMin = Math.log(Math.max(0.1, root.viewXMin)) / Math.LN10
+            const logMin = Math.log(Math.max(1e-4, root.viewXMin)) / Math.LN10
             const logMax = Math.log(Math.max(1, root.viewXMax)) / Math.LN10
             return Math.pow(10, logMin + norm * (logMax - logMin))
         } else {
-            return root.viewXMin + norm * (root.viewXMax - root.viewXMin)
+            return Math.max(0, root.viewXMin + norm * (root.viewXMax - root.viewXMin))
         }
     }
 
@@ -197,12 +251,12 @@ Item {
 
     function freqToCanvasX(f) {
         const pW = root.plotW
-        if (!(f > 0)) return root.marginLeft
         if (root.freqScale === 0) {
-            const logMin = Math.log(Math.max(0.1, root.viewXMin)) / Math.LN10
+            const safeF = Math.max(1e-4, f)
+            const logMin = Math.log(Math.max(1e-4, root.viewXMin)) / Math.LN10
             const logMax = Math.log(Math.max(1, root.viewXMax)) / Math.LN10
             const logRange = (logMax - logMin) || 1
-            const logF = Math.log(f) / Math.LN10
+            const logF = Math.log(safeF) / Math.LN10
             return root.marginLeft + ((logF - logMin) / logRange) * pW
         } else {
             const range = (root.viewXMax - root.viewXMin) || 1
@@ -218,16 +272,34 @@ Item {
         } else {
             points = filterEngine.groupDelayData
         }
-        if (!isCustomView) {
-            autoScale()
+
+        const pts = root.points
+        const n = pts ? pts.length : 0
+        root._cachedCount = n
+        if (n > 0) {
+            if (!root._cachedX || root._cachedX.length < n) {
+                root._cachedX = new Float64Array(n)
+                root._cachedY = new Float64Array(n)
+            }
+            const cx = root._cachedX
+            const cy = root._cachedY
+            for (let i = 0; i < n; ++i) {
+                const p = pts[i]
+                cx[i] = p["x"]
+                cy[i] = p["y"]
+            }
         }
+        if (!isCustomView) autoScale()
     }
 
     function schedulePaint() {
-        if (canvas.available)
-            canvas.requestPaint()
-        else
-            paintRetry.restart()
+        if (canvas.available) canvas.requestPaint()
+        else paintRetry.restart()
+        if (crosshairCanvas.available) crosshairCanvas.requestPaint()
+    }
+
+    function scheduleCrosshairPaint() {
+        if (crosshairCanvas.available) crosshairCanvas.requestPaint()
     }
 
     function showPlotToast(msg) {
@@ -286,6 +358,61 @@ Item {
         border.width: 1
     }
 
+    // ── Native QML Math Typography for Production Output ──────────────────────
+    // Y-Axis Label (Rotated 90 degrees)
+    Item {
+        x: 0
+        y: root.marginTop
+        width: root.marginLeft - 4
+        height: root.plotH
+        
+        Text {
+            anchors.centerIn: parent
+            rotation: -90
+            textFormat: Text.RichText
+            text: {
+                if (root.displayMode === 0) {
+                    return root.magScaleMode === 1 ? "Linear Magnitude |H(e<sup>jω</sup>)|" 
+                                                   : "Magnitude |H(e<sup>jω</sup>)| [dB]"
+                } else if (root.displayMode === 1) {
+                    return root.phaseWrapMode === 1 ? "Wrapped Phase ∠H(e<sup>jω</sup>) [°]" 
+                                                    : "Unwrapped Phase ∠H(e<sup>jω</sup>) [°]"
+                } else {
+                    return "Group Delay τ<sub>g</sub>(ω) [samples]"
+                }
+            }
+            font.pixelSize: 12
+            font.family: "Stack Sans Headline"
+            font.weight: Font.Medium
+            color: theme.primaryText
+        }
+    }
+
+    // X-Axis Label
+    Item {
+        x: root.marginLeft
+        y: root.marginTop + root.plotH
+        width: root.plotW
+        height: root.marginBottom
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 22
+            textFormat: Text.RichText
+            text: {
+                if (root.freqScale === 2) return "Normalized Radian Frequency ω [rad/sample]"
+                if (root.freqScale === 3) return "Normalized Digital Frequency [cycles/sample]"
+                return "Frequency f [Hz]"
+            }
+            font.pixelSize: 12
+            font.family: "Stack Sans Headline"
+            font.weight: Font.Medium
+            color: theme.primaryText
+        }
+    }
+
+    // ── Main Plot Canvas (Background Grid, Axes, DSP Curve, Handles) ──────────
     Canvas {
         id: canvas
         anchors.fill: parent
@@ -312,7 +439,6 @@ Item {
             const pW = root.plotW
             const pH = root.plotH
             const nyquist = root.sampleRate / 2.0
-            const pts = root.points
             const mode = root.displayMode
             const fScale = root.freqScale
             const vXMin = root.viewXMin
@@ -321,21 +447,19 @@ Item {
             const vYMax = root.viewYMax
             const vYRange = (vYMax - vYMin) || 1
 
+            // Fast native line dash helper
+            function strokeDashedLine(x1, y1, x2, y2, dashLen, gapLen) {
+                ctx.setLineDash([dashLen, gapLen])
+                ctx.beginPath()
+                ctx.moveTo(x1, y1)
+                ctx.lineTo(x2, y2)
+                ctx.stroke()
+                ctx.setLineDash([])
+            }
+
             // Coordinate mapping functions
             function freqToX(f) {
-                if (fScale === 0) {
-                    // Logarithmic (Hz)
-                    const safeF = Math.max(0.01, f)
-                    const logMin = Math.log(Math.max(0.01, vXMin)) / Math.LN10
-                    const logMax = Math.log(Math.max(1, vXMax)) / Math.LN10
-                    const logRange = (logMax - logMin) || 1
-                    const logF = Math.log(safeF) / Math.LN10
-                    return ((logF - logMin) / logRange) * pW
-                } else {
-                    // Linear / Normalized: f in [vXMin, vXMax]
-                    const range = (vXMax - vXMin) || 1
-                    return ((f - vXMin) / range) * pW
-                }
+                return root.freqToCanvasX(f) - mL
             }
 
             function valToY(v) {
@@ -358,49 +482,21 @@ Item {
                     if (f >= 1000) return (f / 1000).toFixed(f % 1000 === 0 ? 0 : 1) + "k"
                     return String(Math.round(f))
                 } else if (fScale === 2) {
-                    // Normalized radian: w / pi
                     const frac = f / nyquist
                     if (frac === 0) return "0"
                     if (Math.abs(frac - 1.0) < 0.01) return "π"
                     return frac.toFixed(2) + "π"
                 } else {
-                    // Normalized cycles: f / fs
                     const frac = (f / root.sampleRate).toFixed(2)
                     return String(frac)
                 }
             }
 
-            function strokeDash(x1, y1, x2, y2, dashLen, gapLen) {
-                const dx = x2 - x1
-                const dy = y2 - y1
-                const len = Math.sqrt(dx * dx + dy * dy)
-                if (len < 1) return
-                const ux = dx / len
-                const uy = dy / len
-                let pos = 0
-                let draw = true
-                ctx.beginPath()
-                while (pos < len) {
-                    const seg = Math.min(draw ? dashLen : gapLen, len - pos)
-                    const xa = x1 + ux * pos
-                    const ya = y1 + uy * pos
-                    const xb = x1 + ux * (pos + seg)
-                    const yb = y1 + uy * (pos + seg)
-                    if (draw) {
-                        ctx.moveTo(xa, ya)
-                        ctx.lineTo(xb, yb)
-                    }
-                    pos += seg
-                    draw = !draw
-                }
-                ctx.stroke()
-            }
-
-            // ── Grid & Axes (Dynamic Desmos Engine) ──────────────────────────────────
+            // ── Grid & Axes ────────────────────────────────────────────────────────
             ctx.strokeStyle = theme.plotGrid
             ctx.lineWidth = 1
 
-            // Horizontal Y-Grid (Dynamic clean step)
+            // Y-Grid
             const yStep = niceStep(vYRange, 7)
             const yStart = Math.floor(vYMin / yStep) * yStep
             for (let v = yStart; v <= vYMax + yStep * 0.05; v += yStep) {
@@ -415,21 +511,20 @@ Item {
                 ctx.stroke()
 
                 ctx.fillStyle = theme.secondaryText
-                ctx.font = "11px 'Stack Sans Headline', sans-serif"
+                ctx.font = "500 11px 'Stack Sans Headline', sans-serif"
                 ctx.textAlign = "right"
                 ctx.textBaseline = "middle"
                 let label = (yStep < 1) ? v.toFixed(1) : v.toFixed(0)
                 if (mode === 0 && root.magScaleMode === 1) label = v.toFixed(2)
-                ctx.fillText(label, mL - 6, y)
+                ctx.fillText(label, mL - 8, y)
             }
 
-            // Vertical X-Grid (Dynamic clean step)
+            // X-Grid
             ctx.textAlign = "center"
             ctx.textBaseline = "top"
-            ctx.font = "11px 'Stack Sans Headline', sans-serif"
+            ctx.font = "500 11px 'Stack Sans Headline', sans-serif"
 
             if (fScale === 0) {
-                // Logarithmic decades & intermediate subdivisions
                 const logMin = Math.log(Math.max(0.01, vXMin)) / Math.LN10
                 const logMax = Math.log(Math.max(1, vXMax)) / Math.LN10
                 const dStart = Math.floor(logMin)
@@ -451,11 +546,10 @@ Item {
                         ctx.stroke()
 
                         ctx.fillStyle = theme.secondaryText
-                        ctx.fillText(formatFreqLabel(freq), x, mT + pH + 5)
+                        ctx.fillText(formatFreqLabel(freq), x, mT + pH + 6)
                     }
                 }
             } else {
-                // Linear or Normalized mode
                 const xRange = (vXMax - vXMin) || 1
                 const xStep = niceStep(xRange, 7)
                 const xStart = Math.floor(vXMin / xStep) * xStep
@@ -472,31 +566,9 @@ Item {
                     ctx.stroke()
 
                     ctx.fillStyle = theme.secondaryText
-                    ctx.fillText(formatFreqLabel(freq), x, mT + pH + 5)
+                    ctx.fillText(formatFreqLabel(freq), x, mT + pH + 6)
                 }
             }
-
-            // X Axis Label
-            ctx.fillStyle = theme.primaryText
-            ctx.font = "bold 12px 'Stack Sans Headline', sans-serif"
-            let xLabel = "Frequency f [Hz]"
-            if (fScale === 2) xLabel = "Normalized Radian Frequency ω [rad/sample]"
-            else if (fScale === 3) xLabel = "Normalized Digital Frequency [cycles/sample]"
-            ctx.fillText(xLabel, mL + pW / 2, mT + pH + 22)
-
-            // Y Axis Label (Rotated)
-            ctx.save()
-            ctx.translate(14, mT + pH / 2)
-            ctx.rotate(-Math.PI / 2)
-            ctx.textAlign = "center"
-            ctx.textBaseline = "middle"
-            ctx.font = "bold 12px 'Stack Sans Headline', sans-serif"
-            let yLabel = "Magnitude |H(e^jω)| [dB]"
-            if (mode === 0 && root.magScaleMode === 1) yLabel = "Linear Magnitude |H(e^jω)|"
-            else if (mode === 1) yLabel = root.phaseWrapMode === 1 ? "Wrapped Phase ∠H(e^jω) [°]" : "Unwrapped Phase ∠H(e^jω) [°]"
-            else if (mode === 2) yLabel = "Group Delay τ_g(ω) [samples]"
-            ctx.fillText(yLabel, 0, 0)
-            ctx.restore()
 
             // ── DSP Reference Overlays (Tolerances & Cutoff) ──────────────────────
             ctx.save()
@@ -506,12 +578,11 @@ Item {
 
             if (root.showDspGuides && mode === 0) {
                 if (root.magScaleMode === 0) {
-                    // -3 dB half-power threshold line (Drawn Amber, text aligned to RIGHT)
                     const y3 = valToY(-3.0)
                     if (y3 >= mT && y3 <= mT + pH) {
                         ctx.strokeStyle = "#D97706"
                         ctx.lineWidth = 1
-                        strokeDash(mL, y3, mL + pW, y3, 4, 3)
+                        strokeDashedLine(mL, y3, mL + pW, y3, 4, 3)
                         ctx.fillStyle = "#D97706"
                         ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
                         ctx.textAlign = "right"
@@ -519,14 +590,13 @@ Item {
                         ctx.fillText("-3.0 dB Cutoff", mL + pW - 8, y3 - 2)
                     }
 
-                    // Passband Ripple Bounds (Drawn Green, text aligned to LEFT to prevent any overlap!)
                     const rip = filterEngine.rippleDb
                     if (rip > 0.05 && rip < 10) {
                         const yRip = valToY(-rip)
                         if (yRip >= mT && yRip <= mT + pH) {
                             ctx.strokeStyle = "rgba(16, 185, 129, 0.85)"
                             ctx.lineWidth = 1
-                            strokeDash(mL, yRip, mL + pW, yRip, 3, 3)
+                            strokeDashedLine(mL, yRip, mL + pW, yRip, 3, 3)
                             ctx.fillStyle = "rgba(16, 185, 129, 0.9)"
                             ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
                             ctx.textAlign = "left"
@@ -535,14 +605,13 @@ Item {
                         }
                     }
 
-                    // Stopband Attenuation Threshold (-stopbandDb)
                     const stopDb = filterEngine.stopbandDb
                     if (stopDb > 10 && stopDb < 100) {
                         const yStop = valToY(-stopDb)
                         if (yStop >= mT && yStop <= mT + pH) {
                             ctx.strokeStyle = "rgba(239, 68, 68, 0.85)"
                             ctx.lineWidth = 1
-                            strokeDash(mL, yStop, mL + pW, yStop, 4, 3)
+                            strokeDashedLine(mL, yStop, mL + pW, yStop, 4, 3)
                             ctx.fillStyle = "rgba(239, 68, 68, 0.9)"
                             ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
                             ctx.textAlign = "right"
@@ -551,12 +620,11 @@ Item {
                         }
                     }
                 } else {
-                    // Linear Magnitude 1/√2 ≈ 0.7071
                     const yHalf = valToY(Math.SQRT1_2)
                     if (yHalf >= mT && yHalf <= mT + pH) {
                         ctx.strokeStyle = "#D97706"
                         ctx.lineWidth = 1
-                        strokeDash(mL, yHalf, mL + pW, yHalf, 4, 3)
+                        strokeDashedLine(mL, yHalf, mL + pW, yHalf, 4, 3)
                         ctx.fillStyle = "#D97706"
                         ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
                         ctx.textAlign = "right"
@@ -566,58 +634,91 @@ Item {
                 }
             }
 
-            // ── Frequency Response Curve ─────────────────────────────────────────
-            const n = pts ? pts.length : 0
-            if (n > 1) {
-                const curve = root.curveColor()
+            // ── Frequency Response Curve (Ultra-Fast Culling & Typed Buffer Pass) ──
+            const count = root._cachedCount
+            const cachedX = root._cachedX
+            const cachedY = root._cachedY
 
-                function getYValue(rawY) {
-                    if (mode === 0) {
-                        if (root.magScaleMode === 1) {
-                            return Math.pow(10, rawY / 20.0) // Linear |H|
-                        }
-                        return rawY // dB
-                    } else if (mode === 1) {
-                        if (root.phaseWrapMode === 1) {
-                            return ((((rawY + 180) % 360) + 360) % 360) - 180
-                        }
-                        return rawY
+            if (count > 1 && cachedX && cachedY) {
+                // Viewport Culling via Binary Search
+                let iStart = 0, iEnd = count - 1
+                if (count > 2) {
+                    let low = 0, high = count - 1
+                    while (low <= high) {
+                        const mid = (low + high) >> 1
+                        if (cachedX[mid] < vXMin) low = mid + 1
+                        else high = mid - 1
                     }
-                    return rawY
+                    iStart = Math.max(0, low - 1)
+
+                    low = 0; high = count - 1
+                    while (low <= high) {
+                        const mid = (low + high) >> 1
+                        if (cachedX[mid] <= vXMax) low = mid + 1
+                        else high = mid - 1
+                    }
+                    iEnd = Math.min(count - 1, low + 1)
                 }
 
-                // Shaded area under curve (for Magnitude mode)
-                if (mode === 0 && root.magScaleMode === 0) {
+                const visibleCount = iEnd - iStart + 1
+                if (visibleCount > 1) {
+                    if (!root._screenX || root._screenX.length < visibleCount) {
+                        root._screenX = new Float32Array(visibleCount + 64)
+                        root._screenY = new Float32Array(visibleCount + 64)
+                    }
+                    const sX = root._screenX
+                    const sY = root._screenY
+
+                    const magLin = (mode === 0 && root.magScaleMode === 1)
+                    const phaseWrap = (mode === 1 && root.phaseWrapMode === 1)
+
+                    // Single-pass screen coordinate transform
+                    for (let idx = 0, i = iStart; i <= iEnd; ++i, ++idx) {
+                        const rawX = cachedX[i]
+                        const rawY = cachedY[i]
+                        let yVal = rawY
+                        if (magLin) {
+                            yVal = Math.pow(10, rawY / 20.0)
+                        } else if (phaseWrap) {
+                            yVal = ((((rawY + 180) % 360) + 360) % 360) - 180
+                        }
+                        sX[idx] = mL + freqToX(rawX)
+                        sY[idx] = Math.max(mT, Math.min(mT + pH, valToY(yVal)))
+                    }
+
+                    // Polished Adaptive Gradient Background Fill
                     ctx.beginPath()
-                    const fx0 = mL + freqToX(Number(pts[0]["x"]))
-                    const fy0 = Math.max(mT, Math.min(mT + pH, valToY(getYValue(Number(pts[0]["y"])))))
-                    ctx.moveTo(fx0, fy0)
-                    for (let i = 1; i < n; ++i) {
-                        const fx = mL + freqToX(Number(pts[i]["x"]))
-                        const fy = Math.max(mT, Math.min(mT + pH, valToY(getYValue(Number(pts[i]["y"])))))
-                        ctx.lineTo(fx, fy)
+                    ctx.moveTo(sX[0], sY[0])
+                    for (let idx = 1; idx < visibleCount; ++idx) {
+                        ctx.lineTo(sX[idx], sY[idx])
                     }
-                    const fxEnd = mL + freqToX(Number(pts[n - 1]["x"]))
-                    ctx.lineTo(fxEnd, mT + pH)
-                    ctx.lineTo(fx0, mT + pH)
+                    ctx.lineTo(sX[visibleCount - 1], mT + pH)
+                    ctx.lineTo(sX[0], mT + pH)
                     ctx.closePath()
-                    ctx.fillStyle = theme.isDark ? "rgba(10, 132, 255, 0.12)" : "rgba(10, 132, 255, 0.18)"
-                    ctx.fill()
-                }
 
-                // Stroke Main Response Curve
-                ctx.lineWidth = root.plotLineWidth
-                ctx.strokeStyle = curve
-                ctx.lineJoin = "round"
-                ctx.lineCap = "round"
-                ctx.beginPath()
-                for (let i = 0; i < n; ++i) {
-                    const fx = mL + freqToX(Number(pts[i]["x"]))
-                    const fy = Math.max(mT, Math.min(mT + pH, valToY(getYValue(Number(pts[i]["y"])))))
-                    if (i === 0) ctx.moveTo(fx, fy)
-                    else ctx.lineTo(fx, fy)
+                    let r = 10, g = 132, b = 255
+                    if (mode === 1) { r = 255; g = 159; b = 10 }
+                    else if (mode === 2) { r = 48; g = 209; b = 88 }
+
+                    const grad = ctx.createLinearGradient(0, mT, 0, mT + pH)
+                    grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${theme.isDark ? 0.35 : 0.45})`)
+                    grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.02)`)
+                    ctx.fillStyle = grad
+                    ctx.fill()
+
+                    // Stroke Curve
+                    ctx.lineWidth = root.plotLineWidth
+                    ctx.strokeStyle = root.curveColor()
+                    ctx.lineJoin = "round"
+                    ctx.lineCap = "round"
+
+                    ctx.beginPath()
+                    ctx.moveTo(sX[0], sY[0])
+                    for (let idx = 1; idx < visibleCount; ++idx) {
+                        ctx.lineTo(sX[idx], sY[idx])
+                    }
+                    ctx.stroke()
                 }
-                ctx.stroke()
             }
 
             // ── Interactive Cutoff Frequency Marker / Handles ────────────────────
@@ -626,9 +727,8 @@ Item {
                 const x = mL + freqToX(freq)
                 ctx.strokeStyle = color
                 ctx.lineWidth = 1.6
-                strokeDash(x, mT, x, mT + pH, 5, 3)
+                strokeDashedLine(x, mT, x, mT + pH, 5, 3)
 
-                // Draggable indicator handle
                 ctx.fillStyle = color
                 ctx.beginPath()
                 ctx.arc(x, mT + pH * 0.22, 6, 0, 2 * Math.PI)
@@ -637,7 +737,6 @@ Item {
                 ctx.lineWidth = 1.2
                 ctx.stroke()
 
-                // Annotation badge
                 ctx.font = "bold 10.5px 'Stack Sans Headline', sans-serif"
                 ctx.textAlign = "center"
                 ctx.textBaseline = "bottom"
@@ -646,67 +745,161 @@ Item {
             }
 
             drawCutoffHandle(root.cutoffFreq, "#0A84FF", "fc1")
-            if (root.isBandFilter)
-                drawCutoffHandle(root.cutoffFreq2, "#30D158", "fc2")
+            if (root.isBandFilter) drawCutoffHandle(root.cutoffFreq2, "#30D158", "fc2")
             ctx.restore()
-
-            // ── Interactive Crosshair Tracking Cursor & HUD Badge ─────────────────
-            if (root.showCrosshair && root.isHovering && root.hoverFreq > 0) {
-                const hx = root.cursorCanvasX
-                const hy = root.cursorCanvasY
-
-                // Vertical & Horizontal crosshair guides
-                ctx.strokeStyle = "rgba(160, 160, 160, 0.45)"
-                ctx.lineWidth = 1
-                strokeDash(hx, mT, hx, mT + pH, 3, 2)
-                strokeDash(mL, hy, mL + pW, hy, 3, 2)
-
-                // Snapped dot on curve
-                ctx.beginPath()
-                ctx.arc(hx, hy, 5, 0, 2 * Math.PI)
-                ctx.fillStyle = theme.accent
-                ctx.fill()
-                ctx.strokeStyle = "#FFFFFF"
-                ctx.lineWidth = 1.5
-                ctx.stroke()
-
-                // High Precision Floating HUD Badge
-                const radVal = (2 * Math.PI * root.hoverFreq / root.sampleRate)
-                const radPi = (root.hoverFreq / nyquist).toFixed(3) + "π"
-                const lines = [
-                    "f: " + root.hoverFreq.toFixed(1) + " Hz (" + radPi + " rad)",
-                    mode === 0
-                        ? ("|H|: " + root.hoverVal.toFixed(2) + " dB (lin: " + Math.pow(10, root.hoverVal/20).toFixed(4) + ")")
-                        : (mode === 1 ? ("Phase: " + root.hoverVal.toFixed(1) + "°") : ("τg: " + root.hoverVal.toFixed(2) + " samples"))
-                ]
-
-                ctx.font = "10px 'Stack Sans Headline', monospace"
-                const line1W = ctx.measureText(lines[0]).width
-                const line2W = ctx.measureText(lines[1]).width
-                const boxW = Math.max(line1W, line2W) + 16
-                const boxH = 34
-                const boxX = Math.max(mL + 4, Math.min(mL + pW - boxW - 4, hx + (hx > mL + pW - boxW - 20 ? -boxW - 10 : 10)))
-                const boxY = Math.max(mT + 4, Math.min(mT + pH - boxH - 4, hy - 17))
-
-                ctx.fillStyle = theme.isDark ? "rgba(25, 25, 25, 0.94)" : "rgba(255, 255, 255, 0.94)"
-                ctx.strokeStyle = theme.borderColor
-                ctx.lineWidth = 1
-                ctx.beginPath()
-                ctx.rect(boxX, boxY, boxW, boxH)
-                ctx.fill()
-                ctx.stroke()
-
-                ctx.fillStyle = theme.primaryText
-                ctx.textAlign = "left"
-                ctx.textBaseline = "top"
-                ctx.fillText(lines[0], boxX + 8, boxY + 5)
-                ctx.fillStyle = theme.accent
-                ctx.fillText(lines[1], boxX + 8, boxY + 18)
-            }
         }
     }
 
-    // Top Controls Bar (Clean Segmented Controls without clutter or overlap)
+    // ── Dedicated Interactive Crosshair HUD Canvas (Zero-Lag Mouse Hover) ──────
+    Canvas {
+        id: crosshairCanvas
+        anchors.fill: parent
+        antialiasing: true
+        renderTarget: Canvas.Image
+        renderStrategy: Canvas.Cooperative
+        z: 3
+
+        onPaint: {
+            const ctx = getContext("2d")
+            if (!ctx) return
+
+            ctx.reset()
+            ctx.clearRect(0, 0, width, height)
+
+            if (!root.isHovering || !(root.hoverFreq >= 0)) return
+
+            const mL = root.marginLeft
+            const mT = root.marginTop
+            const pW = root.plotW
+            const pH = root.plotH
+            const hx = root.cursorCanvasX
+            const hy = root.cursorCanvasY
+            const mode = root.displayMode
+            const fScale = root.freqScale
+            const nyquist = root.sampleRate / 2.0
+
+            // Clamp on-screen visual positions to plot bounds
+            const dotX = Math.max(mL, Math.min(mL + pW, hx))
+            const isOutOfYRange = (hy < mT || hy > mT + pH)
+            const dotY = Math.max(mT, Math.min(mT + pH, hy))
+
+            // Dashed Crosshair Tracking Lines (Full Inspector Reticle when showCrosshair is enabled)
+            if (root.showCrosshair) {
+                ctx.strokeStyle = theme.isDark ? "rgba(255, 255, 255, 0.40)" : "rgba(0, 0, 0, 0.40)"
+                ctx.lineWidth = 1
+                ctx.setLineDash([3, 3])
+
+                ctx.beginPath()
+                ctx.moveTo(dotX, mT); ctx.lineTo(dotX, mT + pH)
+                if (!isOutOfYRange) {
+                    ctx.moveTo(mL, dotY); ctx.lineTo(mL + pW, dotY)
+                }
+                ctx.stroke()
+                ctx.setLineDash([])
+            }
+
+            // Tracking Dot (Rich Apple-style glow + outer ring)
+            ctx.beginPath()
+            ctx.arc(dotX, dotY, isOutOfYRange ? 4 : 5.5, 0, 2 * Math.PI)
+            ctx.fillStyle = theme.accent
+            ctx.fill()
+            ctx.strokeStyle = "#FFFFFF"
+            ctx.lineWidth = 1.8
+            ctx.stroke()
+
+            // Subtle outer glow halo when in-bounds
+            if (!isOutOfYRange) {
+                ctx.beginPath()
+                ctx.arc(dotX, dotY, 9, 0, 2 * Math.PI)
+                ctx.strokeStyle = theme.accent
+                ctx.globalAlpha = 0.35
+                ctx.lineWidth = 2
+                ctx.stroke()
+                ctx.globalAlpha = 1.0
+            }
+
+            // High-Precision Mathematical HUD Readout
+            let fLabel = ""
+            if (fScale === 0 || fScale === 1) {
+                const fVal = root.hoverFreq
+                if (fVal >= 1000) {
+                    fLabel = (fVal / 1000).toFixed(3) + " kHz"
+                } else if (fVal >= 100) {
+                    fLabel = fVal.toFixed(1) + " Hz"
+                } else {
+                    fLabel = fVal.toFixed(2) + " Hz"
+                }
+                const radPi = (root.hoverFreq / nyquist).toFixed(3) + "π rad"
+                fLabel += " (" + radPi + ")"
+            } else if (fScale === 2) {
+                const radFrac = (root.hoverFreq / nyquist)
+                fLabel = radFrac.toFixed(3) + "π rad/s (" + root.hoverFreq.toFixed(1) + " Hz)"
+            } else {
+                const cycFrac = (root.hoverFreq / root.sampleRate)
+                fLabel = cycFrac.toFixed(4) + " cyc/s (" + root.hoverFreq.toFixed(1) + " Hz)"
+            }
+
+            let valLabel = ""
+            if (mode === 0) {
+                if (root.magScaleMode === 1) {
+                    valLabel = "|H|: " + root.hoverVal.toFixed(4) + " (" + (20 * Math.log10(Math.max(1e-12, root.hoverVal))).toFixed(2) + " dB)"
+                } else {
+                    const linVal = Math.pow(10, root.hoverVal / 20.0)
+                    valLabel = "|H|: " + root.hoverVal.toFixed(2) + " dB (lin: " + (linVal < 0.0001 ? linVal.toExponential(2) : linVal.toFixed(4)) + ")"
+                }
+            } else if (mode === 1) {
+                if (root.phaseWrapMode === 1) {
+                    valLabel = "Phase: " + root.hoverVal.toFixed(1) + "°"
+                } else {
+                    valLabel = "Phase: " + root.hoverVal.toFixed(1) + "° (wrap: " + (((((root.hoverVal + 180) % 360) + 360) % 360) - 180).toFixed(1) + "°)"
+                }
+            } else {
+                const msDelay = (root.hoverVal / root.sampleRate) * 1000.0
+                valLabel = "τg: " + root.hoverVal.toFixed(2) + " smp (" + (msDelay < 0.01 ? (msDelay * 1000).toFixed(1) + " µs" : msDelay.toFixed(2) + " ms") + ")"
+            }
+
+            const lines = [ fLabel, valLabel ]
+
+            ctx.font = "bold 10px 'Stack Sans Headline', monospace"
+            const line1W = ctx.measureText(lines[0]).width
+            const line2W = ctx.measureText(lines[1]).width
+            const boxW = Math.max(line1W, line2W) + 20
+            const boxH = 38
+
+            // Floating placement to avoid cursor occlusions
+            let boxX = dotX + 14
+            if (boxX + boxW > mL + pW - 6) {
+                boxX = dotX - boxW - 14
+            }
+            boxX = Math.max(mL + 4, Math.min(mL + pW - boxW - 4, boxX))
+
+            let boxY = dotY - boxH / 2
+            boxY = Math.max(mT + 4, Math.min(mT + pH - boxH - 4, boxY))
+
+            // Rounded badge background
+            ctx.fillStyle = theme.isDark ? "rgba(22, 24, 28, 0.94)" : "rgba(255, 255, 255, 0.95)"
+            ctx.strokeStyle = theme.borderColor
+            ctx.lineWidth = 1
+            ctx.beginPath()
+            if (typeof ctx.roundRect === "function") {
+                ctx.roundRect(boxX, boxY, boxW, boxH, 6)
+            } else {
+                ctx.rect(boxX, boxY, boxW, boxH)
+            }
+            ctx.fill()
+            ctx.stroke()
+
+            // Badge text render
+            ctx.fillStyle = theme.primaryText
+            ctx.textAlign = "left"
+            ctx.textBaseline = "top"
+            ctx.fillText(lines[0], boxX + 10, boxY + 6)
+            ctx.fillStyle = theme.accent
+            ctx.fillText(lines[1], boxX + 10, boxY + 20)
+        }
+    }
+
+    // Top Controls Bar (Fully Responsive Segmented Controls)
     Item {
         id: topBar
         anchors {
@@ -780,9 +973,9 @@ Item {
                 }
             }
 
-            // 2. Unit Scale Segmented Pill (dB vs Lin for Mag, Unwrap vs Wrap for Phase)
+            // 2. Unit Scale Segmented Pill (dB vs Lin)
             Rectangle {
-                visible: root.displayMode === 0 || root.displayMode === 1
+                visible: (root.displayMode === 0 || root.displayMode === 1) && !root.ultraCompactMode
                 height: 22
                 width: unitRow.implicitWidth + 2
                 radius: 4
@@ -797,8 +990,8 @@ Item {
 
                     Repeater {
                         model: root.displayMode === 0
-                               ? [{ name: "dB", mode: 0 }, { name: "Lin", mode: 1 }]
-                               : [{ name: "Unwrap", mode: 0 }, { name: "Wrap", mode: 1 }]
+                                ? [{ name: "dB", mode: 0 }, { name: "Lin", mode: 1 }]
+                                : [{ name: "Unwrap", mode: 0 }, { name: "Wrap", mode: 1 }]
                         delegate: Rectangle {
                             required property int index
                             required property var modelData
@@ -826,10 +1019,8 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (root.displayMode === 0)
-                                        root.magScaleMode = modelData.mode
-                                    else
-                                        root.phaseWrapMode = modelData.mode
+                                    if (root.displayMode === 0) root.magScaleMode = modelData.mode
+                                    else root.phaseWrapMode = modelData.mode
                                     root.refreshPoints()
                                     root.schedulePaint()
                                 }
@@ -841,7 +1032,7 @@ Item {
 
             // 3. Guides Toggle Pill
             Rectangle {
-                visible: root.displayMode === 0
+                visible: root.displayMode === 0 && !root.compactMode
                 height: 22
                 width: guideTxt.implicitWidth + 14
                 radius: 4
@@ -874,14 +1065,15 @@ Item {
             }
         }
 
-        // Right Controls Cluster (Auto Scale, Data Cursor, Save, Copy, Context Menu)
+        // Right Controls Cluster (Responsive)
         Row {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: 5
 
-            // Auto Scale / Fit View Pill (Desmos Home)
+            // Auto Scale / Fit View Pill (Hides in Ultra Compact)
             Rectangle {
+                visible: !root.ultraCompactMode
                 height: 22
                 width: autoScaleRow.implicitWidth + 12
                 radius: 4
@@ -942,7 +1134,6 @@ Item {
                     id: curRow
                     anchors.centerIn: parent
                     spacing: 4
-
                     Text {
                         text: "✛"
                         font.pixelSize: 11
@@ -971,92 +1162,80 @@ Item {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         root.showCrosshair = !root.showCrosshair
-                        if (!root.showCrosshair) {
-                            root.isHovering = false
-                        }
+                        if (!root.showCrosshair) root.isHovering = false
                         root.schedulePaint()
                     }
                 }
             }
 
-            // Save Image Button
+            // Save Image Button (Hides in Compact)
             Rectangle {
-                width: 26
-                height: 22
-                radius: 4
+                visible: !root.compactMode
+                width: 26; height: 22; radius: 4
                 color: saveMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
-                border.color: theme.borderColor
-                border.width: 1
-
+                border.color: theme.borderColor; border.width: 1
                 Codicon {
                     anchors.centerIn: parent
                     icon: "camera"
                     iconSize: 12
                     iconColor: saveMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-
                 ToolTip.visible: saveMouse.containsMouse
                 ToolTip.text: "Save Plot Image (PNG)"
                 ToolTip.delay: 400
-
-                MouseArea {
-                    id: saveMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.exportPlotImage()
-                }
+                MouseArea { id: saveMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.exportPlotImage() }
             }
 
-            // Copy Image Button
+            // Copy Image Button (Hides in Compact)
             Rectangle {
-                width: 26
-                height: 22
-                radius: 4
+                visible: !root.compactMode
+                width: 26; height: 22; radius: 4
                 color: copyMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
-                border.color: theme.borderColor
-                border.width: 1
-
+                border.color: theme.borderColor; border.width: 1
                 Codicon {
                     anchors.centerIn: parent
                     icon: "copy"
                     iconSize: 12
                     iconColor: copyMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-
                 ToolTip.visible: copyMouse.containsMouse
                 ToolTip.text: "Copy Plot to Clipboard"
                 ToolTip.delay: 400
-
-                MouseArea {
-                    id: copyMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.copyPlotImage()
-                }
+                MouseArea { id: copyMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.copyPlotImage() }
             }
 
-            // MATLAB Context Menu Button
+            // Pop out in New Window Button (Hides in Compact)
             Rectangle {
-                width: 24
-                height: 22
-                radius: 4
-                color: menuBtnMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
-                border.color: theme.borderColor
-                border.width: 1
+                visible: !root.compactMode && !root.isDetached
+                width: 26; height: 22; radius: 4
+                color: popoutMouse.containsMouse ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
+                border.color: theme.borderColor; border.width: 1
+                Codicon {
+                    anchors.centerIn: parent
+                    icon: "link-external"
+                    iconSize: 12
+                    iconColor: popoutMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                }
+                ToolTip.visible: popoutMouse.containsMouse
+                ToolTip.text: "Open in Dedicated Window"
+                ToolTip.delay: 400
+                MouseArea { id: popoutMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.openInNewWindow() }
+            }
 
+            // MATLAB Context Menu / Overflow (Always Visible)
+            Rectangle {
+                width: 24; height: 22; radius: 4
+                color: menuBtnMouse.containsMouse || plotContextMenu.opened ? (theme.isDark ? "#25272B" : "#E4E7EB") : "transparent"
+                border.color: theme.borderColor; border.width: 1
                 Codicon {
                     anchors.centerIn: parent
                     icon: "kebab-vertical"
                     iconSize: 13
-                    iconColor: menuBtnMouse.containsMouse ? theme.primaryText : theme.secondaryText
+                    iconColor: menuBtnMouse.containsMouse || plotContextMenu.opened ? theme.primaryText : theme.secondaryText
                 }
-
-                ToolTip.visible: menuBtnMouse.containsMouse
+                ToolTip.visible: menuBtnMouse.containsMouse && !plotContextMenu.opened
                 ToolTip.text: "Plot Settings & MATLAB Analysis Menu (Right-Click)"
                 ToolTip.delay: 400
-
                 MouseArea {
                     id: menuBtnMouse
                     anchors.fill: parent
@@ -1068,53 +1247,29 @@ Item {
         }
     }
 
-    // In-plot Notification Toast
     Rectangle {
         id: toastBanner
-        anchors {
-            bottom: parent.bottom
-            horizontalCenter: parent.horizontalCenter
-            bottomMargin: 10
-        }
-        width: Math.min(parent.width - 24, toastText.implicitWidth + 20)
-        height: 26
-        radius: 6
+        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 10 }
+        width: Math.min(parent.width - 24, toastText.implicitWidth + 20); height: 26; radius: 6
         color: theme.isDark ? "#2C2C2E" : "#3A3A3C"
-        border.color: theme.borderColor
-        border.width: 1
+        border.color: theme.borderColor; border.width: 1
         opacity: root.toastVisible ? 1.0 : 0.0
         visible: opacity > 0.01
         z: 100
-
         Behavior on opacity { NumberAnimation { duration: 160 } }
-
         Row {
-            anchors.centerIn: parent
-            spacing: 6
-            Codicon {
-                icon: "check"
-                iconSize: 11
-                iconColor: "#30D158"
-                anchors.verticalCenter: parent.verticalCenter
-            }
+            anchors.centerIn: parent; spacing: 6
+            Codicon { icon: "check"; iconSize: 11; iconColor: "#30D158"; anchors.verticalCenter: parent.verticalCenter }
             Text {
                 id: toastText
                 text: root.toastMessage
-                font.family: "Stack Sans Headline"
-                font.pixelSize: 11
-                color: "#FFFFFF"
+                font.family: "Stack Sans Headline"; font.pixelSize: 11; color: "#FFFFFF"
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
-
-        Timer {
-            id: toastTimer
-            interval: 2200
-            onTriggered: root.toastVisible = false
-        }
+        Timer { id: toastTimer; interval: 2200; onTriggered: root.toastVisible = false }
     }
 
-    // Save File Dialog
     FileDialog {
         id: savePlotDialog
         title: "Save Plot Image"
@@ -1124,51 +1279,25 @@ Item {
         onAccepted: root.saveToFile(selectedFile)
     }
 
-    Timer {
-        id: paintRetry
-        interval: 50
-        repeat: false
-        onTriggered: root.schedulePaint()
-    }
-
-    Timer {
-        interval: 120
-        running: true
-        repeat: false
-        onTriggered: {
-            root.refreshPoints()
-            root.schedulePaint()
-        }
-    }
+    Timer { id: paintRetry; interval: 50; repeat: false; onTriggered: root.schedulePaint() }
+    Timer { interval: 120; running: true; repeat: false; onTriggered: { root.refreshPoints(); root.schedulePaint() } }
 
     Connections {
         target: filterEngine
-        function onResultsChanged() {
-            root.refreshPoints()
-            root.schedulePaint()
-        }
-        function onSpecChanged() {
-            root.schedulePaint()
-        }
+        function onResultsChanged() { root.refreshPoints(); root.schedulePaint() }
+        function onSpecChanged() { root.schedulePaint() }
     }
-
     Connections {
         target: theme
         function onThemeModeChanged() { root.schedulePaint() }
     }
 
-    Component.onCompleted: {
-        refreshPoints()
-        schedulePaint()
-    }
+    Component.onCompleted: { refreshPoints(); schedulePaint() }
 
     onVisibleChanged:     { if (visible) schedulePaint() }
     onWidthChanged:       schedulePaint()
     onHeightChanged:      schedulePaint()
-    onDisplayModeChanged: {
-        refreshPoints()
-        schedulePaint()
-    }
+    onDisplayModeChanged: { refreshPoints(); schedulePaint() }
     onPointsChanged:      schedulePaint()
 
     property bool draggingCutoff:  false
@@ -1182,7 +1311,7 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        z: 2
+        z: 5
 
         onPressed: function(mouse) {
             if (mouse.button === Qt.RightButton) {
@@ -1245,377 +1374,165 @@ Item {
                 lastMouseX = mouse.x
                 lastMouseY = mouse.y
                 root.panBy(dx, dy)
-            } else if (root.showCrosshair) {
-                // Interactive Crosshair Snapping
+            } else {
                 const mL = root.marginLeft
                 const mT = root.marginTop
                 const pW = root.plotW
                 const pH = root.plotH
-                if (mouse.x >= mL && mouse.x <= mL + pW && mouse.y >= mT && mouse.y <= mT + pH) {
-                    const f = root.xToFreq(mouse.x)
-                    if (f > 0 && root.points && root.points.length > 1) {
-                        let closestIdx = 0
-                        let minDiff = Infinity
-                        for (let i = 0; i < root.points.length; ++i) {
-                            const diff = Math.abs(Number(root.points[i]["x"]) - f)
-                            if (diff < minDiff) {
-                                minDiff = diff
-                                closestIdx = i
-                            }
-                        }
 
-                        const pt = root.points[closestIdx]
-                        root.hoverFreq = Number(pt["x"])
-                        root.hoverVal = Number(pt["y"])
-                        root.cursorCanvasX = root.freqToCanvasX(root.hoverFreq)
-                        const yRange = (root.viewYMax - root.viewYMin) || 1
-                        let mappedY = root.hoverVal
-                        if (root.displayMode === 0 && root.magScaleMode === 1) {
-                            mappedY = Math.pow(10, root.hoverVal / 20.0)
-                        } else if (root.displayMode === 1 && root.phaseWrapMode === 1) {
-                            mappedY = ((((root.hoverVal + 180) % 360) + 360) % 360) - 180
-                        }
-                        root.cursorCanvasY = mT + ((root.viewYMax - mappedY) / yRange) * pH
-                        root.isHovering = true
-                        root.schedulePaint()
-                        return
-                    }
-                }
-                if (root.isHovering) {
-                    root.isHovering = false
-                    root.schedulePaint()
-                }
-            } else {
                 const x1 = root.freqToCanvasX(root.cutoffFreq)
                 const x2 = root.freqToCanvasX(root.cutoffFreq2)
                 const nearHandle = Math.abs(mouse.x - x1) < 14 || (root.isBandFilter && Math.abs(mouse.x - x2) < 14)
-                const inPlot = mouse.x >= root.marginLeft && mouse.x <= root.marginLeft + root.plotW &&
-                               mouse.y >= root.marginTop && mouse.y <= root.marginTop + root.plotH
-                cursorShape = nearHandle ? Qt.SizeHorCursor : (root.showCrosshair ? Qt.CrossCursor : (inPlot ? Qt.OpenHandCursor : Qt.ArrowCursor))
+                const inPlotX = mouse.x >= mL && mouse.x <= mL + pW
+                const inPlotY = mouse.y >= mT - 10 && mouse.y <= mT + pH + 15
+
+                cursorShape = nearHandle ? Qt.SizeHorCursor : ((inPlotX && inPlotY) ? Qt.CrossCursor : Qt.ArrowCursor)
+
+                if (inPlotX && inPlotY && !nearHandle) {
+                    const f = root.xToFreq(mouse.x)
+                    // Continuous analytical evaluation across 100% of mathematical spectrum
+                    const res = filterEngine.evaluateResponseAt(f)
+                    root.hoverFreq = res["freq"]
+                    root.hoverLinMag = res["magLin"]
+                    root.hoverPhaseDeg = res["phase"]
+                    root.hoverPhaseUnwrapped = res["phaseUnwrapped"]
+                    root.hoverGd = res["groupDelay"]
+
+                    let mappedY = 0
+                    if (root.displayMode === 0) {
+                        root.hoverVal = (root.magScaleMode === 1) ? res["magLin"] : res["magDb"]
+                        mappedY = root.hoverVal
+                    } else if (root.displayMode === 1) {
+                        root.hoverVal = (root.phaseWrapMode === 1) ? res["phaseWrapped"] : res["phaseUnwrapped"]
+                        mappedY = root.hoverVal
+                    } else {
+                        root.hoverVal = res["groupDelay"]
+                        mappedY = root.hoverVal
+                    }
+
+                    root.cursorCanvasX = root.freqToCanvasX(root.hoverFreq)
+                    const yRange = (root.viewYMax - root.viewYMin) || 1
+                    root.cursorCanvasY = mT + ((root.viewYMax - mappedY) / yRange) * pH
+                    root.isHovering = true
+                    root.scheduleCrosshairPaint()
+                    return
+                }
+
+                if (root.isHovering) {
+                    root.isHovering = false
+                    root.scheduleCrosshairPaint()
+                }
             }
         }
 
         onExited: {
             if (root.isHovering) {
                 root.isHovering = false
-                root.schedulePaint()
+                root.scheduleCrosshairPaint()
             }
         }
     }
 
-    // Desmos Floating Zoom & Auto-Scale Tool Cluster (Bottom-Right overlay)
     Rectangle {
         id: floatingDesmosControls
         anchors {
-            right: parent.right
-            bottom: parent.bottom
-            rightMargin: root.marginRight + 12
-            bottomMargin: root.marginBottom + 12
+            right: parent.right; bottom: parent.bottom
+            rightMargin: root.marginRight + 12; bottomMargin: root.marginBottom + 12
         }
-        width: 32
-        height: 94
-        radius: 7
+        width: 32; height: 94; radius: 7
         color: theme.isDark ? "#25272B" : "#FFFFFF"
-        border.color: theme.borderColor
-        border.width: 1
+        border.color: theme.borderColor; border.width: 1
         z: 20
 
         Column {
-            anchors.centerIn: parent
-            spacing: 2
-
-            // Zoom In (+)
+            anchors.centerIn: parent; spacing: 2
             Rectangle {
                 width: 28; height: 26; radius: 4
                 color: fZoomInMouse.containsMouse ? (theme.isDark ? "#3A3A3C" : "#EAEAEA") : "transparent"
-                Text {
-                    anchors.centerIn: parent
-                    text: "+"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 18
-                    font.weight: Font.DemiBold
-                    color: theme.primaryText
-                }
-                ToolTip.visible: fZoomInMouse.containsMouse
-                ToolTip.text: "Zoom In (+)"
-                ToolTip.delay: 350
-                MouseArea {
-                    id: fZoomInMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.zoomCenter(0.8)
-                }
+                Text { anchors.centerIn: parent; text: "+"; font.family: "Stack Sans Headline"; font.pixelSize: 18; font.weight: Font.DemiBold; color: theme.primaryText }
+                ToolTip.visible: fZoomInMouse.containsMouse; ToolTip.text: "Zoom In (+)"; ToolTip.delay: 350
+                MouseArea { id: fZoomInMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.zoomCenter(0.8) }
             }
-
-            Rectangle {
-                width: 20; height: 1
-                color: theme.borderColor
-                opacity: 0.6
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-
-            // Zoom Out (−)
+            Rectangle { width: 20; height: 1; color: theme.borderColor; opacity: 0.6; anchors.horizontalCenter: parent.horizontalCenter }
             Rectangle {
                 width: 28; height: 26; radius: 4
                 color: fZoomOutMouse.containsMouse ? (theme.isDark ? "#3A3A3C" : "#EAEAEA") : "transparent"
-                Text {
-                    anchors.centerIn: parent
-                    text: "−"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 18
-                    font.weight: Font.DemiBold
-                    color: theme.primaryText
-                }
-                ToolTip.visible: fZoomOutMouse.containsMouse
-                ToolTip.text: "Zoom Out (−)"
-                ToolTip.delay: 350
-                MouseArea {
-                    id: fZoomOutMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.zoomCenter(1.25)
-                }
+                Text { anchors.centerIn: parent; text: "−"; font.family: "Stack Sans Headline"; font.pixelSize: 18; font.weight: Font.DemiBold; color: theme.primaryText }
+                ToolTip.visible: fZoomOutMouse.containsMouse; ToolTip.text: "Zoom Out (−)"; ToolTip.delay: 350
+                MouseArea { id: fZoomOutMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.zoomCenter(1.25) }
             }
-
-            Rectangle {
-                width: 20; height: 1
-                color: theme.borderColor
-                opacity: 0.6
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-
-            // Auto Scale / Fit (⤢)
+            Rectangle { width: 20; height: 1; color: theme.borderColor; opacity: 0.6; anchors.horizontalCenter: parent.horizontalCenter }
             Rectangle {
                 width: 28; height: 26; radius: 4
                 color: fAutoFitMouse.containsMouse ? (theme.isDark ? "#3A3A3C" : "#EAEAEA") : "transparent"
-                Codicon {
-                    anchors.centerIn: parent
-                    icon: "screen-full"
-                    iconSize: 13
-                    iconColor: root.isCustomView ? theme.accent : theme.secondaryText
-                }
-                ToolTip.visible: fAutoFitMouse.containsMouse
-                ToolTip.text: "Auto Scale / Fit View (Double-click plot)"
-                ToolTip.delay: 350
-                MouseArea {
-                    id: fAutoFitMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        root.autoScale()
-                        root.showPlotToast("Auto-scaled to curve fit")
-                    }
-                }
+                Codicon { anchors.centerIn: parent; icon: "screen-full"; iconSize: 13; iconColor: root.isCustomView ? theme.accent : theme.secondaryText }
+                ToolTip.visible: fAutoFitMouse.containsMouse; ToolTip.text: "Auto Scale / Fit View"; ToolTip.delay: 350
+                MouseArea { id: fAutoFitMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.autoScale(); root.showPlotToast("Auto-scaled to curve fit") } }
             }
         }
     }
 
-    // MATLAB Filter Designer Professional Context Menu
     Menu {
         id: plotContextMenu
+        parent: root
+        background: Rectangle { implicitWidth: 230; color: theme.isDark ? "#25272B" : "#FFFFFF"; border.color: theme.borderColor; border.width: 1; radius: 8 }
 
-        background: Rectangle {
-            implicitWidth: 230
-            color: theme.isDark ? "#25272B" : "#FFFFFF"
-            border.color: theme.borderColor
-            border.width: 1
-            radius: 8
-        }
-
-        MenuItem {
-            text: "Auto Scale / Fit View (Desmos)"
-            onTriggered: {
-                root.autoScale()
-                root.showPlotToast("Auto-scaled to curve fit")
-            }
-        }
-        MenuItem {
-            text: "Zoom In (+)"
-            onTriggered: root.zoomCenter(0.8)
-        }
-        MenuItem {
-            text: "Zoom Out (−)"
-            onTriggered: root.zoomCenter(1.25)
-        }
-
+        MenuItem { text: "Auto Scale / Fit View (Desmos)"; onTriggered: { root.autoScale(); root.showPlotToast("Auto-scaled to curve fit") } }
+        MenuItem { text: "Zoom In (+)"; onTriggered: root.zoomCenter(0.8) }
+        MenuItem { text: "Zoom Out (−)"; onTriggered: root.zoomCenter(1.25) }
         MenuSeparator {}
-
         Menu {
             title: "Response View"
-            MenuItem {
-                text: "Magnitude (dB)"
-                checkable: true
-                checked: root.displayMode === 0 && root.magScaleMode === 0
-                onTriggered: { root.displayMode = 0; root.magScaleMode = 0; root.refreshPoints(); root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Magnitude (Linear |H|)"
-                checkable: true
-                checked: root.displayMode === 0 && root.magScaleMode === 1
-                onTriggered: { root.displayMode = 0; root.magScaleMode = 1; root.refreshPoints(); root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Phase Response"
-                checkable: true
-                checked: root.displayMode === 1
-                onTriggered: { root.displayMode = 1; root.refreshPoints(); root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Group Delay Response"
-                checkable: true
-                checked: root.displayMode === 2
-                onTriggered: { root.displayMode = 2; root.refreshPoints(); root.schedulePaint() }
-            }
+            MenuItem { text: "Magnitude (dB)"; checkable: true; checked: root.displayMode === 0 && root.magScaleMode === 0; onTriggered: { root.displayMode = 0; root.magScaleMode = 0; root.refreshPoints(); root.schedulePaint() } }
+            MenuItem { text: "Magnitude (Linear |H|)"; checkable: true; checked: root.displayMode === 0 && root.magScaleMode === 1; onTriggered: { root.displayMode = 0; root.magScaleMode = 1; root.refreshPoints(); root.schedulePaint() } }
+            MenuItem { text: "Phase Response"; checkable: true; checked: root.displayMode === 1; onTriggered: { root.displayMode = 1; root.refreshPoints(); root.schedulePaint() } }
+            MenuItem { text: "Group Delay Response"; checkable: true; checked: root.displayMode === 2; onTriggered: { root.displayMode = 2; root.refreshPoints(); root.schedulePaint() } }
         }
-
         Menu {
             title: "Frequency Axis Scale"
-            MenuItem {
-                text: "Logarithmic (Hz)"
-                checkable: true
-                checked: root.freqScale === 0
-                onTriggered: { root.freqScale = 0; root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Linear (Hz)"
-                checkable: true
-                checked: root.freqScale === 1
-                onTriggered: { root.freqScale = 1; root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Normalized Radian (ω/π rad/sample)"
-                checkable: true
-                checked: root.freqScale === 2
-                onTriggered: { root.freqScale = 2; root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Normalized Digital (f/fs cycles/sample)"
-                checkable: true
-                checked: root.freqScale === 3
-                onTriggered: { root.freqScale = 3; root.schedulePaint() }
-            }
+            MenuItem { text: "Logarithmic (Hz)"; checkable: true; checked: root.freqScale === 0; onTriggered: { root.freqScale = 0; root.schedulePaint() } }
+            MenuItem { text: "Linear (Hz)"; checkable: true; checked: root.freqScale === 1; onTriggered: { root.freqScale = 1; root.schedulePaint() } }
+            MenuItem { text: "Normalized Radian (ω/π rad/sample)"; checkable: true; checked: root.freqScale === 2; onTriggered: { root.freqScale = 2; root.schedulePaint() } }
+            MenuItem { text: "Normalized Digital (f/fs cycles/sample)"; checkable: true; checked: root.freqScale === 3; onTriggered: { root.freqScale = 3; root.schedulePaint() } }
         }
-
         Menu {
             title: "Magnitude Scale"
             visible: root.displayMode === 0
-            MenuItem {
-                text: "Decibels (dB)"
-                checkable: true
-                checked: root.magScaleMode === 0
-                onTriggered: { root.magScaleMode = 0; root.refreshPoints(); root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Linear (|H|)"
-                checkable: true
-                checked: root.magScaleMode === 1
-                onTriggered: { root.magScaleMode = 1; root.refreshPoints(); root.schedulePaint() }
-            }
+            MenuItem { text: "Decibels (dB)"; checkable: true; checked: root.magScaleMode === 0; onTriggered: { root.magScaleMode = 0; root.refreshPoints(); root.schedulePaint() } }
+            MenuItem { text: "Linear (|H|)"; checkable: true; checked: root.magScaleMode === 1; onTriggered: { root.magScaleMode = 1; root.refreshPoints(); root.schedulePaint() } }
         }
-
         Menu {
             title: "Phase Scale"
             visible: root.displayMode === 1
-            MenuItem {
-                text: "Unwrapped Phase"
-                checkable: true
-                checked: root.phaseWrapMode === 0
-                onTriggered: { root.phaseWrapMode = 0; root.refreshPoints(); root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Wrapped Phase [-180°, +180°]"
-                checkable: true
-                checked: root.phaseWrapMode === 1
-                onTriggered: { root.phaseWrapMode = 1; root.refreshPoints(); root.schedulePaint() }
-            }
+            MenuItem { text: "Unwrapped Phase"; checkable: true; checked: root.phaseWrapMode === 0; onTriggered: { root.phaseWrapMode = 0; root.refreshPoints(); root.schedulePaint() } }
+            MenuItem { text: "Wrapped Phase [-180°, +180°]"; checkable: true; checked: root.phaseWrapMode === 1; onTriggered: { root.phaseWrapMode = 1; root.refreshPoints(); root.schedulePaint() } }
         }
-
         MenuSeparator {}
-
-        MenuItem {
-            text: "Data Cursor / Inspector (+)"
-            checkable: true
-            checked: root.showCrosshair
-            onTriggered: {
-                root.showCrosshair = !root.showCrosshair
-                if (!root.showCrosshair) root.isHovering = false
-                root.schedulePaint()
-            }
-        }
-
-        MenuItem {
-            text: "DSP Reference Spec Guides"
-            visible: root.displayMode === 0
-            checkable: true
-            checked: root.showDspGuides
-            onTriggered: {
-                root.showDspGuides = !root.showDspGuides
-                root.schedulePaint()
-            }
-        }
-
+        MenuItem { text: "Data Cursor / Inspector (+)"; checkable: true; checked: root.showCrosshair; onTriggered: { root.showCrosshair = !root.showCrosshair; if (!root.showCrosshair) root.isHovering = false; root.schedulePaint() } }
+        MenuItem { text: "DSP Reference Spec Guides"; visible: root.displayMode === 0; checkable: true; checked: root.showDspGuides; onTriggered: { root.showDspGuides = !root.showDspGuides; root.schedulePaint() } }
         Menu {
             title: "Plot Line Thickness"
-            MenuItem {
-                text: "Fine (1.5 px)"
-                checkable: true
-                checked: Math.abs(root.plotLineWidth - 1.5) < 0.2
-                onTriggered: { root.plotLineWidth = 1.5; root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Standard (2.2 px)"
-                checkable: true
-                checked: Math.abs(root.plotLineWidth - 2.2) < 0.2
-                onTriggered: { root.plotLineWidth = 2.2; root.schedulePaint() }
-            }
-            MenuItem {
-                text: "Bold (3.2 px)"
-                checkable: true
-                checked: Math.abs(root.plotLineWidth - 3.2) < 0.2
-                onTriggered: { root.plotLineWidth = 3.2; root.schedulePaint() }
-            }
+            MenuItem { text: "Fine (1.5 px)"; checkable: true; checked: Math.abs(root.plotLineWidth - 1.5) < 0.2; onTriggered: { root.plotLineWidth = 1.5; root.schedulePaint() } }
+            MenuItem { text: "Standard (2.2 px)"; checkable: true; checked: Math.abs(root.plotLineWidth - 2.2) < 0.2; onTriggered: { root.plotLineWidth = 2.2; root.schedulePaint() } }
+            MenuItem { text: "Bold (3.2 px)"; checkable: true; checked: Math.abs(root.plotLineWidth - 3.2) < 0.2; onTriggered: { root.plotLineWidth = 3.2; root.schedulePaint() } }
         }
-
         MenuSeparator {}
-
-        MenuItem {
-            text: "Copy Plot Image to Clipboard"
-            onTriggered: root.copyPlotImage()
-        }
-
-        MenuItem {
-            text: "Save Plot Image (PNG)..."
-            onTriggered: root.exportPlotImage()
-        }
-
+        MenuItem { text: "Copy Plot Image to Clipboard"; onTriggered: root.copyPlotImage() }
+        MenuItem { text: "Save Plot Image (PNG)..."; onTriggered: root.exportPlotImage() }
         MenuSeparator {}
-
         MenuItem {
             text: "Copy Filter Specifications"
             onTriggered: {
                 const specText = filterEngine.filterResponseName() + " " + filterEngine.filterTypeName() +
-                    "\nOrder: " + filterEngine.order +
-                    "\nSample Rate: " + filterEngine.sampleRate + " Hz" +
-                    "\nCutoff: " + filterEngine.cutoffFreq + " Hz" +
-                    (root.isBandFilter ? (" to " + filterEngine.cutoffFreq2 + " Hz") : "") +
+                    "\nOrder: " + filterEngine.order + "\nSample Rate: " + filterEngine.sampleRate + " Hz" +
+                    "\nCutoff: " + filterEngine.cutoffFreq + " Hz" + (root.isBandFilter ? (" to " + filterEngine.cutoffFreq2 + " Hz") : "") +
                     (filterEngine.filterResponse === 1 || filterEngine.filterResponse === 3 ? ("\nRipple: " + filterEngine.rippleDb + " dB") : "") +
                     (filterEngine.filterResponse === 2 || filterEngine.filterResponse === 3 ? ("\nStopband: " + filterEngine.stopbandDb + " dB") : "")
                 filterEngine.copyText(specText)
                 root.showPlotToast("Filter specifications copied")
             }
         }
-
-        MenuItem {
-            text: "Copy Numerator & Denominator (b, a)"
-            onTriggered: {
-                const pyCode = filterEngine.exportCode(2)
-                filterEngine.copyText(pyCode)
-                root.showPlotToast("Coefficients (b, a) copied")
-            }
-        }
+        MenuItem { text: "Copy Numerator & Denominator (b, a)"; onTriggered: { filterEngine.copyText(filterEngine.exportCode(2)); root.showPlotToast("Coefficients (b, a) copied") } }
     }
 
     function curveColor() {
