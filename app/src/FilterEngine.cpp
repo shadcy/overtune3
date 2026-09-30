@@ -5,7 +5,11 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QGuiApplication>
+#include <QImage>
+#include <QByteArray>
+#include <QRegularExpression>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -555,3 +559,59 @@ QVariantMap FilterEngine::evaluateLab(double passbandFreq, double stopbandFreq,
     res["allPassed"] = (score == 4);
     return res;
 }
+
+QString FilterEngine::picturesDirectory() const {
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    if (dir.isEmpty()) {
+        dir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    }
+    return dir;
+}
+
+QString FilterEngine::defaultExportPlotPath(const QString &plotName) const {
+    QString dir = picturesDirectory();
+    QDir().mkpath(dir);
+    QString cleanName = plotName;
+    cleanName.replace(QRegularExpression("[^a-zA-Z0-9_-]"), "_");
+    if (cleanName.isEmpty()) cleanName = "dsp_plot";
+    QString timeStr = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+    return dir + "/" + cleanName + "_" + timeStr + ".png";
+}
+
+bool FilterEngine::copyImageFileToClipboard(const QString &filePath) {
+    QString clean = filePath;
+    if (clean.startsWith("file://")) {
+        clean = QUrl(filePath).toLocalFile();
+    }
+    QImage img(clean);
+    if (img.isNull()) {
+        qWarning() << "[FilterEngine] Failed to load image for clipboard:" << clean;
+        return false;
+    }
+    QGuiApplication::clipboard()->setImage(img);
+    return true;
+}
+
+bool FilterEngine::saveImageData(const QString &filePath, const QString &dataUrlOrBase64) {
+    QString clean = filePath;
+    if (clean.startsWith("file://")) {
+        clean = QUrl(filePath).toLocalFile();
+    }
+    QFileInfo fi(clean);
+    QDir().mkpath(fi.absolutePath());
+
+    QString base64Str = dataUrlOrBase64;
+    int commaIdx = base64Str.indexOf(',');
+    if (commaIdx >= 0) {
+        base64Str = base64Str.mid(commaIdx + 1);
+    }
+    QByteArray bytes = QByteArray::fromBase64(base64Str.toLatin1());
+    if (bytes.isEmpty()) {
+        return false;
+    }
+    QFile f(clean);
+    if (!f.open(QIODevice::WriteOnly)) return false;
+    f.write(bytes);
+    return true;
+}
+

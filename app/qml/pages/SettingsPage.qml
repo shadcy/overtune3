@@ -102,47 +102,13 @@ Item {
 
                     SectionHeader { text: "APPEARANCE"; width: parent.width }
 
-                    Repeater {
-                        model: [
-                            { label: "System", value: 0 },
-                            { label: "Light",  value: 1 },
-                            { label: "Dark",   value: 2 }
-                        ]
-                        delegate: Item {
-                            required property var modelData
-                            width: appearanceCol.width
-                            height: 30
-
-                            Rectangle {
-                                id: radio
-                                width: 18; height: 18
-                                radius: 9
-                                anchors.verticalCenter: parent.verticalCenter
-                                border.color: theme.accent
-                                border.width: selected ? 0 : 1.5
-                                color: selected ? theme.accent : "transparent"
-                                readonly property bool selected: theme.themeMode === modelData.value
-                                Rectangle {
-                                    width: 8; height: 8; radius: 4
-                                    color: "#FFFFFF"
-                                    anchors.centerIn: parent
-                                    visible: parent.selected
-                                }
-                            }
-                            Text {
-                                anchors {
-                                    left: radio.right
-                                    leftMargin: 12
-                                    right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                }
-                                text: modelData.label
-                                font.family: "Stack Sans Headline"
-                                font.pixelSize: 14
-                                color: theme.primaryText
-                                elide: Text.ElideRight
-                            }
-                            TapHandler { onTapped: theme.themeMode = modelData.value }
+                    SegmentedButton {
+                        width: parent.width
+                        implicitHeight: 32
+                        model: ["System", "Light", "Dark"]
+                        currentIndex: theme.themeMode
+                        onActivated: function(idx) {
+                            theme.themeMode = idx
                         }
                     }
                 }

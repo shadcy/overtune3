@@ -59,6 +59,7 @@ public:
   QVariantList impulseData() const { return m_impulseData; }
   QVariantList stepData() const { return m_stepData; }
   bool hasResults() const { return m_hasResults; }
+  const dsp::FilterCoefficients& coefficients() const { return m_coeff; }
 
   // Property setters
   void setFilterType(int v);
@@ -105,6 +106,12 @@ public:
   Q_INVOKABLE QVariantMap evaluateLab(double passbandFreq, double stopbandFreq,
                                       double minStopbandAttenDb, double maxPassbandRippleDb,
                                       int maxOrder) const;
+
+  // Plot Image Export & System Integration
+  Q_INVOKABLE QString picturesDirectory() const;
+  Q_INVOKABLE QString defaultExportPlotPath(const QString &plotName) const;
+  Q_INVOKABLE bool copyImageFileToClipboard(const QString &filePath);
+  Q_INVOKABLE bool saveImageData(const QString &filePath, const QString &dataUrlOrBase64);
 
 signals:
   void specChanged();

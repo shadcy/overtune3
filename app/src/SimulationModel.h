@@ -23,6 +23,9 @@ public:
     Q_INVOKABLE void loadCsv(const QString& path, int column = 0);
     Q_INVOKABLE void generateSine(double freq, double sampleRate, double durationSec);
     Q_INVOKABLE void generateChirp(double f0, double f1, double sampleRate, double durationSec);
+    Q_INVOKABLE void generateMultiTone(double fPass, double fStop, double sampleRate, double durationSec);
+    Q_INVOKABLE void generateSquare(double freq, double sampleRate, double durationSec);
+    Q_INVOKABLE void generateNoise(double durationSec, double sampleRate);
     Q_INVOKABLE void applyFilter(QObject* enginePtr);
     Q_INVOKABLE void clear();
 

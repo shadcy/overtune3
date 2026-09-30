@@ -41,7 +41,23 @@ Text {
             "dashboard":        "\uEACD",
             "preview":          "\uEB2F",
             "debug-start":      "\uEAD3",
-            "link-external":    "\uEB14"
+            "link-external":    "\uEB14",
+            "check":            "\uEA5E",
+            "error":            "\uEA87",
+            "save":             "\uEB4B",
+            "save-as":          "\uEB4C",
+            "copy":             "\uEB7C",
+            "camera":           "\uEA7D",
+            "device-camera":    "\uEA7D",
+            "file-media":       "\uEA8F",
+            "sliders":          "\uEB52",
+            "refresh":          "\uEB37",
+            "mortar-board":     "\uEB18",
+            "organization":     "\uEA7E",
+            "new-file":         "\uEA7B",
+            "more":             "\uEA7C",
+            "ellipsis":         "\uEA7C",
+            "kebab-vertical":   "\uEB60"
         }
         return map[name] || map["question"]
     }

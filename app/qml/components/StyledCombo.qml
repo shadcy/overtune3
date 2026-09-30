@@ -1,22 +1,22 @@
 import QtQuick
 import QtQuick.Controls
 
-// StyledCombo.qml — bounded popup, eliding text, overflow-safe
+// StyledCombo.qml — bounded popup, eliding text, overflow-safe with pointing hand cursor
 ComboBox {
     id: root
     implicitHeight: 28
-    implicitWidth: 120
-    width: parent ? parent.width : implicitWidth
+    implicitWidth: 140
     font.family: "Stack Sans Headline"
     font.pixelSize: 13
     clip: true
 
     background: Rectangle {
         radius: 7
-        color: root.pressed ? theme.surfaceHigh : theme.surface
+        color: root.pressed ? theme.surfaceHigh : (comboHov.hovered ? (theme.isDark ? "#28292D" : "#ECEEF2") : theme.surface)
         border.color: root.activeFocus ? theme.accent : theme.borderColor
         border.width: root.activeFocus ? 1.5 : 1
         Behavior on border.color { ColorAnimation { duration: 150 } }
+        Behavior on color { ColorAnimation { duration: 120 } }
     }
 
     contentItem: Text {
@@ -48,7 +48,6 @@ ComboBox {
         y: root.height + 4
         width: Math.max(root.width, 120)
         padding: 4
-        // Cap popup height so it never leaves the window
         implicitHeight: Math.min(list.contentHeight + padding * 2, 280)
 
         background: Rectangle {
@@ -87,5 +86,14 @@ ComboBox {
             color: highlighted ? theme.accentMuted : "transparent"
         }
         highlighted: root.highlightedIndex === index
+
+        HoverHandler {
+            cursorShape: Qt.PointingHandCursor
+        }
+    }
+
+    HoverHandler {
+        id: comboHov
+        cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
     }
 }

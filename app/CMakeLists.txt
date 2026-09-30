@@ -32,6 +32,7 @@ qt_add_qml_module(FilterDesigner
         qml/components/StyledCombo.qml
         qml/components/StyledSlider.qml
         qml/components/StyledButton.qml
+        qml/components/SegmentedButton.qml
         qml/components/SectionHeader.qml
         qml/components/CodeViewer.qml
         qml/components/SignalPlot.qml
@@ -41,6 +42,7 @@ qt_add_qml_module(FilterDesigner
         qml/components/SpotlightOverlay.qml
         qml/components/ChallengeStudio.qml
         qml/components/ModeHeaderBar.qml
+        qml/components/WindowMenuBar.qml
         qml/pages/DesignPage.qml
         qml/pages/AnalysisPage.qml
         qml/pages/SimulationPage.qml

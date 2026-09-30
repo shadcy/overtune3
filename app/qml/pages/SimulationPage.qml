@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 import "../components"
 
-// SimulationPage.qml — overflow-safe toolbar + plot
+// SimulationPage.qml — interactive signal generator & live filter simulation
 Item {
     id: root
     Layout.fillWidth: true
@@ -13,27 +13,94 @@ Item {
     implicitHeight: 600
     clip: true
 
-    readonly property int pageMargin: width < 700 ? 10 : 16
+    readonly property int pageMargin: width < 700 ? 12 : 20
+    property alias signalPlot: sigPlot
+
+    function generateSelectedSignal() {
+        switch (signalCombo.currentIndex) {
+        case 0: { // Dual-Tone
+            const f1 = Math.max(200, Math.round(filterEngine.cutoffFreq * 0.4))
+            const f2 = Math.min(filterEngine.sampleRate * 0.45, Math.round(filterEngine.cutoffFreq * 2.2))
+            simulation.generateMultiTone(f1, f2, filterEngine.sampleRate, 0.04)
+            break
+        }
+        case 1: { // Sine Wave
+            const f = Math.max(100, Math.round(filterEngine.cutoffFreq * 0.75))
+            simulation.generateSine(f, filterEngine.sampleRate, 0.04)
+            break
+        }
+        case 2: { // Chirp Sweep
+            simulation.generateChirp(100, Math.min(22000, filterEngine.sampleRate * 0.45), filterEngine.sampleRate, 0.05)
+            break
+        }
+        case 3: { // Square Wave
+            const f = Math.max(100, Math.round(filterEngine.cutoffFreq * 0.5))
+            simulation.generateSquare(f, filterEngine.sampleRate, 0.04)
+            break
+        }
+        case 4: { // White Noise
+            simulation.generateNoise(0.04, filterEngine.sampleRate)
+            break
+        }
+        }
+        simulation.applyFilter(filterEngine)
+        sigPlot.restartAnimation()
+    }
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.pageMargin
-        spacing: 10
+        spacing: 12
 
-        Text {
-            text: "Simulation"
-            font.family: "Stack Sans Headline"
-            font.pixelSize: 18
-            font.weight: Font.DemiBold
-            color: theme.primaryText
+        RowLayout {
             Layout.fillWidth: true
-            elide: Text.ElideRight
+            spacing: 12
+
+            Text {
+                text: "Signal Simulation Studio"
+                font.family: "Stack Sans Headline"
+                font.pixelSize: 22
+                font.weight: Font.DemiBold
+                color: theme.primaryText
+                Layout.fillWidth: true
+                elide: Text.ElideRight
+            }
+
+            Rectangle {
+                implicitHeight: 28
+                implicitWidth: filterBadgeRow.implicitWidth + 16
+                radius: 6
+                color: theme.surfaceHigh
+                border.color: theme.borderColor
+                border.width: 1
+
+                Row {
+                    id: filterBadgeRow
+                    anchors.centerIn: parent
+                    spacing: 6
+                    Rectangle {
+                        width: 7; height: 7; radius: 3.5
+                        color: theme.accent
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Text {
+                        text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName() + " (" + filterEngine.order + "th order)"
+                        font.family: "Stack Sans Headline"
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                        color: theme.primaryText
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
         }
 
+        // Signal Generator Toolbar
         Flickable {
             Layout.fillWidth: true
             Layout.preferredHeight: 32
             contentWidth: toolRow.implicitWidth
+            contentHeight: 32
             clip: true
             flickableDirection: Flickable.HorizontalFlick
             boundsBehavior: Flickable.StopAtBounds
@@ -42,52 +109,169 @@ Item {
             Row {
                 id: toolRow
                 spacing: 8
-                StyledButton { text: "Load WAV"; primary: false; implicitWidth: 88; onClicked: wavDialog.open() }
-                StyledButton { text: "Load CSV"; primary: false; implicitWidth: 88; onClicked: csvDialog.open() }
-                StyledButton { text: "Sine"; primary: false; implicitWidth: 56; onClicked: simulation.generateSine(440, filterEngine.sampleRate, 0.1) }
-                StyledButton {
-                    text: "Chirp"; primary: false; implicitWidth: 56
-                    onClicked: simulation.generateChirp(100, filterEngine.sampleRate / 2 * 0.9, filterEngine.sampleRate, 0.1)
+                height: 32
+
+                Text {
+                    text: "Signal Source:"
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                    color: theme.secondaryText
+                    height: 30
+                    verticalAlignment: Text.AlignVCenter
                 }
+
+                StyledCombo {
+                    id: signalCombo
+                    implicitWidth: 190
+                    implicitHeight: 30
+                    model: [
+                        "Dual-Tone Wave",
+                        "Sine Wave",
+                        "Chirp Sweep",
+                        "Square Wave",
+                        "White Noise"
+                    ]
+                    currentIndex: 0
+                    onActivated: root.generateSelectedSignal()
+                }
+
                 StyledButton {
-                    text: "Apply Filter"; primary: true; implicitWidth: 104
+                    text: "Run Simulation"
+                    primary: true
+                    implicitWidth: 124
+                    implicitHeight: 30
+                    onClicked: root.generateSelectedSignal()
+                }
+
+                StyledButton {
+                    text: "Re-apply Filter"
+                    primary: false
+                    implicitWidth: 110
+                    implicitHeight: 30
                     enabled: simulation.hasData
-                    onClicked: simulation.applyFilter(filterEngine)
+                    onClicked: {
+                        simulation.applyFilter(filterEngine)
+                        sigPlot.restartAnimation()
+                    }
                 }
-                StyledButton { text: "Clear"; primary: false; implicitWidth: 64; onClicked: simulation.clear() }
+
+                Rectangle {
+                    width: 1
+                    height: 18
+                    color: theme.borderColor
+                    opacity: 0.6
+                    y: 6
+                }
+
+                StyledButton {
+                    text: "Load WAV..."
+                    primary: false
+                    implicitWidth: 96
+                    implicitHeight: 30
+                    onClicked: wavDialog.open()
+                }
+
+                StyledButton {
+                    text: "Load CSV..."
+                    primary: false
+                    implicitWidth: 92
+                    implicitHeight: 30
+                    onClicked: csvDialog.open()
+                }
+
+                StyledButton {
+                    text: "Clear"
+                    primary: false
+                    implicitWidth: 64
+                    implicitHeight: 30
+                    enabled: simulation.hasData
+                    onClicked: simulation.clear()
+                }
             }
         }
 
-        Text {
+        // Active Signal Status & Info Bar
+        Rectangle {
             Layout.fillWidth: true
-            text: simulation.hasData ? simulation.signalLabel : "No signal loaded — generate or load a signal to begin."
-            font.family: "Stack Sans Headline"
-            font.pixelSize: 12
-            color: theme.secondaryText
-            elide: Text.ElideRight
-            wrapMode: Text.WordWrap
-            maximumLineCount: 2
+            height: 32
+            radius: 6
+            color: theme.surfaceHigh
+            border.color: theme.borderColor
+            border.width: 1
+
+            Row {
+                anchors.left: parent.left
+                anchors.leftMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 8
+
+                Codicon {
+                    icon: "pulse"
+                    iconSize: 13
+                    iconColor: theme.accent
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Text {
+                    text: simulation.hasData
+                        ? ("Input: " + simulation.signalLabel + "  ·  Filtered with current DSP design")
+                        : "No signal active — select a signal and click Run Simulation above."
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 13
+                    color: theme.primaryText
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
         }
 
         FilterCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 140
+            Layout.minimumHeight: 200
             clip: true
-            SignalPlot { anchors.fill: parent }
+            SignalPlot {
+                id: sigPlot
+                anchors.fill: parent
+            }
         }
+    }
+
+    // Live auto-filter synchronization when filter parameters change
+    Connections {
+        target: filterEngine
+        function onResultsChanged() {
+            if (simulation.hasData) {
+                simulation.applyFilter(filterEngine)
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        if (!simulation.hasData) {
+            const f1 = Math.max(200, Math.round(filterEngine.cutoffFreq * 0.4))
+            const f2 = Math.min(filterEngine.sampleRate * 0.45, Math.round(filterEngine.cutoffFreq * 2.2))
+            simulation.generateMultiTone(f1, f2, filterEngine.sampleRate, 0.04)
+        }
+        simulation.applyFilter(filterEngine)
     }
 
     FileDialog {
         id: wavDialog
         title: "Open WAV File"
         nameFilters: ["WAV files (*.wav)", "All files (*)"]
-        onAccepted: simulation.loadWav(selectedFile.toString().replace("file://", ""))
+        onAccepted: {
+            simulation.loadWav(selectedFile.toString().replace("file://", ""))
+            simulation.applyFilter(filterEngine)
+        }
     }
     FileDialog {
         id: csvDialog
         title: "Open CSV File"
         nameFilters: ["CSV files (*.csv *.txt)", "All files (*)"]
-        onAccepted: simulation.loadCsv(selectedFile.toString().replace("file://", ""))
+        onAccepted: {
+            simulation.loadCsv(selectedFile.toString().replace("file://", ""))
+            simulation.applyFilter(filterEngine)
+        }
     }
 }

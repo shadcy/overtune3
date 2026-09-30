@@ -3,12 +3,12 @@ import QtQuick
 
 // Theme.qml — design tokens (colors come from C++ ThemeManager as `theme`)
 QtObject {
-    readonly property int fontSizeXS:  11
-    readonly property int fontSizeS:   13
-    readonly property int fontSizeM:   15
-    readonly property int fontSizeL:   17
-    readonly property int fontSizeXL:  20
-    readonly property int fontSizeXXL: 28
+    readonly property int fontSizeXS:  12
+    readonly property int fontSizeS:   14
+    readonly property int fontSizeM:   16
+    readonly property int fontSizeL:   18
+    readonly property int fontSizeXL:  22
+    readonly property int fontSizeXXL: 30
 
     // Stack Sans Headline font family across the entire application
     readonly property string fontFamily: "Stack Sans Headline"

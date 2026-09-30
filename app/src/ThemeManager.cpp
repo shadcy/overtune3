@@ -3,8 +3,8 @@
 #include <QPalette>
 
 ThemeManager::ThemeManager(QObject* parent) : QObject(parent) {
-    // Qt 6.4: detect dark mode via palette lightness heuristic
-    applySystemTheme();
+    m_mode = Light;
+    m_dark = false;
 }
 
 void ThemeManager::setThemeMode(int mode) {

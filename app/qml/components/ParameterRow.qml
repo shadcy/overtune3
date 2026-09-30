@@ -26,7 +26,7 @@ Item {
         }
         color: theme.secondaryText
         font.family: "Stack Sans Headline"
-        font.pixelSize: 12
+        font.pixelSize: 13
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
         wrapMode: root.stacked ? Text.WordWrap : Text.NoWrap

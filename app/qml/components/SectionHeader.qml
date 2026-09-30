@@ -4,7 +4,7 @@ import QtQuick
 Text {
     id: root
     font.family: "Stack Sans Headline"
-    font.pixelSize: 11
+    font.pixelSize: 12
     font.weight: Font.DemiBold
     font.letterSpacing: 0.8
     color: theme.secondaryText

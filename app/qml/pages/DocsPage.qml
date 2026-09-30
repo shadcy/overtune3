@@ -431,18 +431,18 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 26
                         font.weight: Font.Normal
-                        color: "#D4D4D4"
+                        color: theme.primaryText
                     }
 
                     // Intro paragraph with blue link
                     Text {
                         width: parent.width
                         textFormat: Text.RichText
-                        text: "The core DSP synthesis engine in Overtune 3 is packed with classical continuous-to-discrete mathematical transformations. This page highlights a number of them and lets you interactively explore theoretical pole-zero mappings, pre-warped bilinear transforms, and biquadratic section cascades. For full mathematical derivations on the filter engine and more head over to our <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>documentation</a>."
+                        text: "The core DSP synthesis engine in Overtune 3 is packed with classical continuous-to-discrete mathematical transformations. This page highlights a number of them and lets you interactively explore theoretical pole-zero mappings, pre-warped bilinear transforms, and biquadratic section cascades. For full mathematical derivations on the filter engine and more head over to our <a href='https://github.com/shadcy/overtune3' style='color:" + theme.accent + "; text-decoration:none;'>documentation</a>."
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                         onLinkActivated: function(link) { Qt.openUrlExternally(link) }
                     }
@@ -468,7 +468,7 @@ Item {
                             delegate: Text {
                                 width: parent.width
                                 textFormat: Text.RichText
-                                text: "• &nbsp;<a href='" + modelData.url + "' style='color:#3794FF; text-decoration:none;'>" + modelData.title + "</a> <font color='#CCCCCC'>- " + modelData.desc + "</font>"
+                                text: "• &nbsp;<a href='" + modelData.url + "' style='color:" + theme.accent + "; text-decoration:none;'>" + modelData.title + "</a> <font color='" + (theme.isDark ? "#8E8E93" : "#6E6E73") + "'>- " + modelData.desc + "</font>"
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
                                 lineHeight: 1.55
@@ -485,7 +485,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 20
                         font.weight: Font.Normal
-                        color: "#D4D4D4"
+                        color: theme.primaryText
                         topPadding: 12
                     }
 
@@ -497,7 +497,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                     }
 
@@ -510,10 +510,10 @@ Item {
 
                         Repeater {
                             model: [
-                                { html: "1. Tangent Pre-Warping - calculate the analog prototype angular frequency using <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;&Omega; = 2&middot;Fs&middot;tan(&pi;&middot;Fc / Fs)&nbsp;</span> to cancel digital frequency warping distortion." },
-                                { html: "2. Prototype S-Plane Substitution - replace Laplace operator <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;s = (2/T)&middot;(1 - z^-1)/(1 + z^-1)&nbsp;</span> to derive discrete transfer function <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;H(z)&nbsp;</span>." },
-                                { html: "3. Conjugate Root Factorization - group roots into complex conjugate pairs <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;(p, p*)&nbsp;</span> to form cascading Second-Order Sections <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;SOS biquads&nbsp;</span>." },
-                                { html: "4. Direct Form II Transposed Execution - compute output samples using <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;y[n] = &sum; b_k&middot;x[n-k] - &sum; a_k&middot;y[n-k]&nbsp;</span> with minimal state storage." }
+                                { html: "1. Tangent Pre-Warping - calculate the analog prototype angular frequency using <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;&Omega; = 2&middot;Fs&middot;tan(&pi;&middot;Fc / Fs)&nbsp;</span> to cancel digital frequency warping distortion." },
+                                { html: "2. Prototype S-Plane Substitution - replace Laplace operator <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;s = (2/T)&middot;(1 - z^-1)/(1 + z^-1)&nbsp;</span> to derive discrete transfer function <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;H(z)&nbsp;</span>." },
+                                { html: "3. Conjugate Root Factorization - group roots into complex conjugate pairs <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;(p, p*)&nbsp;</span> to form cascading Second-Order Sections <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;SOS biquads&nbsp;</span>." },
+                                { html: "4. Direct Form II Transposed Execution - compute output samples using <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;y[n] = &sum; b_k&middot;x[n-k] - &sum; a_k&middot;y[n-k]&nbsp;</span> with minimal state storage." }
                             ]
                             delegate: Text {
                                 width: parent.width
@@ -536,7 +536,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                         topPadding: 4
                     }
@@ -556,18 +556,18 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 26
                         font.weight: Font.Normal
-                        color: "#D4D4D4"
+                        color: theme.primaryText
                     }
 
                     // Intro paragraph
                     Text {
                         width: parent.width
                         textFormat: Text.RichText
-                        text: "The tutorial studio in Overtune 3 is packed with step-by-step DSP recipes. This page highlights a number of them and lets you interactively explore filter design workflows, from rapid specification to bare-metal embedded deployment. For full details on custom presets and community guides head over to our <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>documentation</a>."
+                        text: "The tutorial studio in Overtune 3 is packed with step-by-step DSP recipes. This page highlights a number of them and lets you interactively explore filter design workflows, from rapid specification to bare-metal embedded deployment. For full details on custom presets and community guides head over to our <a href='https://github.com/shadcy/overtune3' style='color:" + theme.accent + "; text-decoration:none;'>documentation</a>."
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                         onLinkActivated: function(link) { Qt.openUrlExternally(link) }
                     }
@@ -592,7 +592,7 @@ Item {
                             delegate: Text {
                                 width: parent.width
                                 textFormat: Text.RichText
-                                text: "• &nbsp;<a href='" + modelData.url + "' style='color:#3794FF; text-decoration:none;'>" + modelData.title + "</a> <font color='#CCCCCC'>- " + modelData.desc + "</font>"
+                                text: "• &nbsp;<a href='" + modelData.url + "' style='color:" + theme.accent + "; text-decoration:none;'>" + modelData.title + "</a> <font color='" + (theme.isDark ? "#8E8E93" : "#6E6E73") + "'>- " + modelData.desc + "</font>"
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
                                 lineHeight: 1.55
@@ -609,7 +609,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 20
                         font.weight: Font.Normal
-                        color: "#D4D4D4"
+                        color: theme.primaryText
                         topPadding: 12
                     }
 
@@ -621,7 +621,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                     }
 
@@ -634,10 +634,10 @@ Item {
 
                         Repeater {
                             model: [
-                                { html: "1. Synthesize Topology - in Filter Designer Studio, select <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;Lowpass (LPF)&nbsp;</span> topology and drag the cutoff line directly to <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;12,000 Hz&nbsp;</span>." },
-                                { html: "2. Verify System Stability - press <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;Ctrl+2&nbsp;</span> to open Analysis Suite and confirm all poles lie within <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;|z| &lt; 1&nbsp;</span>." },
-                                { html: "3. Simulate Audio Playback - navigate to Simulation Studio using <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;Ctrl+3&nbsp;</span> and audition filtered vs. raw audio with the real-time spectrum analyzer." },
-                                { html: "4. Export Production Code - press <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;Ctrl+4&nbsp;</span> and select <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;Embedded C&nbsp;</span> or <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;Modern C++20&nbsp;</span> to copy deployment code." }
+                                { html: "1. Synthesize Topology - in Filter Designer Studio, select <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;Lowpass (LPF)&nbsp;</span> topology and drag the cutoff line directly to <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;12,000 Hz&nbsp;</span>." },
+                                { html: "2. Verify System Stability - press <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;Ctrl+2&nbsp;</span> to open Analysis Suite and confirm all poles lie within <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;|z| &lt; 1&nbsp;</span>." },
+                                { html: "3. Simulate Audio Playback - navigate to Simulation Studio using <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;Ctrl+3&nbsp;</span> and audition filtered vs. raw audio with the real-time spectrum analyzer." },
+                                { html: "4. Export Production Code - press <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;Ctrl+4&nbsp;</span> and select <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;Embedded C&nbsp;</span> or <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;Modern C++20&nbsp;</span> to copy deployment code." }
                             ]
                             delegate: Text {
                                 width: parent.width
@@ -660,7 +660,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                         topPadding: 4
                     }
@@ -680,18 +680,18 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 26
                         font.weight: Font.Normal
-                        color: "#D4D4D4"
+                        color: theme.primaryText
                     }
 
                     // Intro paragraph with blue link
                     Text {
                         width: parent.width
                         textFormat: Text.RichText
-                        text: "The Overtune 3 open-source project is packed with community contributions and DSP reference literature. This page highlights key contributors, guidelines for extending the engine, and direct links to comprehensive articles on digital signal processing across our <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>documentation</a>."
+                        text: "The Overtune 3 open-source project is packed with community contributions and DSP reference literature. This page highlights key contributors, guidelines for extending the engine, and direct links to comprehensive articles on digital signal processing across our <a href='https://github.com/shadcy/overtune3' style='color:" + theme.accent + "; text-decoration:none;'>documentation</a>."
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                         onLinkActivated: function(link) { Qt.openUrlExternally(link) }
                     }
@@ -717,7 +717,7 @@ Item {
                             delegate: Text {
                                 width: parent.width
                                 textFormat: Text.RichText
-                                text: "• &nbsp;<a href='" + modelData.url + "' style='color:#3794FF; text-decoration:none;'>" + modelData.title + "</a> <font color='#CCCCCC'>- " + modelData.desc + "</font>"
+                                text: "• &nbsp;<a href='" + modelData.url + "' style='color:" + theme.accent + "; text-decoration:none;'>" + modelData.title + "</a> <font color='" + (theme.isDark ? "#8E8E93" : "#6E6E73") + "'>- " + modelData.desc + "</font>"
                                 font.family: "Stack Sans Headline"
                                 font.pixelSize: 13
                                 lineHeight: 1.55
@@ -734,7 +734,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 20
                         font.weight: Font.Normal
-                        color: "#D4D4D4"
+                        color: theme.primaryText
                         topPadding: 12
                     }
 
@@ -746,7 +746,7 @@ Item {
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                     }
 
@@ -759,10 +759,10 @@ Item {
 
                         Repeater {
                             model: [
-                                { html: "1. Fork & Clone - clone the repository from <a href='https://github.com/shadcy/overtune3' style='color:#3794FF; text-decoration:none;'>github.com/shadcy/overtune3</a> and create a feature branch using <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;git checkout -b feature/my-filter&nbsp;</span>." },
-                                { html: "2. Implement Algorithms - add new prototype approximations or filter topologies into <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;dsp/src/&nbsp;</span> in modern pure C++20 with zero external dependencies." },
-                                { html: "3. Build & Validate - execute <span style=\"background-color:#2D2D2D; color:#E0E0E0; font-family:monospace; font-size:11px;\">&nbsp;./build.sh&nbsp;</span> to compile both the pure DSP engine and Qt 6 presentation layer." },
-                                { html: "4. Submit Pull Request - push your branch and open a pull request on <a href='https://github.com/shadcy/overtune3/issues' style='color:#3794FF; text-decoration:none;'>github.com/shadcy/overtune3/issues</a> for review." }
+                                { html: "1. Fork & Clone - clone the repository from <a href='https://github.com/shadcy/overtune3' style='color:" + theme.accent + "; text-decoration:none;'>github.com/shadcy/overtune3</a> and create a feature branch using <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;git checkout -b feature/my-filter&nbsp;</span>." },
+                                { html: "2. Implement Algorithms - add new prototype approximations or filter topologies into <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;dsp/src/&nbsp;</span> in modern pure C++20 with zero external dependencies." },
+                                { html: "3. Build & Validate - execute <span style=\"background-color:' + (theme.isDark ? '#2D2D2D' : '#E5E7EB') + '; color:' + (theme.isDark ? '#E0E0E0' : '#1F2937') + '; font-family:monospace; font-size:11px;\">&nbsp;./build.sh&nbsp;</span> to compile both the pure DSP engine and Qt 6 presentation layer." },
+                                { html: "4. Submit Pull Request - push your branch and open a pull request on <a href='https://github.com/shadcy/overtune3/issues' style='color:" + theme.accent + "; text-decoration:none;'>github.com/shadcy/overtune3/issues</a> for review." }
                             ]
                             delegate: Text {
                                 width: parent.width
@@ -782,11 +782,11 @@ Item {
                     Text {
                         width: parent.width
                         textFormat: Text.RichText
-                        text: "That is the tip of the iceberg for community collaboration. Have a look at our <a href='https://github.com/shadcy/overtune3/issues' style='color:#3794FF; text-decoration:none;'>issue tracker</a> and contribution guide on GitHub for open tasks and discussions. Maintained by <a href='https://github.com/shadcy' style='color:#3794FF; text-decoration:none;'>shadcy</a> and open-source contributors."
+                        text: "That is the tip of the iceberg for community collaboration. Have a look at our <a href='https://github.com/shadcy/overtune3/issues' style='color:" + theme.accent + "; text-decoration:none;'>issue tracker</a> and contribution guide on GitHub for open tasks and discussions. Maintained by <a href='https://github.com/shadcy' style='color:" + theme.accent + "; text-decoration:none;'>shadcy</a> and open-source contributors."
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 13
                         lineHeight: 1.55
-                        color: "#CCCCCC"
+                        color: theme.secondaryText
                         wrapMode: Text.WordWrap
                         topPadding: 4
                         onLinkActivated: function(link) { Qt.openUrlExternally(link) }

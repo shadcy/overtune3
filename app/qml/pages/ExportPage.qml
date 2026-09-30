@@ -22,17 +22,22 @@ Item {
         saveDialog.open()
     }
 
-    Column {
+    Item {
         anchors.fill: parent
         anchors.margins: root.pageMargin
-        spacing: 10
 
         // ── Header Title & Subtitle ───────────────────────────────────────────
         Row {
-            width: parent.width
+            id: headerRow
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
             spacing: 12
 
             Column {
+                width: parent.width
                 spacing: 2
                 Text {
                     text: "Production Code Exporter"
@@ -46,14 +51,21 @@ Item {
                     font.family: "Stack Sans Headline"
                     font.pixelSize: 12
                     color: theme.secondaryText
+                    elide: Text.ElideRight
+                    width: parent.width
                 }
             }
         }
 
         // ── Main VS Code Editor Container ─────────────────────────────────────
         Rectangle {
-            width: parent.width
-            height: parent.height - 56
+            anchors {
+                top: headerRow.bottom
+                topMargin: 10
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
             radius: 8
             color: theme.surface
             border.color: theme.borderColor

@@ -11,10 +11,20 @@ Window {
     title:         "Overtune 3"
     width:         1280
     height:        800
-    minimumWidth:  420
-    minimumHeight: 360
+    minimumWidth:  860
+    minimumHeight: 600
     visible:       true
     color:         theme.background
+
+    palette.window:          theme.background
+    palette.windowText:      theme.primaryText
+    palette.base:            theme.surface
+    palette.text:            theme.primaryText
+    palette.button:          theme.surfaceHigh
+    palette.buttonText:      theme.primaryText
+    palette.highlight:       theme.accent
+    palette.highlightedText: "#FFFFFF"
+    palette.mid:             theme.borderColor
 
     readonly property bool isNarrow: width < 820
     readonly property bool isCompact: width < 1100
@@ -83,6 +93,35 @@ Window {
             exportPage.openSaveDialog()
         }
         showNotification("Opened Save Code dialog", false)
+    }
+
+    function doAutoScale() {
+        if (sidebar.currentPage === 0 && designPage && designPage.freqPlot) {
+            designPage.freqPlot.autoScale()
+            showNotification("Auto-scaled frequency response (Desmos Fit)", false)
+        } else if (sidebar.currentPage === 1 && analysisPage) {
+            analysisPage.autoScaleAll()
+            showNotification("Auto-scaled analysis plots (Desmos Fit)", false)
+        } else if (sidebar.currentPage === 2 && simulationPage && simulationPage.signalPlot) {
+            simulationPage.signalPlot.autoScale()
+            showNotification("Auto-scaled simulation waveform (Desmos Fit)", false)
+        }
+    }
+
+    function doZoomIn() {
+        if (sidebar.currentPage === 0 && designPage && designPage.freqPlot) {
+            designPage.freqPlot.zoomCenter(0.8)
+        } else if (sidebar.currentPage === 2 && simulationPage && simulationPage.signalPlot) {
+            simulationPage.signalPlot.zoomCenter(0.8)
+        }
+    }
+
+    function doZoomOut() {
+        if (sidebar.currentPage === 0 && designPage && designPage.freqPlot) {
+            designPage.freqPlot.zoomCenter(1.25)
+        } else if (sidebar.currentPage === 2 && simulationPage && simulationPage.signalPlot) {
+            simulationPage.signalPlot.zoomCenter(1.25)
+        }
     }
 
     // ── Global Toast / Snackbar Notification ──────────────────────────────────
@@ -235,8 +274,28 @@ Window {
         onActivated: root.doClear()
     }
 
-    // ── Tutorial & Interactive Learning Engine ───────────────────────────────
-    TutorialEngine { id: tutEngine }
+    // Zoom & Desmos Fit Shortcuts
+    Shortcut {
+        sequence: "Ctrl+0"
+        onActivated: root.doAutoScale()
+    }
+    Shortcut {
+        sequences: ["Ctrl+=", "Ctrl++"]
+        onActivated: root.doZoomIn()
+    }
+    Shortcut {
+        sequence: "Ctrl+-"
+        onActivated: root.doZoomOut()
+    }
+
+    // Theme Toggle Shortcut
+    Shortcut {
+        sequence: "Ctrl+T"
+        onActivated: {
+            theme.themeMode = theme.isDark ? 1 : 2
+            root.showNotification("Theme: " + (theme.isDark ? "Dark Mode" : "Light Mode"), false)
+        }
+    }
 
     // ── Main layout ───────────────────────────────────────────────────────────
     Item {
@@ -245,27 +304,27 @@ Window {
         opacity: root.fontsReady ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        // Top Navigation & 3-Mode Switcher [DESIGN | LEARN | CHALLENGE]
-        ModeHeaderBar {
-            id: headerBar
-            tutEngine: tutEngine
+        WindowMenuBar {
+            id: windowMenuBar
             anchors {
                 top: parent.top
                 left: parent.left
                 right: parent.right
             }
+            rootWindow: root
         }
 
         Sidebar {
             id: sidebar
             anchors {
-                top: headerBar.bottom
+                top: windowMenuBar.bottom
                 left: parent.left
                 bottom: parent.bottom
             }
             width: 48
 
             onCurrentPageChanged: {
+                pageTransitionAnim.restart()
                 pageStack.currentIndex = currentPage
                 if (currentPage === 3)
                     exportModel.generate(filterEngine)
@@ -275,44 +334,50 @@ Window {
         Item {
             id: contentHost
             anchors {
-                top: headerBar.bottom
+                top: windowMenuBar.bottom
                 left: sidebar.right
                 right: parent.right
                 bottom: parent.bottom
             }
             clip: true
 
-            ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
-
-                // Real-time DSP Lab Challenge Evaluator Bar (visible in CHALLENGE mode)
-                ChallengeStudio {
-                    id: challengeStudio
-                    tutEngine: tutEngine
-                    Layout.fillWidth: true
+            ParallelAnimation {
+                id: pageTransitionAnim
+                NumberAnimation {
+                    target: pageStack
+                    property: "opacity"
+                    from: 0.65
+                    to: 1.0
+                    duration: 180
+                    easing.type: Easing.OutCubic
                 }
-
-                StackLayout {
-                    id: pageStack
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    currentIndex: 0
-
-                    DesignPage     { id: designPage;     Layout.fillWidth: true; Layout.fillHeight: true }
-                    AnalysisPage   { id: analysisPage;   Layout.fillWidth: true; Layout.fillHeight: true }
-                    SimulationPage { id: simulationPage; Layout.fillWidth: true; Layout.fillHeight: true }
-                    ExportPage     { id: exportPage;     Layout.fillWidth: true; Layout.fillHeight: true }
-                    DocsPage       { id: docsPage;       Layout.fillWidth: true; Layout.fillHeight: true }
-                    SettingsPage   { id: settingsPage;   Layout.fillWidth: true; Layout.fillHeight: true }
+                NumberAnimation {
+                    target: pageTranslate
+                    property: "y"
+                    from: 5
+                    to: 0
+                    duration: 180
+                    easing.type: Easing.OutCubic
                 }
             }
 
-            // Interactive Tutorial Step & Spotlight Overlay (visible in LEARN mode)
-            SpotlightOverlay {
-                id: spotlightOverlay
-                tutEngine: tutEngine
+            StackLayout {
+                id: pageStack
                 anchors.fill: parent
+                currentIndex: 0
+                opacity: 1.0
+
+                transform: Translate {
+                    id: pageTranslate
+                    y: 0
+                }
+
+                DesignPage     { id: designPage;     Layout.fillWidth: true; Layout.fillHeight: true }
+                AnalysisPage   { id: analysisPage;   Layout.fillWidth: true; Layout.fillHeight: true }
+                SimulationPage { id: simulationPage; Layout.fillWidth: true; Layout.fillHeight: true }
+                ExportPage     { id: exportPage;     Layout.fillWidth: true; Layout.fillHeight: true }
+                DocsPage       { id: docsPage;       Layout.fillWidth: true; Layout.fillHeight: true }
+                SettingsPage   { id: settingsPage;   Layout.fillWidth: true; Layout.fillHeight: true }
             }
         }
     }

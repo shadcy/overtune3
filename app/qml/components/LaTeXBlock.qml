@@ -146,7 +146,7 @@ Item {
                 fillMode: Image.PreserveAspectFit
                 mipmap: true
                 source: root.eqId.length > 0
-                    ? ("qrc:/math/" + root.eqId + "_" + (theme.isDark ? "dark" : "light") + ".png")
+                    ? ("qrc:/FilterDesigner/math/" + root.eqId + "_" + (theme.isDark ? "dark" : "light") + ".png")
                     : ""
             }
 

@@ -12,9 +12,21 @@ Item {
     implicitHeight: 600
     clip: true
 
-    readonly property bool narrowLayout: width < 860
+    readonly property bool narrowLayout: width < 740
     readonly property int pageMargin: width < 700 ? 10 : 16
     readonly property real cardMinH: narrowLayout ? 240 : 180
+
+    property alias magPlot: anaMagPlot
+    property alias phasePlot: anaPhasePlot
+    property alias gdPlot: anaGdPlot
+    property alias pzPlot: anaPzPlot
+
+    function autoScaleAll() {
+        if (anaMagPlot) anaMagPlot.autoScale()
+        if (anaPhasePlot) anaPhasePlot.autoScale()
+        if (anaGdPlot) anaGdPlot.autoScale()
+        if (anaPzPlot) anaPzPlot.autoScale()
+    }
 
     Flickable {
         id: flick
@@ -60,6 +72,7 @@ Item {
                         elide: Text.ElideRight
                     }
                     FrequencyPlot {
+                        id: anaMagPlot
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.minimumHeight: 120
@@ -89,6 +102,7 @@ Item {
                         elide: Text.ElideRight
                     }
                     FrequencyPlot {
+                        id: anaPhasePlot
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.minimumHeight: 120
@@ -118,6 +132,7 @@ Item {
                         elide: Text.ElideRight
                     }
                     FrequencyPlot {
+                        id: anaGdPlot
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.minimumHeight: 120
@@ -148,25 +163,12 @@ Item {
                         elide: Text.ElideRight
                     }
 
-                    RowLayout {
+                    SegmentedButton {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 26
-                        spacing: 4
-
-                        Repeater {
-                            model: ["Pole-Zero", "Impulse", "Step"]
-                            delegate: StyledButton {
-                                required property int index
-                                required property string modelData
-                                text: modelData
-                                primary: stackView.currentIndex === index
-                                Layout.fillWidth: true
-                                Layout.minimumWidth: 56
-                                Layout.preferredHeight: 24
-                                font.pixelSize: 11
-                                onClicked: stackView.currentIndex = index
-                            }
-                        }
+                        Layout.preferredHeight: 28
+                        model: ["Pole-Zero", "Impulse", "Step"]
+                        currentIndex: stackView.currentIndex
+                        onActivated: function(idx) { stackView.currentIndex = idx }
                     }
 
                     StackLayout {
@@ -176,7 +178,7 @@ Item {
                         Layout.minimumHeight: 120
                         currentIndex: 0
 
-                        PoleZeroPlot { Layout.fillWidth: true; Layout.fillHeight: true }
+                        PoleZeroPlot { id: anaPzPlot; Layout.fillWidth: true; Layout.fillHeight: true }
                         ImpulseStepPlot { Layout.fillWidth: true; Layout.fillHeight: true; mode: 0 }
                         ImpulseStepPlot { Layout.fillWidth: true; Layout.fillHeight: true; mode: 1 }
                     }

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-// StyledButton.qml — overflow-safe button with Inter
+// StyledButton.qml — overflow-safe button with tactile feedback and pointing hand cursor
 Button {
     id: root
     implicitHeight: 30
@@ -14,6 +14,9 @@ Button {
     clip: true
 
     property bool primary: true
+
+    scale: root.pressed ? 0.95 : (hov.hovered && root.enabled ? 1.02 : 1.0)
+    Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
 
     background: Rectangle {
         radius: 8
@@ -39,5 +42,8 @@ Button {
         opacity: root.enabled ? 1 : 0.5
     }
 
-    HoverHandler { id: hov }
+    HoverHandler {
+        id: hov
+        cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+    }
 }

@@ -15,8 +15,10 @@ Item {
     readonly property var typeNames:     ["Low Pass", "High Pass", "Band Pass", "Band Stop"]
     readonly property var responseNames: ["Butterworth", "Chebyshev I", "Chebyshev II", "Elliptic", "Bessel"]
     readonly property bool isBand: filterEngine.filterType >= 2
-    readonly property bool narrowLayout: width < 900
+    readonly property bool narrowLayout: width < 680
     readonly property int pageMargin: width < 700 ? 10 : 16
+
+    property alias freqPlot: freqPlot
 
     function setPlotMode(m) {
         if (freqPlot) freqPlot.displayMode = m
@@ -117,6 +119,60 @@ Item {
                     wrapMode: Text.WordWrap
                 }
 
+                SectionHeader { text: "PRESET TEMPLATES"; width: parent.width }
+
+                ParameterRow {
+                    width: parent.width
+                    label: "Application"
+                    StyledCombo {
+                        id: appPresetCombo
+                        width: parent.width
+                        model: [
+                            "Custom Specification",
+                            "Audio Sub-Bass Cut (30 Hz HP)",
+                            "Audio Bass Roll-Off (80 Hz HP)",
+                            "Mains Hum Notch (50 Hz BS)",
+                            "Mains Hum Notch (60 Hz BS)",
+                            "Speech / Telecom (300-3.4k BP)",
+                            "Anti-Aliasing Audio (20k LP)",
+                            "Hi-Res Audio Filter (40k LP)",
+                            "Ultrasonic Sensor (10k HP)"
+                        ]
+                        onActivated: {
+                            if (currentIndex === 1) {
+                                filterEngine.filterType = 1; filterEngine.filterResponse = 0; filterEngine.order = 4;
+                                filterEngine.sampleRate = 48000; filterEngine.cutoffFreq = 30;
+                            } else if (currentIndex === 2) {
+                                filterEngine.filterType = 1; filterEngine.filterResponse = 0; filterEngine.order = 3;
+                                filterEngine.sampleRate = 48000; filterEngine.cutoffFreq = 80;
+                            } else if (currentIndex === 3) {
+                                filterEngine.sampleRate = 48000; filterEngine.filterType = 3; filterEngine.filterResponse = 3;
+                                filterEngine.order = 4; filterEngine.cutoffFreq = 48; filterEngine.cutoffFreq2 = 52;
+                                filterEngine.rippleDb = 0.5; filterEngine.stopbandDb = 50;
+                            } else if (currentIndex === 4) {
+                                filterEngine.sampleRate = 48000; filterEngine.filterType = 3; filterEngine.filterResponse = 3;
+                                filterEngine.order = 4; filterEngine.cutoffFreq = 58; filterEngine.cutoffFreq2 = 62;
+                                filterEngine.rippleDb = 0.5; filterEngine.stopbandDb = 50;
+                            } else if (currentIndex === 5) {
+                                filterEngine.sampleRate = 8000; filterEngine.filterType = 2; filterEngine.filterResponse = 1;
+                                filterEngine.order = 4; filterEngine.cutoffFreq = 300; filterEngine.cutoffFreq2 = 3400;
+                                filterEngine.rippleDb = 0.5;
+                            } else if (currentIndex === 6) {
+                                filterEngine.sampleRate = 48000; filterEngine.filterType = 0; filterEngine.filterResponse = 3;
+                                filterEngine.order = 8; filterEngine.cutoffFreq = 20000;
+                                filterEngine.rippleDb = 0.1; filterEngine.stopbandDb = 70;
+                            } else if (currentIndex === 7) {
+                                filterEngine.sampleRate = 96000; filterEngine.filterType = 0; filterEngine.filterResponse = 0;
+                                filterEngine.order = 8; filterEngine.cutoffFreq = 40000;
+                            } else if (currentIndex === 8) {
+                                filterEngine.sampleRate = 48000; filterEngine.filterType = 1; filterEngine.filterResponse = 0;
+                                filterEngine.order = 4; filterEngine.cutoffFreq = 10000;
+                            }
+                        }
+                    }
+                }
+
+                Item { width: 1; height: 2 }
                 SectionHeader { text: "TYPE"; width: parent.width }
 
                 ParameterRow {
@@ -206,6 +262,43 @@ Item {
                     }
                 }
 
+                // Live Bandwidth & Q Readout Card for Band-pass / Band-stop
+                Rectangle {
+                    visible: root.isBand
+                    width: parent.width
+                    height: visible ? 32 : 0
+                    radius: 5
+                    color: theme.surfaceHigh
+                    border.color: theme.borderColor
+                    border.width: 1
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 12
+                        Text {
+                            text: "f₀: " + Math.round(Math.sqrt(filterEngine.cutoffFreq * filterEngine.cutoffFreq2)) + " Hz"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.primaryText
+                        }
+                        Text {
+                            text: "BW: " + Math.round(filterEngine.cutoffFreq2 - filterEngine.cutoffFreq) + " Hz"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            color: theme.secondaryText
+                        }
+                        Text {
+                            readonly property real bw: Math.max(1, filterEngine.cutoffFreq2 - filterEngine.cutoffFreq)
+                            readonly property real f0: Math.sqrt(filterEngine.cutoffFreq * filterEngine.cutoffFreq2)
+                            text: "Q: " + (f0 / bw).toFixed(2)
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: theme.accent
+                        }
+                    }
+                }
+
                 ParameterRow {
                     width: parent.width
                     visible: filterEngine.filterResponse === 1 || filterEngine.filterResponse === 3
@@ -240,6 +333,45 @@ Item {
                     }
                 }
 
+                Item { width: 1; height: 4 }
+                SectionHeader { text: "PLOT DISPLAY & TOOLS"; width: parent.width }
+
+                ParameterRow {
+                    width: parent.width
+                    label: "Line Width"
+                    SegmentedButton {
+                        width: parent.width
+                        implicitHeight: 26
+                        model: ["1.5px", "2.2px", "3.2px"]
+                        currentIndex: {
+                            if (Math.abs(freqPlot.plotLineWidth - 1.5) < 0.2) return 0
+                            if (Math.abs(freqPlot.plotLineWidth - 2.2) < 0.2) return 1
+                            return 2
+                        }
+                        onActivated: function(idx) {
+                            const widths = [1.5, 2.2, 3.2]
+                            freqPlot.plotLineWidth = widths[idx]
+                            freqPlot.schedulePaint()
+                        }
+                    }
+                }
+
+                ParameterRow {
+                    width: parent.width
+                    label: "Data Cursor (+)"
+                    SegmentedButton {
+                        width: parent.width
+                        implicitHeight: 26
+                        model: ["Off", "On"]
+                        currentIndex: freqPlot.showCrosshair ? 1 : 0
+                        onActivated: function(idx) {
+                            freqPlot.showCrosshair = (idx === 1)
+                            if (!freqPlot.showCrosshair) freqPlot.isHovering = false
+                            freqPlot.schedulePaint()
+                        }
+                    }
+                }
+
                 Item { width: 1; height: 8 }
                 Rectangle {
                     width: parent.width
@@ -247,13 +379,50 @@ Item {
                     color: theme.borderColor
                     opacity: 0.5
                 }
-                Item { width: 1; height: 6 }
+                Item { width: 1; height: 4 }
+
+                // Stability & Pole Radius Status Card (Clean, minimal and balanced)
+                Rectangle {
+                    width: parent.width
+                    height: 44
+                    radius: 6
+                    color: theme.surfaceHigh
+                    border.color: theme.borderColor
+                    border.width: 1
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 9
+                        Rectangle {
+                            width: 7; height: 7; radius: 3.5
+                            color: filterEngine.isStable() ? "#34C759" : theme.danger
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 1
+                            Text {
+                                text: filterEngine.isStable() ? "System Stable (|p| < 1)" : "System Unstable (|p| ≥ 1)"
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 12
+                                font.weight: Font.DemiBold
+                                color: theme.primaryText
+                            }
+                            Text {
+                                text: "Max Pole Radius |p| = " + filterEngine.maxPoleRadius().toFixed(4)
+                                font.family: "Stack Sans Headline"
+                                font.pixelSize: 11
+                                color: theme.secondaryText
+                            }
+                        }
+                    }
+                }
 
                 Text {
                     width: parent.width
                     text: filterEngine.filterResponseName() + " " + filterEngine.filterTypeName()
                     font.family: "Stack Sans Headline"
-                    font.pixelSize: 13
+                    font.pixelSize: 14
                     font.weight: Font.DemiBold
                     color: theme.primaryText
                     wrapMode: Text.WordWrap
@@ -382,7 +551,7 @@ Item {
                             Text {
                                 text: modelData.label
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 12
+                                font.pixelSize: 13
                                 font.weight: parent.parent.active ? Font.DemiBold : Font.Normal
                                 color: parent.parent.active ? theme.primaryText : theme.secondaryText
                                 anchors.verticalCenter: parent.verticalCenter
@@ -391,7 +560,7 @@ Item {
                             // Unit pill badge
                             Rectangle {
                                 width: unitText.implicitWidth + 8
-                                height: 16
+                                height: 18
                                 radius: 4
                                 color: parent.parent.active
                                     ? (theme.isDark ? "#2D2D2D" : "#EAEAEA")
@@ -403,7 +572,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: modelData.unit
                                     font.family: "Stack Sans Headline"
-                                    font.pixelSize: 10
+                                    font.pixelSize: 11
                                     color: theme.secondaryText
                                 }
                             }
@@ -440,7 +609,7 @@ Item {
                             return "Fs: " + Number(filterEngine.sampleRate).toLocaleString(Qt.locale(), "f", 0) + " Hz  ·  Exact τg"
                     }
                     font.family: "Stack Sans Headline"
-                    font.pixelSize: 11
+                    font.pixelSize: 12
                     color: theme.secondaryText
                 }
             }

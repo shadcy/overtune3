@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 
-// StyledSlider.qml — compact slider with adaptive value label
+// StyledSlider.qml — compact slider with adaptive value label and pointing hand cursor
 Item {
     id: root
     implicitWidth: 200
@@ -20,7 +20,6 @@ Item {
 
     readonly property real valueLabelWidth: {
         const sample = Number(sl.value).toFixed(valueDecimals) + valueSuffix
-        // Approximate: ~7px per char at 12px Inter, clamp for overflow safety
         return Math.min(Math.max(40, sample.length * 7.2), Math.max(40, width * 0.38))
     }
 
@@ -38,7 +37,6 @@ Item {
             top: parent.top
             bottom: parent.bottom
         }
-        // Prevent zero-width slider crash / NaN visualPosition
         enabled: root.width > 48 && (to > from)
 
         background: Rectangle {
@@ -71,6 +69,13 @@ Item {
             border.color: sl.pressed ? theme.accent : theme.borderColor
             border.width: sl.pressed ? 2 : 1
             visible: sl.availableWidth > 16
+            scale: sl.pressed ? 1.15 : (sliderHov.hovered ? 1.08 : 1.0)
+            Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+        }
+
+        HoverHandler {
+            id: sliderHov
+            cursorShape: sl.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         }
     }
 

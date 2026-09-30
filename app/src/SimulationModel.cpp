@@ -7,7 +7,10 @@
 #include <numbers>
 #include <QVariantMap>
 
-SimulationModel::SimulationModel(QObject* parent) : QObject(parent) {}
+SimulationModel::SimulationModel(QObject* parent) : QObject(parent) {
+    // Initialize with a clean dual-tone test signal (1 kHz passband + 6 kHz stopband)
+    generateMultiTone(1000.0, 6000.0, 48000.0, 0.04);
+}
 
 void SimulationModel::loadWav(const QString& path) {
     try {
@@ -51,18 +54,68 @@ void SimulationModel::generateChirp(double f0, double f1, double sampleRate, dou
     publish(samples);
 }
 
+void SimulationModel::generateMultiTone(double fPass, double fStop, double sampleRate, double durationSec) {
+    const int n = static_cast<int>(sampleRate * durationSec);
+    std::vector<double> samples(n);
+    const double w1 = 2.0 * std::numbers::pi * fPass / sampleRate;
+    const double w2 = 2.0 * std::numbers::pi * fStop / sampleRate;
+    for (int i = 0; i < n; ++i) {
+        samples[i] = 0.5 * std::sin(w1 * i) + 0.5 * std::sin(w2 * i);
+    }
+    m_label = QString("Dual-Tone (%1 Hz + %2 Hz)").arg(fPass).arg(fStop);
+    publish(samples);
+}
+
+void SimulationModel::generateSquare(double freq, double sampleRate, double durationSec) {
+    const int n = static_cast<int>(sampleRate * durationSec);
+    std::vector<double> samples(n);
+    const double omega = 2.0 * std::numbers::pi * freq / sampleRate;
+    for (int i = 0; i < n; ++i) {
+        samples[i] = std::sin(omega * i) >= 0.0 ? 0.8 : -0.8;
+    }
+    m_label = QString("Square Wave %1 Hz").arg(freq);
+    publish(samples);
+}
+
+void SimulationModel::generateNoise(double durationSec, double sampleRate) {
+    const int n = static_cast<int>(sampleRate * durationSec);
+    std::vector<double> samples(n);
+    for (int i = 0; i < n; ++i) {
+        samples[i] = (static_cast<double>(rand()) / RAND_MAX) * 1.6 - 0.8;
+    }
+    m_label = QStringLiteral("White Noise");
+    publish(samples);
+}
+
 void SimulationModel::applyFilter(QObject* enginePtr) {
     if (m_rawInput.empty()) return;
     auto* eng = qobject_cast<FilterEngine*>(enginePtr);
     if (!eng) return;
 
-    // Force a design to get valid coefficients
-    eng->design();
+    static bool inApply = false;
+    if (inApply) return;
+    inApply = true;
 
-    // We need access to the internal coefficients — expose via a signal path
-    // For now, re-design and grab from engine by requesting it to store them
-    // (this is a simplified approach; in production you'd pass coeff directly)
+    const auto& coeff = eng->coefficients();
+    if (!coeff.isValid()) {
+        inApply = false;
+        return;
+    }
+
+    auto filtered = dsp::SignalProcessor::process(coeff, m_rawInput);
+
+    m_output.clear();
+    const int dispMax = 4096;
+    const int step = std::max(1, static_cast<int>(filtered.size()) / dispMax);
+    for (int i = 0; i < static_cast<int>(filtered.size()); i += step) {
+        QVariantMap pt;
+        pt["x"] = static_cast<double>(i);
+        pt["y"] = filtered[i];
+        m_output.append(pt);
+    }
+
     emit dataChanged();
+    inApply = false;
 }
 
 void SimulationModel::clear() {
