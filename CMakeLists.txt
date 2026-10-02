@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(FilterDesigner VERSION 3.2.3 LANGUAGES CXX)
+project(FilterDesigner VERSION 3.2.4 LANGUAGES CXX)
 
 # ── C++20 ─────────────────────────────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD 20)
@@ -32,10 +32,10 @@ add_subdirectory(app)   # Qt 6 QML application
 
 # ── CPack Packaging & Installer Generation ─────────────────────────────────────
 set(CPACK_PACKAGE_NAME "Overtune3")
-set(CPACK_PACKAGE_VENDOR "Overtune DSP")
+set(CPACK_PACKAGE_VENDOR "Shadcy")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "High-Precision Digital Filter Design & Live Audio Lab")
-set(CPACK_PACKAGE_VERSION "3.2.3")
-set(CPACK_PACKAGE_CONTACT "support@overtune.audio")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_CONTACT "https://github.com/shadcy/overtune3/issues")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 if(WIN32)
@@ -47,7 +47,7 @@ if(WIN32)
     set(CPACK_NSIS_MODIFY_PATH ON)
 else()
     set(CPACK_GENERATOR "TGZ;DEB")
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Overtune DSP Team")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Shadcy")
     set(CPACK_DEBIAN_PACKAGE_SECTION "sound")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6core6, libqt6gui6, libqt6qml6, libqt6quick6, libqt6multimedia6, libqt6network6")
 endif()

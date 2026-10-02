@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.4] - 2026-10-02
+
+### Fixed
+- Windows setup now installs the executable and deployed Qt runtime in the paths used by shortcuts and the installer launcher.
+- Installer and update status now reports file-copy and system-integration failures instead of claiming success.
+- Installer, updater, and What's New windows follow the app's selected appearance and use the bundled banner.
+- Windows Installed Apps and app version labels use the release version.
+
+### Improved
+- Windows setup opens the installed app from its finish page and keeps custom install-directory support.
+- Installer/update copy and plot-label spacing have been refined.
+
 ## [3.2.3] - 2026-10-02
 
 ### Added

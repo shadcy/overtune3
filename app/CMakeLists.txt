@@ -8,6 +8,8 @@ if(WIN32)
 endif()
 
 # ── Application ───────────────────────────────────────────────────────────────
+set_source_files_properties(../assets/banner.png PROPERTIES QT_RESOURCE_ALIAS "icons/banner.png")
+
 qt_add_executable(FilterDesigner
     src/main.cpp
     src/FilterEngine.cpp
@@ -133,6 +135,7 @@ qt_add_qml_module(FilterDesigner
         icons/16-9ar-logo.png
         icons/16-9ar-compliance.png
         icons/logo.png
+        ../assets/banner.png
 )
 
 target_link_libraries(FilterDesigner PRIVATE
@@ -149,6 +152,8 @@ target_link_libraries(FilterDesigner PRIVATE
 target_include_directories(FilterDesigner PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+target_compile_definitions(FilterDesigner PRIVATE OVERTUNE_VERSION="${PROJECT_VERSION}")
 
 set_target_properties(FilterDesigner PROPERTIES OUTPUT_NAME "ot3")
 

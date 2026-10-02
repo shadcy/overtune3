@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $AppName = "Overtune 3"
 $AppId = "Overtune3"
 $ExeName = "ot3.exe"
-$Version = "3.2.2"
+$Version = "3.2.4"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "         Overtune 3 - Windows Native Installer            " -ForegroundColor White
@@ -171,7 +171,7 @@ if (!(Test-Path $UninstallKey)) {
 
 Set-ItemProperty -Path $UninstallKey -Name "DisplayName" -Value "Overtune 3.2 Studio"
 Set-ItemProperty -Path $UninstallKey -Name "DisplayVersion" -Value $Version
-Set-ItemProperty -Path $UninstallKey -Name "Publisher" -Value "Overtune DSP"
+Set-ItemProperty -Path $UninstallKey -Name "Publisher" -Value "Shadcy"
 Set-ItemProperty -Path $UninstallKey -Name "InstallLocation" -Value $InstallDir
 Set-ItemProperty -Path $UninstallKey -Name "DisplayIcon" -Value $IconRef
 Set-ItemProperty -Path $UninstallKey -Name "UninstallString" -Value "powershell.exe -ExecutionPolicy Bypass -File `"$InstallDir\uninstall.ps1`""

@@ -1215,7 +1215,7 @@ Item {
         height: 22
         radius: 6
         color: "#000000"
-        border.color: "rgba(255, 255, 255, 0.22)"
+        border.color: Qt.rgba(1, 1, 1, 0.22)
         border.width: 1
 
         Row {
@@ -1250,7 +1250,7 @@ Item {
         height: 22
         radius: 6
         color: "#000000"
-        border.color: "rgba(255, 255, 255, 0.22)"
+        border.color: Qt.rgba(1, 1, 1, 0.22)
         border.width: 1
 
         Row {

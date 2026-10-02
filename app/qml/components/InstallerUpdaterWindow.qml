@@ -9,7 +9,7 @@ Window {
     property bool isStandalone: false
     property int activeTab: 0 // 0 = Auto-Updater, 1 = System Installer
 
-    title: (isStandalone || activeTab === 1) ? "Overtune 3.2.3 Setup" : "Overtune 3.2.3 — Installer & Auto-Updater"
+    title: (isStandalone || activeTab === 1) ? "Overtune " + updateInstaller.currentVersion + " Setup" : "Overtune " + updateInstaller.currentVersion + " — Installer & Auto-Updater"
     width:         520
     height:        Math.min(640, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 620)
     minimumWidth:  460
@@ -17,7 +17,16 @@ Window {
     maximumWidth:  600
     maximumHeight: 760
 
-    color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7"
+    color: theme.background
+    palette.window: theme.background
+    palette.windowText: theme.primaryText
+    palette.base: theme.surface
+    palette.text: theme.primaryText
+    palette.button: theme.surfaceHigh
+    palette.buttonText: theme.primaryText
+    palette.highlight: theme.accent
+    palette.highlightedText: "#FFFFFF"
+    palette.mid: theme.borderColor
     visible: false
     flags: isStandalone ? (Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
                         : (Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
@@ -80,7 +89,19 @@ Window {
         clip: true
         contentWidth: availableWidth
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical.policy:   ScrollBar.AsNeeded
+        ScrollBar.vertical: ScrollBar {
+            id: installerScrollBar
+            policy: ScrollBar.AsNeeded
+            hoverEnabled: true
+            width: 8
+            contentItem: Rectangle {
+                implicitWidth: 6
+                radius: 3
+                color: installerScrollBar.pressed ? theme.accent
+                     : (installerScrollBar.hovered ? theme.secondaryText : theme.borderColor)
+            }
+            background: Item {}
+        }
 
         Column {
             width: scrollView.availableWidth
@@ -94,7 +115,7 @@ Window {
 
                 Image {
                     anchors.fill: parent
-                    source: "qrc:/FilterDesigner/icons/16-9ar-logo.png"
+                    source: "qrc:/FilterDesigner/icons/banner.png"
                     fillMode: Image.PreserveAspectCrop
                     smooth: true
                     mipmap: true
@@ -108,7 +129,7 @@ Window {
                     gradient: Gradient {
                         orientation: Gradient.Vertical
                         GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 1.0; color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7" }
+                        GradientStop { position: 1.0; color: theme.background }
                     }
                 }
 
@@ -154,7 +175,7 @@ Window {
 
                     Text {
                         text: (root.isStandalone || root.activeTab === 1)
-                              ? (updateInstaller.status === "installed" ? "Overtune 3.2.3 Ready to Launch" : "Install Overtune " + updateInstaller.currentVersion + " to " + updateInstaller.osName)
+                              ? (updateInstaller.status === "installed" ? "Overtune " + updateInstaller.currentVersion + " Ready to Launch" : "Install Overtune " + updateInstaller.currentVersion + " to " + updateInstaller.osName)
                               : (updateInstaller.hasUpdate ? ("Update: v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion) : ("Overtune " + updateInstaller.currentVersion + " is Up to Date"))
                         font.pixelSize: 24
                         font.weight: Font.Bold
@@ -165,7 +186,7 @@ Window {
                     Text {
                         text: (root.isStandalone || root.activeTab === 1)
                               ? (updateInstaller.status === "installed"
-                                 ? "Installation completed successfully. You can launch Overtune 3.2.3 now or close this wizard."
+                                 ? "Installation completed successfully. You can launch Overtune " + updateInstaller.currentVersion + " now or close this wizard."
                                  : "Setup native system integration, desktop shortcuts, and Start menu registration.")
                               : (updateInstaller.hasUpdate ? ("Upgrade from v" + updateInstaller.currentVersion + " to v" + updateInstaller.latestVersion + " is ready to install.") : ("You are currently running the latest stable release (v" + updateInstaller.currentVersion + ")."))
                         font.pixelSize: 13
@@ -450,7 +471,7 @@ Window {
 
                             Item { width: 1; height: 4 }
 
-                            // SHA256 integrity tag
+                            // Installed and release versions
                             Rectangle {
                                 width: parent.width
                                 height: 26
@@ -464,13 +485,13 @@ Window {
                                     anchors.rightMargin: 8
 
                                     Codicon {
-                                        icon: "shield"
+                                        icon: "versions"
                                         iconSize: 12
                                         iconColor: "#30D158"
                                     }
 
                                     Text {
-                                        text: "SHA-256 Verified: " + updateInstaller.releaseSha256.substring(0, 16) + "..."
+                                        text: "Current v" + updateInstaller.currentVersion + "  ·  Latest v" + updateInstaller.latestVersion
                                         font.pixelSize: 10
                                         font.family: "Monospace"
                                         color: theme.secondaryText
@@ -561,7 +582,7 @@ Window {
                                             implicitWidth: browseText.implicitWidth + 20
                                             implicitHeight: 24
                                             radius: 4
-                                            color: browseMouse.pressed ? Qt.darker(theme.surface, 1.2) : (browseMouse.containsMouse ? theme.surfaceHover : theme.surface)
+                                            color: browseMouse.pressed ? Qt.darker(theme.surface, 1.2) : (browseMouse.containsMouse ? theme.surfaceHigh : theme.surface)
                                             border.color: theme.borderColor
 
                                             Row {
@@ -765,6 +786,12 @@ Window {
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
+        background: Rectangle {
+            color: theme.surface
+            border.color: theme.borderColor
+            border.width: 1
+            radius: 8
+        }
         contentItem: Text {
             text: "Are you sure you want to completely remove Overtune 3, its shortcuts, registry entries, and local files?"
             color: theme.primaryText
@@ -782,7 +809,7 @@ Window {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
-        color: theme.isDark ? "#0C0C0E" : "#EBEBED"
+        color: theme.surface
         z: 10
 
         Rectangle {

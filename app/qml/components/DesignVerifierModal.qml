@@ -7,7 +7,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2.3 — Design Verifier"
+    title: "Overtune " + updateInstaller.currentVersion + " — Design Verifier"
     width:         520
     height:        Math.min(580, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 560)
     minimumWidth:  460
@@ -15,7 +15,16 @@ Window {
     maximumWidth:  600
     maximumHeight: 740
 
-    color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7"
+    color: theme.background
+    palette.window: theme.background
+    palette.windowText: theme.primaryText
+    palette.base: theme.surface
+    palette.text: theme.primaryText
+    palette.button: theme.surfaceHigh
+    palette.buttonText: theme.primaryText
+    palette.highlight: theme.accent
+    palette.highlightedText: "#FFFFFF"
+    palette.mid: theme.borderColor
     visible: false
     flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint
 
@@ -73,7 +82,19 @@ Window {
         contentWidth: availableWidth
         contentHeight: mainCol.implicitHeight
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical.policy:   ScrollBar.AsNeeded
+        ScrollBar.vertical: ScrollBar {
+            id: verifierScrollBar
+            policy: ScrollBar.AsNeeded
+            hoverEnabled: true
+            width: 8
+            contentItem: Rectangle {
+                implicitWidth: 6
+                radius: 3
+                color: verifierScrollBar.pressed ? theme.accent
+                     : (verifierScrollBar.hovered ? theme.secondaryText : theme.borderColor)
+            }
+            background: Item {}
+        }
 
         Column {
             id: mainCol
@@ -274,7 +295,7 @@ Window {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
-        color: "#0c0c0e"
+        color: theme.surface
         z: 10
 
         Rectangle {

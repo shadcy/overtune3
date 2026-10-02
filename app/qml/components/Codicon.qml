@@ -8,7 +8,7 @@ Text {
     property int iconSize: 16
     property color iconColor: theme.secondaryText
 
-    font.family: "codicon"
+    font.family: codiconFontFamily
     font.pixelSize: iconSize
     color: iconColor
     horizontalAlignment: Text.AlignHCenter

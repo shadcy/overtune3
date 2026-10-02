@@ -12,7 +12,7 @@ set "PKG_NAME=overtune3-windows-x64"
 set "STAGE_DIR=%ROOT_DIR%\shareware\windows\%PKG_NAME%"
 
 echo ========================================================
-echo   Packaging Overtune 3 for Windows x64 (Shareware)
+echo   Packaging Overtune 3.2.4 for Windows x64
 echo ========================================================
 echo Root directory: %ROOT_DIR%
 
@@ -79,16 +79,32 @@ copy /y "%SCRIPT_DIR%install_windows.ps1" "%STAGE_DIR%\" >nul
     echo popd
 ) > "%STAGE_DIR%\run.bat"
 
-echo [4/4] Creating zip archives...
+echo [4/5] Creating zip archives...
 if not exist "%DIST_DIR%" mkdir "%DIST_DIR%"
 
 powershell -NoProfile -Command "Compress-Archive -Path '%STAGE_DIR%' -DestinationPath '%ROOT_DIR%\shareware\windows\%PKG_NAME%.zip' -Force"
 copy /y "%ROOT_DIR%\shareware\windows\%PKG_NAME%.zip" "%DIST_DIR%\%PKG_NAME%.zip" >nul
+
+echo [5/5] Building the Windows setup installer...
+where makensis >nul 2>nul
+if errorlevel 1 (
+    echo [ERROR] NSIS is required to build the setup installer. Install NSIS and add makensis to PATH.
+    exit /b 1
+)
+pushd "%SCRIPT_DIR%"
+makensis installer_windows.nsi
+if errorlevel 1 (
+    popd
+    echo [ERROR] NSIS failed to build the setup installer.
+    exit /b 1
+)
+popd
 
 echo.
 echo [OK] Windows shareware package created successfully:
 echo   - Folder:  %STAGE_DIR%
 echo   - Archive: %ROOT_DIR%\shareware\windows\%PKG_NAME%.zip
 echo   - Dist:    %DIST_DIR%\%PKG_NAME%.zip
+echo   - Setup:   %DIST_DIR%\Overtune3-Setup-x64.exe
 echo.
 endlocal

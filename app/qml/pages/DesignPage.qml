@@ -182,9 +182,9 @@ Item {
                 contentItem: Rectangle {
                     implicitWidth: 6
                     radius: 3
-                    color: configScrollBar.pressed ? theme.accent
-                         : (configScrollBar.hovered ? (theme.isDark ? "rgba(255, 255, 255, 0.45)" : "rgba(0, 0, 0, 0.4)")
-                                                    : (theme.isDark ? "rgba(255, 255, 255, 0.22)" : "rgba(0, 0, 0, 0.18)"))
+                color: configScrollBar.pressed ? theme.accent
+                     : (configScrollBar.hovered ? (theme.isDark ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(0, 0, 0, 0.4))
+                                                    : (theme.isDark ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(0, 0, 0, 0.18)))
                     Behavior on color { ColorAnimation { duration: 120 } }
                 }
                 background: Item {

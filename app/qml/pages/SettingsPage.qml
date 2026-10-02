@@ -71,7 +71,7 @@ Item {
         PageHeader {
             Layout.fillWidth: true
             title: "Settings"
-            badgeText: "v3.2.3"
+            badgeText: "v" + updateInstaller.currentVersion
             badgeIcon: "settings-gear"
 
             Rectangle {
@@ -582,7 +582,7 @@ Item {
                         Repeater {
                             model: [
                                 { label: "App",       value: "Overtune 3 Studio" },
-                                { label: "Version",   value: "3.2.3" },
+                                { label: "Version",   value: updateInstaller.currentVersion },
                                 { label: "DSP Engine",value: "C++20, zero dependencies" },
                                 { label: "UI",        value: "Qt 6 / QML" }
                             ]

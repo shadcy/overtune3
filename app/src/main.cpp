@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[]) {
 #ifdef Q_OS_WIN
-    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.3");
+    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.4");
 #endif
     // Avoid GTK theme crash on Ubuntu Wayland/GNOME
     qputenv("QT_QPA_PLATFORMTHEME", "generic");
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
     QGuiApplication::setApplicationName("Overtune 3");
     QGuiApplication::setOrganizationName("Overtune");
-    QGuiApplication::setApplicationVersion("3.2.3");
+    QGuiApplication::setApplicationVersion(OVERTUNE_VERSION);
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(QStringLiteral(":/FilterDesigner/icons/logo.png")));
@@ -39,7 +39,9 @@ int main(int argc, char* argv[]) {
     QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-SemiBold.ttf"));
     QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-Bold.ttf"));
     QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/Inter-Regular.ttf"));
-    QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/codicon.ttf"));
+    const int codiconFontId = QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/codicon.ttf"));
+    const QStringList codiconFamilies = QFontDatabase::applicationFontFamilies(codiconFontId);
+    const QString codiconFontFamily = codiconFamilies.isEmpty() ? QStringLiteral("codicon") : codiconFamilies.constFirst();
 
     QFont defaultFont(QStringLiteral("Stack Sans Headline"));
     defaultFont.setStyleHint(QFont::SansSerif);
@@ -78,6 +80,7 @@ int main(int argc, char* argv[]) {
     qml.rootContext()->setContextProperty("exportModel",       &exportModel);
     qml.rootContext()->setContextProperty("theme",             &theme);
     qml.rootContext()->setContextProperty("updateInstaller",   &updateInstaller);
+    qml.rootContext()->setContextProperty("codiconFontFamily", codiconFontFamily);
     qml.rootContext()->setContextProperty("cliLaunchInstaller", launchInstaller);
     qml.rootContext()->setContextProperty("cliLaunchUpdater",   launchUpdater);
 

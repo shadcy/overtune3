@@ -20,7 +20,6 @@ class UpdateInstallerEngine : public QObject {
     Q_PROPERTY(QString releaseDate READ releaseDate NOTIFY updateInfoChanged)
     Q_PROPERTY(QStringList releaseNotes READ releaseNotes NOTIFY updateInfoChanged)
     Q_PROPERTY(QString releaseSize READ releaseSize NOTIFY updateInfoChanged)
-    Q_PROPERTY(QString releaseSha256 READ releaseSha256 NOTIFY updateInfoChanged)
 
     Q_PROPERTY(bool hasUpdate READ hasUpdate NOTIFY updateInfoChanged)
     Q_PROPERTY(bool isChecking READ isChecking NOTIFY stateChanged)
@@ -44,13 +43,12 @@ public:
     explicit UpdateInstallerEngine(QObject *parent = nullptr);
     ~UpdateInstallerEngine() override = default;
 
-    QString currentVersion() const { return QStringLiteral("3.2.3"); }
+    QString currentVersion() const { return QStringLiteral(OVERTUNE_VERSION); }
     QString latestVersion() const { return m_latestVersion; }
     QString releaseName() const { return m_releaseName; }
     QString releaseDate() const { return m_releaseDate; }
     QStringList releaseNotes() const { return m_releaseNotes; }
     QString releaseSize() const { return m_releaseSize; }
-    QString releaseSha256() const { return m_releaseSha256; }
 
     bool hasUpdate() const { return m_hasUpdate; }
     bool isChecking() const { return m_status == QStringLiteral("checking"); }
@@ -107,15 +105,13 @@ private:
     bool performLinuxInstall(const QString &dir, bool desktop, bool menu);
     bool performWindowsInstall(const QString &dir, bool desktop, bool menu);
 
-    QString m_latestVersion = QStringLiteral("3.2.4");
-    QString m_releaseName = QStringLiteral("Overtune 3.2.3 — High-Precision DSP & Adaptive Audio Studio");
+    QString m_latestVersion = QStringLiteral(OVERTUNE_VERSION);
+    QString m_releaseName = QStringLiteral("Overtune ") + QStringLiteral(OVERTUNE_VERSION);
     QString m_releaseDate = QStringLiteral("October 2026");
     QStringList m_releaseNotes;
     QString m_releaseSize = QStringLiteral("24.8 MB");
-    QString m_releaseSha256 = QStringLiteral("e9a8f273b4018c6d123e4f0a91e523bd8a230491823746acdb0192837465fec1");
 
     bool m_hasUpdate = false;
-    bool m_forceUpdateFound = false;
     QString m_status = QStringLiteral("idle");
     QString m_statusMessage = QStringLiteral("Ready");
     qreal m_progress = 0.0;

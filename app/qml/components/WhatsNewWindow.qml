@@ -6,7 +6,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2.3 — What's New"
+    title: "Overtune " + updateInstaller.currentVersion + " — What's New"
     width:         520
     height:        Math.min(620, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 600)
     minimumWidth:  460
@@ -14,7 +14,16 @@ Window {
     maximumWidth:  600
     maximumHeight: 760
 
-    color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7"
+    color: theme.background
+    palette.window: theme.background
+    palette.windowText: theme.primaryText
+    palette.base: theme.surface
+    palette.text: theme.primaryText
+    palette.button: theme.surfaceHigh
+    palette.buttonText: theme.primaryText
+    palette.highlight: theme.accent
+    palette.highlightedText: "#FFFFFF"
+    palette.mid: theme.borderColor
     visible: false
     flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint
 
@@ -54,7 +63,19 @@ Window {
         contentHeight: mainCol.implicitHeight
         opacity: 0
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical.policy:   ScrollBar.AsNeeded
+        ScrollBar.vertical: ScrollBar {
+            id: whatsNewScrollBar
+            policy: ScrollBar.AsNeeded
+            hoverEnabled: true
+            width: 8
+            contentItem: Rectangle {
+                implicitWidth: 6
+                radius: 3
+                color: whatsNewScrollBar.pressed ? theme.accent
+                     : (whatsNewScrollBar.hovered ? theme.secondaryText : theme.borderColor)
+            }
+            background: Item {}
+        }
 
         Column {
             id: mainCol
@@ -70,7 +91,7 @@ Window {
 
                 Image {
                     anchors.fill: parent
-                    source: "qrc:/FilterDesigner/icons/16-9ar-logo.png"
+                    source: "qrc:/FilterDesigner/icons/banner.png"
                     fillMode: Image.PreserveAspectCrop
                     smooth: true
                     mipmap: true
@@ -84,7 +105,7 @@ Window {
                     gradient: Gradient {
                         orientation: Gradient.Vertical
                         GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 1.0; color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7" }
+                        GradientStop { position: 1.0; color: theme.background }
                     }
                 }
 
@@ -102,7 +123,7 @@ Window {
                     Text {
                         id: vLabel
                         anchors.centerIn: parent
-                        text: "v3.2.3"
+                        text: "v" + updateInstaller.currentVersion
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
                         color: "#FFFFFF"
@@ -117,7 +138,7 @@ Window {
             Text {
                 x: 36
                 width: parent.width - 72
-                text: "What's new in Overtune 3.2.3"
+                text: "What's new in Overtune " + updateInstaller.currentVersion
                 font.pixelSize: 28
                 font.weight: Font.Bold
                 color: theme.primaryText
@@ -130,7 +151,7 @@ Window {
             Text {
                 x: 36
                 width: parent.width - 72
-                text: "Native installation directory selection, solid-contrast plot math badges, authentic Codicons, and refined UI styling."
+                text: "Choose an install folder, set up shortcuts, and use the app's selected appearance."
                 font.pixelSize: 13
                 color: theme.secondaryText
                 wrapMode: Text.Wrap
@@ -162,12 +183,12 @@ Window {
 
             Repeater {
                 model: [
-                    { n: "1", title: "Target directory selection in installer",
-                      desc: "Choose any custom installation destination directly in the setup wizard via native folder picker." },
-                    { n: "2", title: "Solid black math badges in all plots",
-                      desc: "Mathematical symbols are rendered against solid black squircle badges with clear separation from axis numbers." },
-                    { n: "3", title: "Full authentic Codicon icon set",
-                      desc: "Zero missing glyphs or question mark icons across all views and settings dialogs." }
+                    { n: "1", title: "Choose an install folder",
+                      desc: "Select a destination in setup or type a path." },
+                    { n: "2", title: "Readable plot labels",
+                      desc: "Axis labels use solid black backgrounds and sit clear of tick values." },
+                    { n: "3", title: "Clear version details",
+                      desc: "See the installed and available versions in the update view." }
                 ]
 
                 delegate: Row {
@@ -244,9 +265,9 @@ Window {
             Repeater {
                 model: [
                     { n: "4", title: "Clean version transitions & update flows",
-                      desc: "Accurate v3.2.2 → v3.2.3 version indicators and dynamic button layouts without text clipping." },
-                    { n: "5", title: "Clean Apple-inspired aesthetics",
-                      desc: "Disciplined typography, zero marketing filler, and harmonious dark/light mode surface hierarchy." }
+                      desc: "Accurate version indicators and installer layouts without text clipping." },
+                    { n: "5", title: "Theme-aware setup windows",
+                      desc: "Installer and update windows follow the app's dark or light appearance." }
                 ]
 
                 delegate: Row {
@@ -298,7 +319,7 @@ Window {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
-        color: theme.isDark ? "#0C0C0E" : "#EBEBED"
+        color: theme.surface
         z: 10
 
         Rectangle {
@@ -309,7 +330,7 @@ Window {
 
         Text {
             anchors { left: parent.left; leftMargin: 36; verticalCenter: parent.verticalCenter }
-            text: "Release 3.2.3 (2026)"
+            text: "Release " + updateInstaller.currentVersion + " (2026)"
             font.pixelSize: 11
             color: theme.secondaryText
             font.letterSpacing: 0.2
