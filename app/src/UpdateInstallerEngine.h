@@ -44,7 +44,7 @@ public:
     explicit UpdateInstallerEngine(QObject *parent = nullptr);
     ~UpdateInstallerEngine() override = default;
 
-    QString currentVersion() const { return QStringLiteral("3.0.0"); }
+    QString currentVersion() const { return QStringLiteral("3.2.1"); }
     QString latestVersion() const { return m_latestVersion; }
     QString releaseName() const { return m_releaseName; }
     QString releaseDate() const { return m_releaseDate; }
@@ -79,6 +79,7 @@ public:
     Q_INVOKABLE void checkForUpdates(bool forceUpdateFound = false);
     Q_INVOKABLE void startDownloadAndInstall();
     Q_INVOKABLE void installToSystem(const QString &targetPath = QString(), bool desktopIcon = true, bool startMenu = true);
+    Q_INVOKABLE bool uninstallFromSystem();
     Q_INVOKABLE void restartApplication();
     Q_INVOKABLE void createShortcuts();
     Q_INVOKABLE void openInstallDirectory();
@@ -105,8 +106,8 @@ private:
     bool performLinuxInstall(const QString &dir, bool desktop, bool menu);
     bool performWindowsInstall(const QString &dir, bool desktop, bool menu);
 
-    QString m_latestVersion = QStringLiteral("3.1.0");
-    QString m_releaseName = QStringLiteral("Overtune 3.1.0 — High-Precision DSP & Adaptive Audio");
+    QString m_latestVersion = QStringLiteral("3.2.1");
+    QString m_releaseName = QStringLiteral("Overtune 3.2.1 — High-Precision DSP & Adaptive Audio Studio");
     QString m_releaseDate = QStringLiteral("October 2026");
     QStringList m_releaseNotes;
     QString m_releaseSize = QStringLiteral("24.8 MB");

@@ -6,13 +6,13 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3 (beta) — What's New"
-    width:       520
-    height:      700
-    minimumWidth:  520
-    minimumHeight: 700
-    maximumWidth:  520
-    maximumHeight: 700
+    title: "Overtune 3.2 — What's New"
+    width:         520
+    height:        Math.min(620, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 600)
+    minimumWidth:  460
+    minimumHeight: 460
+    maximumWidth:  600
+    maximumHeight: 760
 
     color: "#000000"
     visible: false
@@ -20,6 +20,13 @@ Window {
 
     function openWindow() {
         if (!visible) {
+            if (transientParent) {
+                x = Math.max(0, transientParent.x + (transientParent.width - width) / 2)
+                y = Math.max(0, transientParent.y + (transientParent.height - height) / 2)
+            } else if (Screen.desktopAvailableWidth && Screen.desktopAvailableHeight) {
+                x = Math.max(0, (Screen.desktopAvailableWidth - width) / 2)
+                y = Math.max(0, (Screen.desktopAvailableHeight - height) / 2)
+            }
             visible = true
             fadeIn.restart()
         }
@@ -44,18 +51,21 @@ Window {
         anchors { top: parent.top; left: parent.left; right: parent.right; bottom: footer.top }
         clip: true
         contentWidth: availableWidth
+        contentHeight: mainCol.implicitHeight
         opacity: 0
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy:   ScrollBar.AsNeeded
 
         Column {
-            width: parent.width
+            id: mainCol
+            width: scrollView.availableWidth
             spacing: 0
+
 
             // ── 16:9 Banner ───────────────────────────────────────────────────
             Item {
                 width: parent.width
-                height: root.width * 9.0 / 16.0   // 292.5 px
+                height: width * 9.0 / 16.0   // 292.5 px
                 clip: true
 
                 Image {
@@ -92,7 +102,7 @@ Window {
                     Text {
                         id: vLabel
                         anchors.centerIn: parent
-                        text: "v3.0"
+                        text: "v3.2"
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
                         color: "#FFFFFF"
@@ -107,7 +117,7 @@ Window {
             Text {
                 x: 36
                 width: parent.width - 72
-                text: "What's new in Overtune 3"
+                text: "What's new in Overtune 3.2"
                 font.pixelSize: 30
                 font.weight: Font.Bold
                 color: "#FFFFFF"
@@ -289,10 +299,12 @@ Window {
     }
 
     // ── Fixed footer ──────────────────────────────────────────────────────────
-    Item {
+    Rectangle {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
+        color: "#0c0c0e"
+        z: 10
 
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
@@ -303,7 +315,7 @@ Window {
 
         Text {
             anchors { left: parent.left; leftMargin: 36; verticalCenter: parent.verticalCenter }
-            text: "September 2026"
+            text: "Release 3.2 (2026)"
             font.pixelSize: 11
             color: "#FFFFFF"
             opacity: 0.25

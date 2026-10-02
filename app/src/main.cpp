@@ -10,7 +10,15 @@
 #include "ThemeManager.h"
 #include "UpdateInstallerEngine.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <shobjidl.h>
+#endif
+
 int main(int argc, char* argv[]) {
+#ifdef Q_OS_WIN
+    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.1");
+#endif
     // Avoid GTK theme crash on Ubuntu Wayland/GNOME
     qputenv("QT_QPA_PLATFORMTHEME", "generic");
 
@@ -19,9 +27,11 @@ int main(int argc, char* argv[]) {
 
     QGuiApplication::setApplicationName("Overtune 3");
     QGuiApplication::setOrganizationName("Overtune");
-    QGuiApplication::setApplicationVersion("3.0.0");
+    QGuiApplication::setApplicationVersion("3.2.1");
 
     QGuiApplication app(argc, argv);
+    app.setWindowIcon(QIcon(QStringLiteral(":/FilterDesigner/icons/logo.png")));
+
 
     // Register bundled fonts
     QFontDatabase::addApplicationFont(QStringLiteral(":/FilterDesigner/fonts/StackSansHeadline-Regular.ttf"));
@@ -42,9 +52,15 @@ int main(int argc, char* argv[]) {
     ThemeManager           theme;
     UpdateInstallerEngine  updateInstaller;
 
-    // Check CLI arguments for installer or update launch modes
+    // Check CLI arguments or executable name for installer or update launch modes
     bool launchInstaller = false;
     bool launchUpdater = false;
+
+    QString currentExe = QFileInfo(QCoreApplication::applicationFilePath()).fileName().toLower();
+    if (currentExe.contains(QStringLiteral("installer")) || currentExe.contains(QStringLiteral("setup"))) {
+        launchInstaller = true;
+    }
+
     for (int i = 1; i < argc; ++i) {
         QString arg = QString::fromLocal8Bit(argv[i]);
         if (arg == QStringLiteral("--install") || arg == QStringLiteral("-i")) {

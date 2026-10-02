@@ -40,7 +40,7 @@
 % ═════════════════════════════════════════════════════════════════
 \noindent
 \begin{tabular*}{\textwidth}{@{}l @{\extracolsep{\fill}} r@{}}
-\textbf{\large OVERTUNE DSP RESEARCH \& ENGINEERING} & \textbf{Release 3.0 (2026)} \\
+\textbf{\large OVERTUNE DSP RESEARCH \& ENGINEERING} & \textbf{Release 3.2 (2026)} \\
 Digital Filter Synthesis \& Real-Time DSP Studio & Architecture: x86\_64 \\
 \textbf{Executable: \texttt{ot3}} & Deployment Note 04
 \end{tabular*}
@@ -50,7 +50,7 @@ Digital Filter Synthesis \& Real-Time DSP Studio & Architecture: x86\_64 \\
 \vspace{16pt}
 
 \begin{center}
-{\LARGE \textbf{Overtune 3 (\texttt{ot3}) --- System Installation Guide}}\\[6pt]
+{\LARGE \textbf{Overtune 3.2 (\texttt{ot3}) --- System Installation Guide}}\\[6pt]
 {\large \textsc{Native Deployment, In-App Auto-Updater, and Portable Shareware Bundles}}
 \end{center}
 
@@ -99,20 +99,65 @@ cd overtune3-linux-x86_64
 
 \section*{3. Windows Installation \& Execution}
 
-Overtune 3 provides native PowerShell and NSIS installer packaging for Windows:
+Overtune 3 provides comprehensive native Windows deployment options designed for both standard desktop users and power users:
 
-\subsection*{Method A: PowerShell Automated Setup (\texttt{install\_windows.ps1})}
-Runs natively on any standard Windows 10/11 system without requiring external package managers:
+\subsection*{Method A: Standalone Portable Shareware Package (Zero Install)}
+For instant, portable execution without administrative rights or registry modifications:
+\begin{enumerate}[leftmargin=20pt,itemsep=2pt]
+  \item Extract \texttt{shareware\textbackslash windows\textbackslash overtune3-windows-x64.zip} (or copy the \texttt{overtune3-windows-x64} directory).
+  \item Double-click \texttt{ot3.bat} or \texttt{run.bat} to launch the application immediately.
+  \item Alternatively, navigate to \texttt{bin\textbackslash} and execute \texttt{ot3.exe} directly.
+\end{enumerate}
+
+\subsection*{Method B: Automated Native PowerShell Installer (\texttt{install\_windows.ps1})}
+To fully integrate Overtune 3 into Windows (Start Menu, Desktop, Apps list, and in-place auto-updater):
 \begin{lstlisting}
-powershell -ExecutionPolicy Bypass -File .\scripts\install_windows.ps1
+# Standard user or Administrator execution:
+powershell -ExecutionPolicy Bypass -File .\shareware\windows\install_windows.ps1
 \end{lstlisting}
-This installs \texttt{ot3.exe} to \texttt{\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3}, creates Start Menu and Desktop shortcuts, registers the uninstaller in Windows Settings / Control Panel, and configures the background updater helper.
 
-\subsection*{Method B: Modern NSIS Setup Executable}
-Run \texttt{Overtune3-Setup-x64.exe} and follow the graphical setup wizard. Silent unattended deployment is supported with the \texttt{/S} switch.
+\textbf{Supported Options \& Switches:}
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+  \item \texttt{-InstallDir <path>}: Target folder (defaults to \texttt{\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3}).
+  \item \texttt{-NoDesktop}: Skip creating the Desktop shortcut.
+  \item \texttt{-NoStartMenu}: Skip creating the Start Menu shortcut.
+\end{itemize}
 
-\subsection*{Method C: Standalone Portable ZIP}
-Extract \texttt{overtune3-windows-x64.zip} and double-click \texttt{bin\textbackslash ot3.exe}.
+What the installer accomplishes:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+  \item Copies the complete application bundle including all required Qt 6.7 runtime libraries, QML engines, multimedia backends, and assets.
+  \item Creates the \textbf{Desktop} shortcut (\texttt{Overtune 3.lnk}) and \textbf{Start Menu} entry (\texttt{Programs\textbackslash Overtune 3}).
+  \item Registers \textbf{Overtune 3 Studio} in Windows Settings $\rightarrow$ \textit{Installed Apps} with an uninstallation hook.
+  \item Prepares \texttt{overtune\_update.bat} for atomic background updating.
+\end{itemize}
+
+\subsection*{Method C: Building from Source on Windows (\texttt{build.bat})}
+If building from repository sources using Visual Studio 2022 and Qt 6:
+\begin{lstlisting}
+# One-click configure, compile, and runtime deployment:
+.\build.bat
+
+# Direct launch:
+.\run.bat
+\end{lstlisting}
+This invokes CMake with the Visual Studio 17 2022 generator, compiles the pure C++20 DSP engine and Qt 6 GUI in parallel Release mode, and runs \texttt{windeployqt} to assemble all runtime DLLs and QML dependencies.
+
+\subsection*{Method D: Modern NSIS Setup Executable}
+To generate or run a standard Windows Setup wizard:
+\begin{lstlisting}
+# Compile NSIS installer (requires makensis):
+cd shareware\windows && makensis installer_windows.nsi
+\end{lstlisting}
+Run \texttt{Overtune3-Setup-x64.exe} interactively or silently with \texttt{/S}.
+
+\subsection*{Windows Uninstallation}
+To remove Overtune 3:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+  \item Open \textbf{Windows Settings} $\rightarrow$ \textbf{Apps} $\rightarrow$ \textbf{Installed Apps} $\rightarrow$ \textbf{Overtune 3 Studio} $\rightarrow$ \textbf{Uninstall}.
+  \item Or run: \texttt{powershell -ExecutionPolicy Bypass -File "\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3\textbackslash uninstall.ps1"}
+  \item Or double-click: \texttt{"\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3\textbackslash uninstall.bat"}
+\end{itemize}
+
 
 \section*{4. In-App Auto-Updater \& In-Place Atomic Updates}
 

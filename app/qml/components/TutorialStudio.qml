@@ -128,7 +128,7 @@ Rectangle {
         const topNames = ["Lowpass (LPF)", "Highpass (HPF)", "Bandpass (BPF)", "Bandstop (Notch)"]
         const respNames = ["Butterworth", "Chebyshev I", "Chebyshev II", "Elliptic", "Bessel"]
         const obj = {
-            overtune_version: "3.0",
+            overtune_version: "3.2",
             type: "overtune_interactive_tutorial",
             id: root.edId.length > 0 ? root.edId : ("tut_student_" + Date.now()),
             title: root.edTitle,

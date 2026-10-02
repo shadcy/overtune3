@@ -14,6 +14,8 @@ if errorlevel 1 exit /b %errorlevel%
 echo [3/3] Deploying Qt runtime libraries...
 "%QT_PATH%\bin\windeployqt.exe" "%~dp0build\bin\Release\ot3.exe" --qmldir "%~dp0app\qml" --multimedia
 copy /y "%~dp0build\bin\Release\ot3.exe" "%~dp0build\bin\Release\FilterDesigner.exe" >nul
+copy /y "%~dp0assets\logo.ico" "%~dp0build\bin\Release\logo.ico" >nul
+copy /y "%~dp0assets\logo.png" "%~dp0build\bin\Release\logo.png" >nul
 
 echo Build complete! Run run.bat or .\build\bin\Release\ot3.exe
 endlocal

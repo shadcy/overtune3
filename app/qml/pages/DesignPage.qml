@@ -76,8 +76,8 @@ Item {
     }
 
     readonly property real configWidth: {
-        const w = Math.min(340, Math.max(240, width * 0.3))
-        return Math.min(w, Math.max(200, width - 280))
+        const w = Math.min(360, Math.max(280, width * 0.28))
+        return Math.min(w, Math.max(260, width - 320))
     }
 
     readonly property real configHeight: {
@@ -108,8 +108,8 @@ Item {
             color: "transparent"
             z: 2
 
-            // Medium-sized Squircle Logo
-            Rectangle {
+            // Native Squircle Logo
+            Item {
                 id: logoSquircle
                 anchors {
                     left: parent.left
@@ -118,15 +118,9 @@ Item {
                 }
                 width: 44
                 height: 44
-                radius: 12
-                color: "#000000"
-                clip: true
-                border.color: theme.isDark ? "rgba(255, 255, 255, 0.18)" : "rgba(0, 0, 0, 0.14)"
-                border.width: 1
 
                 Image {
                     anchors.fill: parent
-                    anchors.margins: 3
                     source: "qrc:/FilterDesigner/icons/logo.png"
                     fillMode: Image.PreserveAspectFit
                     smooth: true
@@ -171,21 +165,40 @@ Item {
             }
             clip: true
             contentWidth: width
-            contentHeight: configColumn.implicitHeight + 24
+            contentHeight: configColumn.implicitHeight + 36
             boundsBehavior: Flickable.StopAtBounds
             flickableDirection: Flickable.VerticalFlick
+
+            // Modern translucent custom scrollbar (eliminates stark white overflow bar)
             ScrollBar.vertical: ScrollBar {
+                id: configScrollBar
                 policy: configFlick.contentHeight > configFlick.height
                         ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                width: 6
+                anchors.right: parent.right
+                anchors.rightMargin: 2
+                topPadding: 4
+                bottomPadding: 4
+                contentItem: Rectangle {
+                    implicitWidth: 6
+                    radius: 3
+                    color: configScrollBar.pressed ? theme.accent
+                         : (configScrollBar.hovered ? (theme.isDark ? "rgba(255, 255, 255, 0.45)" : "rgba(0, 0, 0, 0.4)")
+                                                    : (theme.isDark ? "rgba(255, 255, 255, 0.22)" : "rgba(0, 0, 0, 0.18)"))
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                }
+                background: Item {
+                    implicitWidth: 6
+                }
             }
 
             Column {
                 id: configColumn
-                x: 12
-                width: Math.max(0, configFlick.width - 24)
+                x: 14
+                width: Math.max(0, configFlick.width - 28)
                 spacing: 6
                 topPadding: 10
-                bottomPadding: 16
+                bottomPadding: 24
 
                 Text {
                     width: parent.width
@@ -589,29 +602,32 @@ Item {
                         anchors.top: inspToggleRow.bottom
                         spacing: 0
 
-                        // Flat spec row — 34px, 13px text, matches ParameterRow
+                        // Flat spec row — 32px, 12px text, overflow safe
                         component FlatRow: Item {
                             property string lbl: ""
                             property string val: ""
                             property color  valColor: theme.primaryText
                             width: parent.width
-                            height: 34
+                            height: 32
                             Text {
                                 anchors { left: parent.left; verticalCenter: parent.verticalCenter }
                                 text: lbl
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13
+                                font.pixelSize: 12
                                 color: theme.secondaryText
+                                elide: Text.ElideRight
+                                width: Math.min(implicitWidth, parent.width * 0.48)
                             }
                             Text {
                                 anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                                 text: val
                                 font.family: "Stack Sans Headline"
-                                font.pixelSize: 13
+                                font.pixelSize: 12
                                 font.weight: Font.DemiBold
                                 color: valColor
                                 elide: Text.ElideLeft
-                                maximumLineCount: 1
+                                width: Math.min(implicitWidth, parent.width * 0.52)
+                                horizontalAlignment: Text.AlignRight
                             }
                         }
 
@@ -1054,5 +1070,7 @@ Item {
 
     DesignVerifierModal {
         id: verifierModal
+        transientParent: root.Window.window
     }
 }
+

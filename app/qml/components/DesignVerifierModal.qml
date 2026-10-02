@@ -7,13 +7,13 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3 (beta) — Design Verifier"
-    width:        520
-    height:       540
-    minimumWidth:  520
-    minimumHeight: 540
-    maximumWidth:  520
-    maximumHeight: 540
+    title: "Overtune 3.2 — Design Verifier"
+    width:         520
+    height:        Math.min(580, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 560)
+    minimumWidth:  460
+    minimumHeight: 460
+    maximumWidth:  600
+    maximumHeight: 740
 
     color: "#000000"
     visible: false
@@ -25,6 +25,13 @@ Window {
 
     function openVerification() {
         if (!visible) {
+            if (transientParent) {
+                x = Math.max(0, transientParent.x + (transientParent.width - width) / 2)
+                y = Math.max(0, transientParent.y + (transientParent.height - height) / 2)
+            } else if (Screen.desktopAvailableWidth && Screen.desktopAvailableHeight) {
+                x = Math.max(0, (Screen.desktopAvailableWidth - width) / 2)
+                y = Math.max(0, (Screen.desktopAvailableHeight - height) / 2)
+            }
             visible = true
         }
         raise()
@@ -64,11 +71,13 @@ Window {
         anchors { top: parent.top; left: parent.left; right: parent.right; bottom: footer.top }
         clip: true
         contentWidth: availableWidth
+        contentHeight: mainCol.implicitHeight
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy:   ScrollBar.AsNeeded
 
         Column {
-            width: parent.width
+            id: mainCol
+            width: scrollView.availableWidth
             spacing: 0
 
             // ── 16:9 Compliance Banner ─────────────────────────────────────────
@@ -124,9 +133,7 @@ Window {
             Column {
                 width: parent.width - 48
                 x: 24
-                spacing: 16
-
-                Item { width: 1; height: 4 }
+                spacing: 14
 
                 // Header Titles
                 Column {
@@ -135,7 +142,7 @@ Window {
 
                     Text {
                         text: "Stage 2 Verifier :)"
-                        font.pixelSize: 26
+                        font.pixelSize: 24
                         font.weight: Font.Bold
                         color: "#FFFFFF"
                         lineHeight: 1.2
@@ -150,8 +157,6 @@ Window {
                         width: parent.width
                     }
                 }
-
-                Item { width: 1; height: 4 }
 
                 // Accent Progress Bar Card
                 Rectangle {
@@ -232,7 +237,7 @@ Window {
                 Rectangle {
                     visible: !root.isVerifying && root.verResult !== null && !root.verResult.passed
                     width: parent.width
-                    height: 44
+                    height: visible ? 44 : 0
                     radius: 10
                     color: Qt.rgba(1.0, 0.23, 0.19, 0.16)
                     border.color: Qt.rgba(1.0, 0.23, 0.19, 0.4)
@@ -259,16 +264,18 @@ Window {
                     }
                 }
 
-                Item { width: 1; height: 20 }
+                Item { width: 1; height: 16 }
             }
         }
     }
 
     // ── Sticky Footer (OLED Black) matching WhatsNewWindow ─────────────────────
-    Item {
+    Rectangle {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
+        color: "#0c0c0e"
+        z: 10
 
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }

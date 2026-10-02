@@ -7,13 +7,13 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3 (beta) — Installer & Auto-Updater"
+    title: "Overtune 3.2 — Installer & Auto-Updater"
     width:         520
-    height:        720
-    minimumWidth:  520
-    minimumHeight: 720
-    maximumWidth:  520
-    maximumHeight: 720
+    height:        Math.min(640, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 620)
+    minimumWidth:  460
+    minimumHeight: 460
+    maximumWidth:  600
+    maximumHeight: 760
 
     color: "#000000"
     visible: false
@@ -26,6 +26,13 @@ Window {
             activeTab = tabIndex
         }
         if (!visible) {
+            if (transientParent) {
+                x = Math.max(0, transientParent.x + (transientParent.width - width) / 2)
+                y = Math.max(0, transientParent.y + (transientParent.height - height) / 2)
+            } else if (Screen.desktopAvailableWidth && Screen.desktopAvailableHeight) {
+                x = Math.max(0, (Screen.desktopAvailableWidth - width) / 2)
+                y = Math.max(0, (Screen.desktopAvailableHeight - height) / 2)
+            }
             visible = true
             fadeIn.restart()
         }
@@ -63,7 +70,7 @@ Window {
         ScrollBar.vertical.policy:   ScrollBar.AsNeeded
 
         Column {
-            width: parent.width
+            width: scrollView.availableWidth
             spacing: 0
 
             // ── 16:9 Banner Header ────────────────────────────────────────────
@@ -629,10 +636,12 @@ Window {
     }
 
     // ── Sticky Footer (OLED Black) matching WhatsNewWindow / DesignVerifierModal
-    Item {
+    Rectangle {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
+        color: "#0c0c0e"
+        z: 10
 
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }

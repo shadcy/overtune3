@@ -17,6 +17,17 @@ shareware/
 │       ├── install_linux.sh             <-- Native desktop installer
 │       └── README.md
 ├── windows/
+│   ├── overtune3-windows-x64.zip        <-- Compressed standalone Windows package
+│   ├── overtune3-windows-x64/           <-- Unpacked portable directory
+│   │   ├── bin/                         <-- Binaries & bundled Qt 6 runtime
+│   │   │   ├── ot3.exe
+│   │   │   ├── FilterDesigner.exe
+│   │   │   ├── Qt6*.dll
+│   │   │   └── platforms/
+│   │   ├── ot3.bat                      <-- Portable one-click launcher
+│   │   ├── run.bat                      <-- Portable launcher alias
+│   │   ├── install_windows.ps1          <-- Native Windows installer
+│   │   └── README_WINDOWS.txt
 │   ├── install_windows.ps1              <-- Native PowerShell installer
 │   ├── installer_windows.nsi            <-- NSIS setup compiler script
 │   ├── package_windows.bat              <-- Windows packaging utility
@@ -51,22 +62,32 @@ sudo ./linux/overtune3-linux-x86_64/install_linux.sh
 
 ## Quick Start: Windows
 
-### Method 1: Automated PowerShell Setup
-Open PowerShell and run:
+### Method 1: Portable Execution (Zero Install)
+Extract `windows\overtune3-windows-x64.zip` (or open `windows\overtune3-windows-x64`):
+```cmd
+ot3.bat
+```
+*(Or double-click `ot3.bat` / `run.bat` in File Explorer).*
+
+### Method 2: Automated PowerShell Setup (Desktop & Start Menu)
+Open PowerShell and execute:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\windows\install_windows.ps1
 ```
 This automatically:
-- Installs `ot3.exe` to `%LOCALAPPDATA%\Programs\Overtune3`
-- Creates **Desktop** and **Start Menu** shortcuts
+- Copies `ot3.exe`, all Qt 6 runtime DLLs, and QML plugins to `%LOCALAPPDATA%\Programs\Overtune3`
+- Creates **Desktop** shortcut (`Overtune 3.lnk`)
+- Creates **Start Menu** shortcut (`Programs\Overtune 3\Overtune 3.lnk`)
 - Adds **Add/Remove Programs** entry in Windows Settings
-- Prepares the background atomic updater script
+- Prepares the background atomic updater (`overtune_update.bat`)
 
-### Method 2: Portable Direct Launch
-If you have `ot3.exe`, place it in `bin\` and launch directly:
+### Method 3: Build from Source (`build.bat`)
+From the repository root:
 ```cmd
-bin\ot3.exe
+build.bat
+run.bat
 ```
+Configures CMake, compiles with MSVC 2022 in Release mode, and runs `windeployqt` to bundle all runtime dependencies.
 
 ---
 

@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.24)
 
 qt_standard_project_setup()
 
+set(APP_EXTRA_SOURCES)
+if(WIN32)
+    list(APPEND APP_EXTRA_SOURCES app.rc)
+endif()
+
 # ── Application ───────────────────────────────────────────────────────────────
 qt_add_executable(FilterDesigner
     src/main.cpp
@@ -15,7 +20,9 @@ qt_add_executable(FilterDesigner
     src/ThemeManager.h
     src/UpdateInstallerEngine.cpp
     src/UpdateInstallerEngine.h
+    ${APP_EXTRA_SOURCES}
 )
+
 
 qt_add_qml_module(FilterDesigner
     URI FilterDesigner

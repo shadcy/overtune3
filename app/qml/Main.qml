@@ -8,7 +8,7 @@ import "pages"
 // Main.qml — Root application window with global shortcuts & toast notifications
 Window {
     id: root
-    title:         "Overtune 3 (beta)"
+    title:         "Overtune 3.2 — Digital Filter Designer & DSP Studio"
     width:         1280
     height:        800
     minimumWidth:  860
@@ -416,10 +416,12 @@ Window {
 
     WhatsNewWindow {
         id: whatsNewWindow
+        transientParent: root
     }
 
     InstallerUpdaterWindow {
         id: installerUpdaterWindow
+        transientParent: root
     }
 
     Component.onCompleted: {

@@ -128,15 +128,15 @@ void UpdateInstallerEngine::onCheckTimerTick() {
         m_checkTimer->stop();
         setProgress(1.0);
 
-        // Update is available: v3.1.0 > v3.0.0
+        // Update is available: v3.2.0 > v3.1.0
         m_hasUpdate = true;
-        m_latestVersion = QStringLiteral("3.1.0");
-        m_releaseName = QStringLiteral("Overtune 3.1.0 — High-Precision DSP & Adaptive Audio");
+        m_latestVersion = QStringLiteral("3.2.0");
+        m_releaseName = QStringLiteral("Overtune 3.2.0 — High-Precision DSP & Adaptive Audio Studio");
         m_releaseDate = QStringLiteral("October 2026");
         m_releaseSize = QStringLiteral("24.8 MB");
         m_releaseSha256 = QStringLiteral("e9a8f273b4018c6d123e4f0a91e523bd8a230491823746acdb0192837465fec1");
 
-        setStatus(QStringLiteral("available"), QStringLiteral("Overtune 3.1.0 is available for installation!"));
+        setStatus(QStringLiteral("available"), QStringLiteral("Overtune 3.2.0 is available for installation!"));
         emit updateInfoChanged();
     }
 }
@@ -149,7 +149,7 @@ void UpdateInstallerEngine::startDownloadAndInstall() {
     m_simStep = 0;
     setProgress(0.0);
     m_downloadSpeed = QStringLiteral("16.4 MB/s");
-    setStatus(QStringLiteral("downloading"), QStringLiteral("Downloading Overtune 3.1.0 update package (24.8 MB)..."));
+    setStatus(QStringLiteral("downloading"), QStringLiteral("Downloading Overtune 3.2.0 update package (24.8 MB)..."));
 
     m_downloadTimer->start(100);
 }
@@ -194,7 +194,7 @@ void UpdateInstallerEngine::onApplyTimerTick() {
         Q_UNUSED(ok);
 
         setProgress(1.0);
-        setStatus(QStringLiteral("ready_to_restart"), QStringLiteral("Overtune 3.1.0 update successfully installed! Restart application to apply."));
+        setStatus(QStringLiteral("ready_to_restart"), QStringLiteral("Overtune 3.2.0 update successfully installed! Restart application to apply."));
         emit updateSuccess(QStringLiteral("Update successfully applied"));
     }
 }
@@ -315,7 +315,27 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
         targetDir.mkpath(QStringLiteral("."));
     }
     QString currentApp = QCoreApplication::applicationFilePath();
+    QString sourceDir = QFileInfo(currentApp).dir().absolutePath();
     QString destApp = dirPath + QStringLiteral("/ot3.exe");
+
+    // Copy binaries and dependencies to target directory if installing from portable/staging location
+    if (QDir::cleanPath(sourceDir).toLower() != QDir::cleanPath(dirPath).toLower()) {
+        QString copyScript = QString::asprintf(
+            "$src = '%s'\n"
+            "$dst = '%s'\n"
+            "robocopy $src $dst /E /NP /NFL /NDL /R:1 /W:1\n"
+            "exit 0\n",
+            sourceDir.toUtf8().constData(),
+            dirPath.toUtf8().constData()
+        );
+        QProcess::execute(QStringLiteral("powershell.exe"), QStringList() << QStringLiteral("-NoProfile") << QStringLiteral("-Command") << copyScript);
+    }
+
+    // Ensure FilterDesigner.exe copy exists alongside ot3.exe
+    QString altDest = dirPath + QStringLiteral("/FilterDesigner.exe");
+    if (!QFile::exists(altDest) && QFile::exists(destApp)) {
+        QFile::copy(destApp, altDest);
+    }
 
     // Write Windows self-updater batch script
     QString updateBat = dirPath + QStringLiteral("/overtune_update.bat");
@@ -323,7 +343,7 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
     if (bf.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QString bcontent = QStringLiteral(
             "@echo off\r\n"
-            "echo Updating Overtune 3...\r\n"
+            "echo Updating Overtune 3.2.1...\r\n"
             "timeout /t 1 /nobreak >nul\r\n"
             "if exist \"%~dp0ot3.exe.new\" (\r\n"
             "    copy /y \"%~dp0ot3.exe.new\" \"%~dp0ot3.exe\"\r\n"
@@ -336,20 +356,24 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
         bf.close();
     }
 
-    // Shortcut creation script via PowerShell
+    // Shortcut creation script + Windows registry integration via PowerShell
     QString ps1Script = dirPath + QStringLiteral("/create_shortcuts.ps1");
     QFile pf(ps1Script);
     if (pf.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QString pcontent = QStringLiteral(
             "$WshShell = New-Object -ComObject WScript.Shell\n"
-        );
+            "$destIco = '%1\\logo.ico'\n"
+            "$iconRef = if (Test-Path $destIco) { \"$destIco,0\" } else { '%2,0' }\n"
+        ).arg(dirPath, destApp);
+
         if (desktop) {
             pcontent += QStringLiteral(
                 "$DesktopPath = [System.Environment]::GetFolderPath('Desktop')\n"
                 "$Shortcut = $WshShell.CreateShortcut(\"$DesktopPath\\Overtune 3.lnk\")\n"
                 "$Shortcut.TargetPath = \"%1\"\n"
                 "$Shortcut.WorkingDirectory = \"%2\"\n"
-                "$Shortcut.Description = \"Overtune 3 DSP Filter Designer\"\n"
+                "$Shortcut.Description = \"Overtune 3.2.1 - DSP Filter Designer and Audio Lab\"\n"
+                "$Shortcut.IconLocation = $iconRef\n"
                 "$Shortcut.Save()\n"
             ).arg(destApp, dirPath);
         }
@@ -361,14 +385,104 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
                 "$Shortcut = $WshShell.CreateShortcut(\"$MenuFolder\\Overtune 3.lnk\")\n"
                 "$Shortcut.TargetPath = \"%1\"\n"
                 "$Shortcut.WorkingDirectory = \"%2\"\n"
-                "$Shortcut.Description = \"Overtune 3 DSP Filter Designer\"\n"
+                "$Shortcut.Description = \"Overtune 3.2.1 - DSP Filter Designer and Audio Lab\"\n"
+                "$Shortcut.IconLocation = $iconRef\n"
                 "$Shortcut.Save()\n"
             ).arg(destApp, dirPath);
         }
+
+        // Register in Windows Installed Apps
+        pcontent += QStringLiteral(
+            "$UninstallKey = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Overtune3'\n"
+            "if (!(Test-Path $UninstallKey)) { New-Item -Path $UninstallKey -Force | Out-Null }\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayName' -Value 'Overtune 3.2.1 Studio'\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayVersion' -Value '3.2.1'\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'Publisher' -Value 'Overtune DSP'\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'InstallLocation' -Value '%1'\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayIcon' -Value $iconRef\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'UninstallString' -Value 'powershell.exe -ExecutionPolicy Bypass -File \"%1\\uninstall.ps1\"'\n"
+        ).arg(dirPath);
+
         pf.write(pcontent.toUtf8());
         pf.close();
+
+        // Execute shortcut & registry script
+        QProcess::execute(QStringLiteral("powershell.exe"), QStringList() << QStringLiteral("-ExecutionPolicy") << QStringLiteral("Bypass") << QStringLiteral("-File") << ps1Script);
     }
 
+    // Write uninstaller scripts into install directory
+    QString uScript = dirPath + QStringLiteral("/uninstall.ps1");
+    QFile uf(uScript);
+    if (uf.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QString uLines = QStringLiteral(
+            "$ErrorActionPreference = 'SilentlyContinue'\n"
+            "$DesktopPath = [System.Environment]::GetFolderPath('Desktop')\n"
+            "Remove-Item -Path (Join-Path $DesktopPath 'Overtune 3.lnk') -Force -ErrorAction SilentlyContinue\n"
+            "$ProgramsPath = [System.Environment]::GetFolderPath('Programs')\n"
+            "Remove-Item -Path (Join-Path $ProgramsPath 'Overtune 3') -Recurse -Force -ErrorAction SilentlyContinue\n"
+            "Remove-Item -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Overtune3' -Recurse -Force -ErrorAction SilentlyContinue\n"
+            "Remove-Item -Path 'HKCU:\\Software\\Overtune3' -Recurse -Force -ErrorAction SilentlyContinue\n"
+            "Remove-Item -Path '%1' -Recurse -Force -ErrorAction SilentlyContinue\n"
+        ).arg(dirPath);
+        uf.write(uLines.toUtf8());
+        uf.close();
+    }
+
+    QString uBat = dirPath + QStringLiteral("/uninstall.bat");
+    QFile ubf(uBat);
+    if (ubf.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        ubf.write("@echo off\r\npowershell.exe -ExecutionPolicy Bypass -File \"%~dp0uninstall.ps1\"\r\n");
+        ubf.close();
+    }
+
+    return true;
+}
+
+bool UpdateInstallerEngine::uninstallFromSystem() {
+    setStatus(QStringLiteral("uninstalling"), QStringLiteral("Uninstalling Overtune 3 from system..."));
+    setProgress(0.5);
+
+#if defined(Q_OS_WIN)
+    QString psScript = QStringLiteral(
+        "$ErrorActionPreference = 'SilentlyContinue'\n"
+        "$Desktop = [System.Environment]::GetFolderPath('Desktop')\n"
+        "Remove-Item -Path \"$Desktop\\Overtune 3.lnk\" -Force -ErrorAction SilentlyContinue\n"
+        "$Programs = [System.Environment]::GetFolderPath('Programs')\n"
+        "Remove-Item -Path \"$Programs\\Overtune 3\" -Recurse -Force -ErrorAction SilentlyContinue\n"
+        "Remove-Item -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Overtune3' -Recurse -Force -ErrorAction SilentlyContinue\n"
+        "Remove-Item -Path 'HKCU:\\Software\\Overtune3' -Recurse -Force -ErrorAction SilentlyContinue\n"
+    );
+    QProcess::execute(QStringLiteral("powershell.exe"), QStringList() << QStringLiteral("-NoProfile") << QStringLiteral("-Command") << psScript);
+
+    // Launch deferred folder deletion batch script
+    QString cleanerBat = QDir::tempPath() + QStringLiteral("/ot3_cleaner.bat");
+    QFile cf(cleanerBat);
+    if (cf.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QString cContent = QStringLiteral(
+            "@echo off\r\n"
+            "timeout /t 2 /nobreak >nul\r\n"
+            "rmdir /s /q \"%1\"\r\n"
+            "del \"%~f0\"\r\n"
+            "exit\r\n"
+        ).arg(m_installPath);
+        cf.write(cContent.toUtf8());
+        cf.close();
+        QProcess::startDetached(QStringLiteral("cmd.exe"), QStringList() << QStringLiteral("/c") << cleanerBat);
+    }
+#else
+    QString home = QDir::homePath();
+    QFile::remove(home + QStringLiteral("/.local/share/applications/overtune3.desktop"));
+    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + QStringLiteral("/overtune3.desktop"));
+    QFile::remove(home + QStringLiteral("/.local/bin/overtune3"));
+    QDir(m_installPath).removeRecursively();
+#endif
+
+    setProgress(1.0);
+    setStatus(QStringLiteral("uninstalled"), QStringLiteral("Overtune 3 uninstalled successfully."));
+    emit updateSuccess(QStringLiteral("Overtune 3 has been uninstalled. Exiting..."));
+
+    // Quit application after 1.5 seconds
+    QTimer::singleShot(1500, qApp, &QCoreApplication::quit);
     return true;
 }
 
