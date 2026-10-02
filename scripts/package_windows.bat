@@ -8,6 +8,7 @@ set "ROOT_DIR=%CD%"
 popd
 
 set "DIST_DIR=%ROOT_DIR%\dist"
+set "RELEASE_DIR=%DIST_DIR%\release"
 set "PKG_NAME=overtune3-windows-x64"
 set "STAGE_DIR=%ROOT_DIR%\shareware\windows\%PKG_NAME%"
 
@@ -81,9 +82,18 @@ copy /y "%SCRIPT_DIR%install_windows.ps1" "%STAGE_DIR%\" >nul
 
 echo [4/5] Creating zip archives...
 if not exist "%DIST_DIR%" mkdir "%DIST_DIR%"
+if not exist "%RELEASE_DIR%" mkdir "%RELEASE_DIR%"
 
-powershell -NoProfile -Command "Compress-Archive -Path '%STAGE_DIR%' -DestinationPath '%ROOT_DIR%\shareware\windows\%PKG_NAME%.zip' -Force"
-copy /y "%ROOT_DIR%\shareware\windows\%PKG_NAME%.zip" "%DIST_DIR%\%PKG_NAME%.zip" >nul
+powershell -NoProfile -Command "Compress-Archive -Path '%STAGE_DIR%' -DestinationPath '%DIST_DIR%\%PKG_NAME%.zip' -Force"
+if errorlevel 1 (
+    echo [ERROR] Failed to create the portable Windows archive.
+    exit /b 1
+)
+copy /y "%DIST_DIR%\%PKG_NAME%.zip" "%RELEASE_DIR%\%PKG_NAME%.zip" >nul
+if errorlevel 1 (
+    echo [ERROR] Failed to stage the portable archive for GitHub release.
+    exit /b 1
+)
 
 echo [5/5] Building the Windows setup installer...
 where makensis >nul 2>nul
@@ -100,11 +110,24 @@ if errorlevel 1 (
 )
 popd
 
+copy /y "%DIST_DIR%\Overtune3-Setup-x64.exe" "%RELEASE_DIR%\Overtune3-Setup-x64.exe" >nul
+if errorlevel 1 (
+    echo [ERROR] Failed to stage the setup installer for GitHub release.
+    exit /b 1
+)
+
+powershell -NoProfile -Command "$files = Get-ChildItem -LiteralPath '%RELEASE_DIR%' -File | Where-Object { $_.Name -in @('Overtune3-Setup-x64.exe', '%PKG_NAME%.zip') }; $files | Get-FileHash -Algorithm SHA256 | ForEach-Object { '{0}  {1}' -f $_.Hash.ToLowerInvariant(), $_.Path.Substring('%RELEASE_DIR%'.Length + 1) } | Set-Content -LiteralPath '%RELEASE_DIR%\SHA256SUMS.txt' -Encoding ascii"
+if errorlevel 1 (
+    echo [ERROR] Failed to write GitHub release checksums.
+    exit /b 1
+)
+
 echo.
 echo [OK] Windows shareware package created successfully:
 echo   - Folder:  %STAGE_DIR%
 echo   - Archive: %ROOT_DIR%\shareware\windows\%PKG_NAME%.zip
 echo   - Dist:    %DIST_DIR%\%PKG_NAME%.zip
 echo   - Setup:   %DIST_DIR%\Overtune3-Setup-x64.exe
+echo   - Release: %RELEASE_DIR%
 echo.
 endlocal
