@@ -71,7 +71,7 @@ Item {
         PageHeader {
             Layout.fillWidth: true
             title: "Settings"
-            badgeText: "v3.2.0"
+            badgeText: "v3.2.1"
             badgeIcon: "settings-gear"
 
             Rectangle {
@@ -584,7 +584,7 @@ Item {
                         Repeater {
                             model: [
                                 { label: "App",       value: "Overtune 3 Studio" },
-                                { label: "Version",   value: "3.2.0" },
+                                { label: "Version",   value: "3.2.1" },
                                 { label: "DSP Engine",value: "C++20, zero dependencies" },
                                 { label: "UI",        value: "Qt 6 / QML" }
                             ]
@@ -606,6 +606,91 @@ Item {
                                     anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 16 }
                                     height: 1; color: theme.borderColor
                                     opacity: index < 3 ? 0.5 : 0
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ── System Integration & Uninstall Card ──────────────────────
+                Rectangle {
+                    width: parent.width
+                    height: maintCol.implicitHeight + 28
+                    radius: 12
+                    color: theme.surface
+                    border.color: theme.borderColor
+                    border.width: 1
+
+                    Column {
+                        id: maintCol
+                        anchors { fill: parent; margins: 16 }
+                        spacing: 12
+
+                        Text {
+                            text: "SYSTEM INTEGRATION & UNINSTALL"
+                            font.family: "Stack Sans Headline"
+                            font.pixelSize: 11
+                            font.weight: Font.SemiBold
+                            font.letterSpacing: 1.4
+                            color: theme.secondaryText
+                        }
+
+                        RowLayout {
+                            width: parent.width
+
+                            Column {
+                                Layout.fillWidth: true
+                                spacing: 2
+
+                                Text {
+                                    text: "Uninstall Overtune 3 Studio"
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 13
+                                    font.weight: Font.DemiBold
+                                    color: theme.primaryText
+                                }
+
+                                Text {
+                                    text: "Completely removes desktop shortcuts, start menu entries, registry keys, and local application files."
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 11
+                                    color: theme.secondaryText
+                                    wrapMode: Text.WordWrap
+                                    width: 380
+                                }
+                            }
+
+                            Rectangle {
+                                implicitWidth: 84
+                                implicitHeight: 30
+                                radius: 6
+                                color: uninsBtnMouse.pressed ? "#CC2D24" : (uninsBtnMouse.containsMouse ? "#E0382E" : "#B3261E")
+
+                                Row {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    Codicon {
+                                        icon: "trash"
+                                        iconSize: 12
+                                        iconColor: "#FFFFFF"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "Uninstall"
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Bold
+                                        color: "#FFFFFF"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: uninsBtnMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: settingsUninsDialog.open()
                                 }
                             }
                         }
@@ -647,6 +732,25 @@ Item {
 
                 Item { width: 1; height: 8 }
             }
+        }
+    }
+
+    Dialog {
+        id: settingsUninsDialog
+        title: "Confirm Complete Uninstallation"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        contentItem: Text {
+            text: "Are you sure you want to completely remove Overtune 3 Studio, its shortcuts, registry entries, and local files?"
+            color: theme.primaryText
+            font.family: "Stack Sans Headline"
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            width: 380
+        }
+        onAccepted: {
+            updateInstaller.uninstallFromSystem()
         }
     }
 }

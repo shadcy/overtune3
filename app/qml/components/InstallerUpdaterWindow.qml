@@ -7,7 +7,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2 — Installer & Auto-Updater"
+    title: "Overtune 3.2.1 — Installer & Auto-Updater"
     width:         520
     height:        Math.min(640, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 620)
     minimumWidth:  460
@@ -625,6 +625,60 @@ Window {
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
+
+                                Item { width: 1; height: 4 }
+
+                                // In-App Complete Uninstaller Button
+                                Rectangle {
+                                    width: parent.width
+                                    height: 38
+                                    radius: 7
+                                    color: "#241214"
+                                    border.color: "#802020"
+                                    border.width: 1
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+
+                                        Codicon {
+                                            icon: "trash"
+                                            iconSize: 13
+                                            iconColor: "#FF453A"
+                                        }
+
+                                        Text {
+                                            text: "Uninstall Overtune 3 from this system"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Medium
+                                            color: "#FF453A"
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Rectangle {
+                                            width: 76
+                                            height: 24
+                                            radius: 5
+                                            color: uninsMouse.pressed ? "#CC2D24" : (uninsMouse.containsMouse ? "#E0382E" : "#A8241D")
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "Uninstall"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Bold
+                                                color: "#FFFFFF"
+                                            }
+
+                                            MouseArea {
+                                                id: uninsMouse
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: uninstallConfirmDialog.open()
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -632,6 +686,24 @@ Window {
 
                 Item { width: 1; height: 20 }
             }
+        }
+    }
+
+    Dialog {
+        id: uninstallConfirmDialog
+        title: "Confirm Complete Uninstallation"
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Yes | Dialog.No
+        contentItem: Text {
+            text: "Are you sure you want to completely remove Overtune 3, its shortcuts, registry entries, and local files?"
+            color: "#FFFFFF"
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            width: 380
+        }
+        onAccepted: {
+            updateInstaller.uninstallFromSystem()
         }
     }
 

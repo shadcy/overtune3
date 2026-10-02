@@ -44,14 +44,24 @@ xcopy /s /e /y /q "%BIN_SRC%\*" "%STAGE_DIR%\bin\" >nul
 if not exist "%STAGE_DIR%\bin\FilterDesigner.exe" (
     copy /y "%STAGE_DIR%\bin\ot3.exe" "%STAGE_DIR%\bin\FilterDesigner.exe" >nul
 )
+if not exist "%STAGE_DIR%\bin\ot3-installer.exe" (
+    copy /y "%STAGE_DIR%\bin\ot3.exe" "%STAGE_DIR%\bin\ot3-installer.exe" >nul
+)
 
 echo [2/4] Adding documentation and assets...
 if exist "%ROOT_DIR%\assets\logo.png" (
     copy /y "%ROOT_DIR%\assets\logo.png" "%STAGE_DIR%\assets\" >nul
     copy /y "%ROOT_DIR%\assets\logo.png" "%STAGE_DIR%\" >nul
 )
+if exist "%ROOT_DIR%\assets\logo.ico" (
+    copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\assets\" >nul
+    copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\bin\" >nul
+)
 if exist "%SCRIPT_DIR%README_WINDOWS.txt" (
     copy /y "%SCRIPT_DIR%README_WINDOWS.txt" "%STAGE_DIR%\" >nul
+)
+if exist "%ROOT_DIR%\CHANGELOG.md" (
+    copy /y "%ROOT_DIR%\CHANGELOG.md" "%STAGE_DIR%\" >nul
 )
 if exist "%ROOT_DIR%\README.md" (
     copy /y "%ROOT_DIR%\README.md" "%STAGE_DIR%\" >nul
@@ -59,6 +69,13 @@ if exist "%ROOT_DIR%\README.md" (
 
 echo [3/4] Adding Windows launcher and installer scripts...
 copy /y "%SCRIPT_DIR%install_windows.ps1" "%STAGE_DIR%\" >nul
+
+rem Copy native one-click installer executable into the package root
+if exist "%ROOT_DIR%\ot3-installer.exe" (
+    copy /y "%ROOT_DIR%\ot3-installer.exe" "%STAGE_DIR%\ot3-installer.exe" >nul
+) else if exist "%BIN_SRC%\ot3-installer.exe" (
+    copy /y "%BIN_SRC%\ot3-installer.exe" "%STAGE_DIR%\ot3-installer.exe" >nul
+)
 
 (
     echo @echo off

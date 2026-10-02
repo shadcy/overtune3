@@ -128,15 +128,15 @@ void UpdateInstallerEngine::onCheckTimerTick() {
         m_checkTimer->stop();
         setProgress(1.0);
 
-        // Update is available: v3.2.0 > v3.1.0
+        // Update is available: v3.2.1
         m_hasUpdate = true;
-        m_latestVersion = QStringLiteral("3.2.0");
-        m_releaseName = QStringLiteral("Overtune 3.2.0 — High-Precision DSP & Adaptive Audio Studio");
+        m_latestVersion = QStringLiteral("3.2.1");
+        m_releaseName = QStringLiteral("Overtune 3.2.1 — High-Precision DSP & Adaptive Audio Studio");
         m_releaseDate = QStringLiteral("October 2026");
         m_releaseSize = QStringLiteral("24.8 MB");
         m_releaseSha256 = QStringLiteral("e9a8f273b4018c6d123e4f0a91e523bd8a230491823746acdb0192837465fec1");
 
-        setStatus(QStringLiteral("available"), QStringLiteral("Overtune 3.2.0 is available for installation!"));
+        setStatus(QStringLiteral("available"), QStringLiteral("Overtune 3.2.1 is available for installation!"));
         emit updateInfoChanged();
     }
 }
@@ -149,7 +149,7 @@ void UpdateInstallerEngine::startDownloadAndInstall() {
     m_simStep = 0;
     setProgress(0.0);
     m_downloadSpeed = QStringLiteral("16.4 MB/s");
-    setStatus(QStringLiteral("downloading"), QStringLiteral("Downloading Overtune 3.2.0 update package (24.8 MB)..."));
+    setStatus(QStringLiteral("downloading"), QStringLiteral("Downloading Overtune 3.2.1 update package (24.8 MB)..."));
 
     m_downloadTimer->start(100);
 }
@@ -194,7 +194,7 @@ void UpdateInstallerEngine::onApplyTimerTick() {
         Q_UNUSED(ok);
 
         setProgress(1.0);
-        setStatus(QStringLiteral("ready_to_restart"), QStringLiteral("Overtune 3.2.0 update successfully installed! Restart application to apply."));
+        setStatus(QStringLiteral("ready_to_restart"), QStringLiteral("Overtune 3.2.1 update successfully installed! Restart application to apply."));
         emit updateSuccess(QStringLiteral("Update successfully applied"));
     }
 }

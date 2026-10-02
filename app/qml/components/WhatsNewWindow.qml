@@ -6,7 +6,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2 — What's New"
+    title: "Overtune 3.2.1 — What's New"
     width:         520
     height:        Math.min(620, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 600)
     minimumWidth:  460
@@ -102,7 +102,7 @@ Window {
                     Text {
                         id: vLabel
                         anchors.centerIn: parent
-                        text: "v3.2"
+                        text: "v3.2.1"
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
                         color: "#FFFFFF"
@@ -117,7 +117,7 @@ Window {
             Text {
                 x: 36
                 width: parent.width - 72
-                text: "What's new in Overtune 3.2"
+                text: "What's new in Overtune 3.2.1"
                 font.pixelSize: 30
                 font.weight: Font.Bold
                 color: "#FFFFFF"
@@ -315,7 +315,7 @@ Window {
 
         Text {
             anchors { left: parent.left; leftMargin: 36; verticalCenter: parent.verticalCenter }
-            text: "Release 3.2 (2026)"
+            text: "Release 3.2.1 (2026)"
             font.pixelSize: 11
             color: "#FFFFFF"
             opacity: 0.25

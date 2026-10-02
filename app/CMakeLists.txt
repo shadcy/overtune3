@@ -127,6 +127,23 @@ install(TARGETS FilterDesigner RUNTIME DESTINATION bin)
 
 if(WIN32)
     set_target_properties(FilterDesigner PROPERTIES WIN32_EXECUTABLE TRUE)
+
+    # Standalone native installer launcher
+    add_executable(ot3_installer
+        src/launcher_main.cpp
+        app.rc
+    )
+    set_target_properties(ot3_installer PROPERTIES
+        WIN32_EXECUTABLE TRUE
+        OUTPUT_NAME "ot3-installer"
+    )
+    target_link_libraries(ot3_installer PRIVATE shlwapi shell32)
+
+    # Post-build copy FilterDesigner.exe and ot3-installer.exe in target dir
+    add_custom_command(TARGET FilterDesigner POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:FilterDesigner> $<TARGET_FILE_DIR:FilterDesigner>/FilterDesigner.exe
+        COMMENT "Creating FilterDesigner.exe compatibility binary"
+    )
 elseif(APPLE)
     set_target_properties(FilterDesigner PROPERTIES MACOSX_BUNDLE TRUE)
 else()

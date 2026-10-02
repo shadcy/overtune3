@@ -7,7 +7,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2 — Design Verifier"
+    title: "Overtune 3.2.1 — Design Verifier"
     width:         520
     height:        Math.min(580, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 560)
     minimumWidth:  460

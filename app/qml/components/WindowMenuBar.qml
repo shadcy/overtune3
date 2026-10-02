@@ -983,7 +983,7 @@ Rectangle {
 
                 StyledMenuItem {
                     text: "Check for Updates..."
-                    shortcutText: "v3.2.0"
+                    shortcutText: "v3.2.1"
                     onTriggered: {
                         if (rootWindow && typeof rootWindow.checkUpdatesNow === "function") {
                             rootWindow.checkUpdatesNow()
