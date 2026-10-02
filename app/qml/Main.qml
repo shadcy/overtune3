@@ -8,7 +8,7 @@ import "pages"
 // Main.qml — Root application window with global shortcuts & toast notifications
 Window {
     id: root
-    title:         "Overtune 3.2.1 — Digital Filter Designer & DSP Studio"
+    title:         "Overtune 3.2.3 — Digital Filter Designer & DSP Studio"
     width:         1280
     height:        800
     minimumWidth:  860
@@ -425,13 +425,8 @@ Window {
     }
 
     Component.onCompleted: {
-        if (typeof cliLaunchInstaller !== "undefined" && cliLaunchInstaller) {
-            Qt.callLater(function() { installerUpdaterWindow.openWindow(1) })
-        } else if (typeof cliLaunchUpdater !== "undefined" && cliLaunchUpdater) {
+        if (typeof cliLaunchUpdater !== "undefined" && cliLaunchUpdater) {
             Qt.callLater(function() { installerUpdaterWindow.checkUpdatesNow() })
-        } else {
-            // Auto-open What's New on every launch
-            Qt.callLater(function() { whatsNewWindow.openWindow() })
         }
     }
 

@@ -5,7 +5,7 @@ import QtQuick.Controls
 Button {
     id: root
     implicitHeight: 30
-    implicitWidth: 100
+    implicitWidth: Math.max(90, (contentItem ? contentItem.implicitWidth : 0) + leftPadding + rightPadding + 4)
     font.family: "Stack Sans Headline"
     font.pixelSize: 12
     font.weight: Font.DemiBold

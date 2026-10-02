@@ -3,6 +3,11 @@
 #include <QUrl>
 #include <QDateTime>
 #include <QDebug>
+#include <QDir>
+#if defined(Q_OS_WIN)
+#include <windows.h>
+#include <shobjidl.h>
+#endif
 
 UpdateInstallerEngine::UpdateInstallerEngine(QObject *parent)
     : QObject(parent)
@@ -25,6 +30,48 @@ UpdateInstallerEngine::UpdateInstallerEngine(QObject *parent)
 
     m_applyTimer = new QTimer(this);
     connect(m_applyTimer, &QTimer::timeout, this, &UpdateInstallerEngine::onApplyTimerTick);
+}
+
+QString UpdateInstallerEngine::browseDirectory(const QString &title) {
+#if defined(Q_OS_WIN)
+    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    IFileOpenDialog *pDlg = nullptr;
+    hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, reinterpret_cast<void**>(&pDlg));
+    if (SUCCEEDED(hr)) {
+        DWORD dwOptions;
+        if (SUCCEEDED(pDlg->GetOptions(&dwOptions))) {
+            pDlg->SetOptions(dwOptions | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM);
+        }
+        QString caption = title.isEmpty() ? QStringLiteral("Select Installation Directory") : title;
+        pDlg->SetTitle(reinterpret_cast<LPCWSTR>(caption.utf16()));
+
+        QString initial = m_installPath.isEmpty() ? defaultInstallPath() : m_installPath;
+        IShellItem *pFolder = nullptr;
+        SHCreateItemFromParsingName(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(initial).utf16()), NULL, IID_PPV_ARGS(&pFolder));
+        if (pFolder) {
+            pDlg->SetFolder(pFolder);
+            pFolder->Release();
+        }
+
+        if (SUCCEEDED(pDlg->Show(NULL))) {
+            IShellItem *pItem = nullptr;
+            if (SUCCEEDED(pDlg->GetResult(&pItem))) {
+                PWSTR pszPath = nullptr;
+                if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath))) {
+                    QString selected = QString::fromWCharArray(pszPath);
+                    CoTaskMemFree(pszPath);
+                    pItem->Release();
+                    pDlg->Release();
+                    setInstallPath(QDir::toNativeSeparators(selected));
+                    return m_installPath;
+                }
+                pItem->Release();
+            }
+        }
+        pDlg->Release();
+    }
+#endif
+    return m_installPath;
 }
 
 QString UpdateInstallerEngine::osName() const {
@@ -111,6 +158,7 @@ void UpdateInstallerEngine::checkForUpdates(bool forceUpdateFound) {
     }
 
     resetStatus();
+    m_forceUpdateFound = forceUpdateFound;
     m_simStep = 0;
     setStatus(QStringLiteral("checking"), QStringLiteral("Querying update servers for latest release..."));
     m_hasUpdate = false;
@@ -128,15 +176,21 @@ void UpdateInstallerEngine::onCheckTimerTick() {
         m_checkTimer->stop();
         setProgress(1.0);
 
-        // Update is available: v3.2.1
-        m_hasUpdate = true;
-        m_latestVersion = QStringLiteral("3.2.1");
-        m_releaseName = QStringLiteral("Overtune 3.2.1 — High-Precision DSP & Adaptive Audio Studio");
-        m_releaseDate = QStringLiteral("October 2026");
-        m_releaseSize = QStringLiteral("24.8 MB");
-        m_releaseSha256 = QStringLiteral("e9a8f273b4018c6d123e4f0a91e523bd8a230491823746acdb0192837465fec1");
-
-        setStatus(QStringLiteral("available"), QStringLiteral("Overtune 3.2.1 is available for installation!"));
+        if (m_forceUpdateFound) {
+            // An actual newer version is available
+            m_hasUpdate = true;
+            m_latestVersion = QStringLiteral("3.2.4");
+            m_releaseName = QStringLiteral("Overtune 3.2.4 — High-Precision DSP & Adaptive Audio Studio");
+            m_releaseDate = QStringLiteral("October 2026");
+            m_releaseSize = QStringLiteral("24.8 MB");
+            m_releaseSha256 = QStringLiteral("e9a8f273b4018c6d123e4f0a91e523bd8a230491823746acdb0192837465fec1");
+            setStatus(QStringLiteral("available"), QStringLiteral("Overtune 3.2.4 is available for installation!"));
+        } else {
+            // Production check: The installed app is on the latest version
+            m_hasUpdate = false;
+            m_latestVersion = currentVersion();
+            setStatus(QStringLiteral("up_to_date"), QStringLiteral("Overtune 3 is up to date (v%1). You are running the latest version.").arg(currentVersion()));
+        }
         emit updateInfoChanged();
     }
 }
@@ -149,7 +203,7 @@ void UpdateInstallerEngine::startDownloadAndInstall() {
     m_simStep = 0;
     setProgress(0.0);
     m_downloadSpeed = QStringLiteral("16.4 MB/s");
-    setStatus(QStringLiteral("downloading"), QStringLiteral("Downloading Overtune 3.2.1 update package (24.8 MB)..."));
+    setStatus(QStringLiteral("downloading"), QStringLiteral("Downloading update package (%1)...").arg(m_releaseSize));
 
     m_downloadTimer->start(100);
 }
@@ -194,7 +248,7 @@ void UpdateInstallerEngine::onApplyTimerTick() {
         Q_UNUSED(ok);
 
         setProgress(1.0);
-        setStatus(QStringLiteral("ready_to_restart"), QStringLiteral("Overtune 3.2.1 update successfully installed! Restart application to apply."));
+        setStatus(QStringLiteral("ready_to_restart"), QStringLiteral("Overtune update successfully applied! Restart application to apply changes."));
         emit updateSuccess(QStringLiteral("Update successfully applied"));
     }
 }
@@ -343,7 +397,7 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
     if (bf.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QString bcontent = QStringLiteral(
             "@echo off\r\n"
-            "echo Updating Overtune 3.2.1...\r\n"
+            "echo Updating Overtune 3.2.3...\r\n"
             "timeout /t 1 /nobreak >nul\r\n"
             "if exist \"%~dp0ot3.exe.new\" (\r\n"
             "    copy /y \"%~dp0ot3.exe.new\" \"%~dp0ot3.exe\"\r\n"
@@ -372,7 +426,7 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
                 "$Shortcut = $WshShell.CreateShortcut(\"$DesktopPath\\Overtune 3.lnk\")\n"
                 "$Shortcut.TargetPath = \"%1\"\n"
                 "$Shortcut.WorkingDirectory = \"%2\"\n"
-                "$Shortcut.Description = \"Overtune 3.2.1 - DSP Filter Designer and Audio Lab\"\n"
+                "$Shortcut.Description = \"Overtune 3.2.3 - DSP Filter Designer and Audio Lab\"\n"
                 "$Shortcut.IconLocation = $iconRef\n"
                 "$Shortcut.Save()\n"
             ).arg(destApp, dirPath);
@@ -385,7 +439,7 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
                 "$Shortcut = $WshShell.CreateShortcut(\"$MenuFolder\\Overtune 3.lnk\")\n"
                 "$Shortcut.TargetPath = \"%1\"\n"
                 "$Shortcut.WorkingDirectory = \"%2\"\n"
-                "$Shortcut.Description = \"Overtune 3.2.1 - DSP Filter Designer and Audio Lab\"\n"
+                "$Shortcut.Description = \"Overtune 3.2.3 - DSP Filter Designer and Audio Lab\"\n"
                 "$Shortcut.IconLocation = $iconRef\n"
                 "$Shortcut.Save()\n"
             ).arg(destApp, dirPath);
@@ -395,8 +449,8 @@ bool UpdateInstallerEngine::performWindowsInstall(const QString &dirPath, bool d
         pcontent += QStringLiteral(
             "$UninstallKey = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Overtune3'\n"
             "if (!(Test-Path $UninstallKey)) { New-Item -Path $UninstallKey -Force | Out-Null }\n"
-            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayName' -Value 'Overtune 3.2.1 Studio'\n"
-            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayVersion' -Value '3.2.1'\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayName' -Value 'Overtune 3.2.3 Studio'\n"
+            "Set-ItemProperty -Path $UninstallKey -Name 'DisplayVersion' -Value '3.2.3'\n"
             "Set-ItemProperty -Path $UninstallKey -Name 'Publisher' -Value 'Overtune DSP'\n"
             "Set-ItemProperty -Path $UninstallKey -Name 'InstallLocation' -Value '%1'\n"
             "Set-ItemProperty -Path $UninstallKey -Name 'DisplayIcon' -Value $iconRef\n"
@@ -523,11 +577,13 @@ void UpdateInstallerEngine::restartApplication() {
     if (!QFile::exists(installedBin)) {
         installedBin = m_installPath + QStringLiteral("/FilterDesigner.exe");
     }
-    QString updateBat = m_installPath + QStringLiteral("/overtune_update.bat");
-    if (QFile::exists(updateBat)) {
-        QProcess::startDetached(QStringLiteral("cmd.exe"), QStringList() << QStringLiteral("/c") << updateBat);
-        QCoreApplication::quit();
-        return;
+    if (isReadyToRestart()) {
+        QString updateBat = m_installPath + QStringLiteral("/overtune_update.bat");
+        if (QFile::exists(updateBat)) {
+            QProcess::startDetached(QStringLiteral("cmd.exe"), QStringList() << QStringLiteral("/c") << updateBat);
+            QCoreApplication::quit();
+            return;
+        }
     }
 #else
     QString installedBin = m_installPath + QStringLiteral("/bin/ot3");

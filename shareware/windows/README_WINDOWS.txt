@@ -1,6 +1,6 @@
 ========================================================================
   Overtune 3 (ot3) — Windows Installation & Deployment Instructions
-  Release 3.2.1 (x64) | Pure C++20 & Qt 6 Real-Time DSP Studio
+  Release 3.2.3 (x64) | Pure C++20 & Qt 6 Real-Time DSP Studio
 ========================================================================
 
 1. SYSTEM REQUIREMENTS

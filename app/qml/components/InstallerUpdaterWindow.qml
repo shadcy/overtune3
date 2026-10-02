@@ -6,8 +6,10 @@ import QtQuick.Window
 // InstallerUpdaterWindow.qml — Standalone installer and auto-updater window with OLED theme & 16:9 banner
 Window {
     id: root
+    property bool isStandalone: false
+    property int activeTab: 0 // 0 = Auto-Updater, 1 = System Installer
 
-    title: "Overtune 3.2.1 — Installer & Auto-Updater"
+    title: (isStandalone || activeTab === 1) ? "Overtune 3.2.3 Setup" : "Overtune 3.2.3 — Installer & Auto-Updater"
     width:         520
     height:        Math.min(640, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 620)
     minimumWidth:  460
@@ -15,11 +17,22 @@ Window {
     maximumWidth:  600
     maximumHeight: 760
 
-    color: "#000000"
+    color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7"
     visible: false
-    flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint
+    flags: isStandalone ? (Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint)
+                        : (Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
 
-    property int activeTab: 0 // 0 = Auto-Updater, 1 = System Installer
+    onClosing: function(close) {
+        if (isStandalone) {
+            Qt.quit()
+        }
+    }
+
+    Component.onCompleted: {
+        if (isStandalone) {
+            openWindow(1)
+        }
+    }
 
     function openWindow(tabIndex) {
         if (tabIndex !== undefined) {
@@ -58,7 +71,7 @@ Window {
         easing.type: Easing.OutCubic
     }
 
-    Shortcut { sequence: "Escape"; onActivated: root.close() }
+    Shortcut { sequence: "Escape"; onActivated: { root.close(); if (root.isStandalone) Qt.quit(); } }
 
     // ── Full scroll matching WhatsNewWindow / DesignVerifierModal ─────────────
     ScrollView {
@@ -87,7 +100,7 @@ Window {
                     mipmap: true
                 }
 
-                // Bottom gradient fade to OLED black
+                // Bottom gradient fade to match background
                 Rectangle {
                     anchors.bottom: parent.bottom
                     width: parent.width
@@ -95,7 +108,7 @@ Window {
                     gradient: Gradient {
                         orientation: Gradient.Vertical
                         GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 1.0; color: "#000000" }
+                        GradientStop { position: 1.0; color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7" }
                     }
                 }
 
@@ -113,10 +126,14 @@ Window {
                     Text {
                         id: pillLabel
                         anchors.centerIn: parent
-                        text: root.activeTab === 0 ? (updateInstaller.hasUpdate ? "UPDATE AVAILABLE" : "AUTO-UPDATER") : "SYSTEM INSTALLER"
+                        text: (root.isStandalone || root.activeTab === 1)
+                              ? (updateInstaller.status === "installed" ? "INSTALLED ✓" : "SYSTEM INSTALLER")
+                              : (updateInstaller.hasUpdate ? "UPDATE AVAILABLE" : "UP TO DATE")
                         font.pixelSize: 10
                         font.weight: Font.Bold
-                        color: updateInstaller.hasUpdate ? theme.accent : "#FFFFFF"
+                        color: (root.isStandalone || root.activeTab === 1)
+                               ? (updateInstaller.status === "installed" ? "#30D158" : "#FFFFFF")
+                               : (updateInstaller.hasUpdate ? theme.accent : "#30D158")
                         font.letterSpacing: 1.2
                     }
                 }
@@ -136,22 +153,23 @@ Window {
                     spacing: 4
 
                     Text {
-                        text: root.activeTab === 0
-                              ? (updateInstaller.hasUpdate ? "Overtune " + updateInstaller.latestVersion + " Ready" : "Overtune 3 Updater")
-                              : "Install Overtune 3 to " + updateInstaller.osName
-                        font.pixelSize: 26
+                        text: (root.isStandalone || root.activeTab === 1)
+                              ? (updateInstaller.status === "installed" ? "Overtune 3.2.3 Ready to Launch" : "Install Overtune " + updateInstaller.currentVersion + " to " + updateInstaller.osName)
+                              : (updateInstaller.hasUpdate ? ("Update: v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion) : ("Overtune " + updateInstaller.currentVersion + " is Up to Date"))
+                        font.pixelSize: 24
                         font.weight: Font.Bold
-                        color: "#FFFFFF"
+                        color: theme.primaryText
                         lineHeight: 1.2
                     }
 
                     Text {
-                        text: root.activeTab === 0
-                              ? "Effortless, seamless updates and live patch delivery for your workflow."
-                              : "Setup native system integration, desktop shortcuts, and desktop file entries."
+                        text: (root.isStandalone || root.activeTab === 1)
+                              ? (updateInstaller.status === "installed"
+                                 ? "Installation completed successfully. You can launch Overtune 3.2.3 now or close this wizard."
+                                 : "Setup native system integration, desktop shortcuts, and Start menu registration.")
+                              : (updateInstaller.hasUpdate ? ("Upgrade from v" + updateInstaller.currentVersion + " to v" + updateInstaller.latestVersion + " is ready to install.") : ("You are currently running the latest stable release (v" + updateInstaller.currentVersion + ")."))
                         font.pixelSize: 13
-                        color: "#FFFFFF"
-                        opacity: 0.6
+                        color: theme.secondaryText
                         wrapMode: Text.Wrap
                         width: parent.width
                     }
@@ -159,11 +177,12 @@ Window {
 
                 // ── Mode Switcher Tabs (Segmented control) ────────────────────
                 Rectangle {
+                    visible: !root.isStandalone
                     width: parent.width
                     height: 34
                     radius: 8
-                    color: "#161618"
-                    border.color: Qt.rgba(1, 1, 1, 0.08)
+                    color: theme.surfaceHigh
+                    border.color: theme.borderColor
                     border.width: 1
 
                     Row {
@@ -176,7 +195,7 @@ Window {
                             width: (parent.width - 2) / 2
                             height: parent.height
                             radius: 6
-                            color: root.activeTab === 0 ? "#2C2C2E" : "transparent"
+                            color: root.activeTab === 0 ? theme.surface : "transparent"
                             Behavior on color { ColorAnimation { duration: 120 } }
 
                             Row {
@@ -185,14 +204,14 @@ Window {
                                 Codicon {
                                     icon: "cloud-download"
                                     iconSize: 13
-                                    iconColor: root.activeTab === 0 ? theme.accent : "#8E8E93"
+                                    iconColor: root.activeTab === 0 ? theme.accent : theme.secondaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
                                     text: "In-App Updater"
                                     font.pixelSize: 12
                                     font.weight: root.activeTab === 0 ? Font.DemiBold : Font.Normal
-                                    color: root.activeTab === 0 ? "#FFFFFF" : "#8E8E93"
+                                    color: root.activeTab === 0 ? theme.primaryText : theme.secondaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -209,7 +228,7 @@ Window {
                             width: (parent.width - 2) / 2
                             height: parent.height
                             radius: 6
-                            color: root.activeTab === 1 ? "#2C2C2E" : "transparent"
+                            color: root.activeTab === 1 ? theme.surface : "transparent"
                             Behavior on color { ColorAnimation { duration: 120 } }
 
                             Row {
@@ -218,14 +237,14 @@ Window {
                                 Codicon {
                                     icon: "package"
                                     iconSize: 13
-                                    iconColor: root.activeTab === 1 ? theme.accent : "#8E8E93"
+                                    iconColor: root.activeTab === 1 ? theme.accent : theme.secondaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
                                     text: "System Installer"
                                     font.pixelSize: 12
                                     font.weight: root.activeTab === 1 ? Font.DemiBold : Font.Normal
-                                    color: root.activeTab === 1 ? "#FFFFFF" : "#8E8E93"
+                                    color: root.activeTab === 1 ? theme.primaryText : theme.secondaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -239,13 +258,13 @@ Window {
                     }
                 }
 
-                // ── Progress Card (Matches DesignVerifierModal) ───────────────
+                // ── Progress Card ─────────────────────────────────────────────
                 Rectangle {
                     width: parent.width
                     height: 84
                     radius: 12
-                    color: "#1C1C1E"
-                    border.color: Qt.rgba(1, 1, 1, 0.06)
+                    color: theme.surface
+                    border.color: theme.borderColor
                     border.width: 1
 
                     Column {
@@ -285,11 +304,11 @@ Window {
                                              : (updateInstaller.isInstalling ? "Applying & verifying update..."
                                                 : (updateInstaller.isReadyToRestart ? "Ready to restart & update"
                                                    : (updateInstaller.status === "installed" ? "Installed to system"
-                                                      : (updateInstaller.hasUpdate ? "Update Available (v" + updateInstaller.latestVersion + ")"
-                                                         : "Current Version: v" + updateInstaller.currentVersion)))))
+                                                      : (updateInstaller.hasUpdate ? ("Update Available: v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion)
+                                                         : ("Current Version: v" + updateInstaller.currentVersion))))))
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
-                                    color: "#FFFFFF"
+                                    color: theme.primaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -309,7 +328,7 @@ Window {
                             width: parent.width
                             height: 6
                             radius: 3
-                            color: "#2C2C2E"
+                            color: theme.surfaceHigh
                             clip: true
 
                             Rectangle {
@@ -328,7 +347,7 @@ Window {
                             Text {
                                 text: updateInstaller.statusMessage
                                 font.pixelSize: 11
-                                color: "#8E8E93"
+                                color: theme.secondaryText
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                             }
@@ -354,8 +373,8 @@ Window {
                         width: parent.width
                         implicitHeight: releaseCol.implicitHeight + 28
                         radius: 12
-                        color: "#1C1C1E"
-                        border.color: Qt.rgba(1, 1, 1, 0.06)
+                        color: theme.surface
+                        border.color: theme.borderColor
                         border.width: 1
 
                         Column {
@@ -375,7 +394,7 @@ Window {
                                     Text {
                                         id: newTag
                                         anchors.centerIn: parent
-                                        text: updateInstaller.hasUpdate ? "v" + updateInstaller.latestVersion : "v" + updateInstaller.currentVersion
+                                        text: updateInstaller.hasUpdate ? ("v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion) : ("v" + updateInstaller.currentVersion)
                                         font.pixelSize: 10
                                         font.weight: Font.Bold
                                         color: "#FFFFFF"
@@ -386,7 +405,7 @@ Window {
                                     text: updateInstaller.releaseName
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
-                                    color: "#FFFFFF"
+                                    color: theme.primaryText
                                     Layout.fillWidth: true
                                     elide: Text.ElideRight
                                 }
@@ -394,14 +413,14 @@ Window {
                                 Text {
                                     text: updateInstaller.releaseDate
                                     font.pixelSize: 11
-                                    color: "#8E8E93"
+                                    color: theme.secondaryText
                                 }
                             }
 
                             Rectangle {
                                 width: parent.width
                                 height: 1
-                                color: Qt.rgba(1, 1, 1, 0.06)
+                                color: theme.borderColor
                             }
 
                             // Bullet points
@@ -422,7 +441,7 @@ Window {
                                         width: parent.width - 24
                                         text: modelData
                                         font.pixelSize: 12
-                                        color: "#D1D1D6"
+                                        color: theme.primaryText
                                         wrapMode: Text.Wrap
                                         lineHeight: 1.3
                                     }
@@ -436,8 +455,8 @@ Window {
                                 width: parent.width
                                 height: 26
                                 radius: 6
-                                color: "#141416"
-                                border.color: Qt.rgba(1, 1, 1, 0.04)
+                                color: theme.surfaceHigh
+                                border.color: theme.borderColor
 
                                 RowLayout {
                                     anchors.fill: parent
@@ -454,7 +473,7 @@ Window {
                                         text: "SHA-256 Verified: " + updateInstaller.releaseSha256.substring(0, 16) + "..."
                                         font.pixelSize: 10
                                         font.family: "Monospace"
-                                        color: "#8E8E93"
+                                        color: theme.secondaryText
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
                                     }
@@ -474,8 +493,8 @@ Window {
                         width: parent.width
                         implicitHeight: installConfigCol.implicitHeight + 28
                         radius: 12
-                        color: "#1C1C1E"
-                        border.color: Qt.rgba(1, 1, 1, 0.06)
+                        color: theme.surface
+                        border.color: theme.borderColor
                         border.width: 1
 
                         Column {
@@ -487,10 +506,10 @@ Window {
                                 text: "Installation Destination & Integration"
                                 font.pixelSize: 13
                                 font.weight: Font.DemiBold
-                                color: "#FFFFFF"
+                                color: theme.primaryText
                             }
 
-                            // Destination directory
+                            // Destination directory with Browse button
                             Column {
                                 width: parent.width
                                 spacing: 4
@@ -498,34 +517,84 @@ Window {
                                 Text {
                                     text: "Target Directory"
                                     font.pixelSize: 11
-                                    color: "#8E8E93"
+                                    color: theme.secondaryText
                                 }
 
                                 Rectangle {
                                     width: parent.width
-                                    height: 32
+                                    height: 34
                                     radius: 6
-                                    color: "#141416"
-                                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                                    color: theme.surfaceHigh
+                                    border.color: theme.borderColor
 
                                     RowLayout {
                                         anchors.fill: parent
-                                        anchors.margins: 6
+                                        anchors.margins: 4
+                                        anchors.leftMargin: 8
+                                        anchors.rightMargin: 6
+                                        spacing: 8
 
                                         Codicon {
                                             icon: "folder"
-                                            iconSize: 13
+                                            iconSize: 14
                                             iconColor: theme.accent
+                                            anchors.verticalCenter: parent.verticalCenter
                                         }
 
                                         TextInput {
                                             id: pathInput
                                             text: updateInstaller.installPath
                                             font.pixelSize: 12
-                                            color: "#FFFFFF"
+                                            color: theme.primaryText
                                             Layout.fillWidth: true
                                             clip: true
-                                            onTextChanged: updateInstaller.installPath = text
+                                            verticalAlignment: TextInput.AlignVCenter
+                                            selectByMouse: true
+                                            onTextChanged: {
+                                                if (updateInstaller.installPath !== text)
+                                                    updateInstaller.installPath = text
+                                            }
+                                        }
+
+                                        // Native Directory Browser Button
+                                        Rectangle {
+                                            implicitWidth: browseText.implicitWidth + 20
+                                            implicitHeight: 24
+                                            radius: 4
+                                            color: browseMouse.pressed ? Qt.darker(theme.surface, 1.2) : (browseMouse.containsMouse ? theme.surfaceHover : theme.surface)
+                                            border.color: theme.borderColor
+
+                                            Row {
+                                                anchors.centerIn: parent
+                                                spacing: 4
+                                                Codicon {
+                                                    icon: "folder-opened"
+                                                    iconSize: 12
+                                                    iconColor: theme.primaryText
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+                                                Text {
+                                                    id: browseText
+                                                    text: "Browse..."
+                                                    font.pixelSize: 11
+                                                    font.weight: Font.Medium
+                                                    color: theme.primaryText
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                id: browseMouse
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    var chosen = updateInstaller.browseDirectory("Select Installation Directory");
+                                                    if (chosen && chosen.length > 0) {
+                                                        pathInput.text = chosen;
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -544,8 +613,8 @@ Window {
                                     Rectangle {
                                         width: 18; height: 18
                                         radius: 4
-                                        color: updateInstaller.createDesktopShortcut ? theme.accent : "#2C2C2E"
-                                        border.color: Qt.rgba(1, 1, 1, 0.1)
+                                        color: updateInstaller.createDesktopShortcut ? theme.accent : theme.surfaceHigh
+                                        border.color: theme.borderColor
                                         anchors.verticalCenter: parent.verticalCenter
 
                                         Codicon {
@@ -566,7 +635,7 @@ Window {
                                     Text {
                                         text: "Create Desktop Shortcut"
                                         font.pixelSize: 12
-                                        color: "#FFFFFF"
+                                        color: theme.primaryText
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
@@ -579,8 +648,8 @@ Window {
                                     Rectangle {
                                         width: 18; height: 18
                                         radius: 4
-                                        color: updateInstaller.createStartMenu ? theme.accent : "#2C2C2E"
-                                        border.color: Qt.rgba(1, 1, 1, 0.1)
+                                        color: updateInstaller.createStartMenu ? theme.accent : theme.surfaceHigh
+                                        border.color: theme.borderColor
                                         anchors.verticalCenter: parent.verticalCenter
 
                                         Codicon {
@@ -599,9 +668,9 @@ Window {
                                     }
 
                                     Text {
-                                        text: updateInstaller.osName === "Windows" ? "Register in Windows Start Menu & Uninstall" : "Register in System Applications (~/.local/share/applications)"
+                                        text: updateInstaller.osName === "Windows" ? "Register in Windows Start Menu & App List" : "Register in System Applications (~/.local/share/applications)"
                                         font.pixelSize: 12
-                                        color: "#FFFFFF"
+                                        color: theme.primaryText
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
@@ -621,20 +690,21 @@ Window {
                                     Text {
                                         text: "CLI Tool: overtune3 command will be linked in PATH"
                                         font.pixelSize: 12
-                                        color: "#8E8E93"
+                                        color: theme.secondaryText
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
 
                                 Item { width: 1; height: 4 }
 
-                                // In-App Complete Uninstaller Button
+                                // In-App Complete Uninstaller Button (visible when installed)
                                 Rectangle {
+                                    visible: updateInstaller.isInstalled
                                     width: parent.width
                                     height: 38
                                     radius: 7
-                                    color: "#241214"
-                                    border.color: "#802020"
+                                    color: theme.isDark ? "#241214" : "#FFF0F0"
+                                    border.color: theme.isDark ? "#802020" : "#FFCDD2"
                                     border.width: 1
 
                                     RowLayout {
@@ -697,7 +767,7 @@ Window {
         standardButtons: Dialog.Yes | Dialog.No
         contentItem: Text {
             text: "Are you sure you want to completely remove Overtune 3, its shortcuts, registry entries, and local files?"
-            color: "#FFFFFF"
+            color: theme.primaryText
             font.pixelSize: 12
             wrapMode: Text.WordWrap
             width: 380
@@ -707,19 +777,18 @@ Window {
         }
     }
 
-    // ── Sticky Footer (OLED Black) matching WhatsNewWindow / DesignVerifierModal
+    // ── Sticky Footer ─────────────────────────────────────────────────────────
     Rectangle {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
-        color: "#0c0c0e"
+        color: theme.isDark ? "#0C0C0E" : "#EBEBED"
         z: 10
 
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 1
-            color: "#FFFFFF"
-            opacity: 0.1
+            color: theme.borderColor
         }
 
         // Left caption
@@ -727,8 +796,7 @@ Window {
             anchors { left: parent.left; leftMargin: 24; verticalCenter: parent.verticalCenter }
             text: updateInstaller.osName + " • " + (updateInstaller.updateChannel === "stable" ? "Stable Channel" : "Beta Channel")
             font.pixelSize: 11
-            color: "#FFFFFF"
-            opacity: 0.4
+            color: theme.secondaryText
             font.letterSpacing: 0.4
         }
 
@@ -737,14 +805,47 @@ Window {
             anchors { right: parent.right; rightMargin: 24; verticalCenter: parent.verticalCenter }
             spacing: 8
 
-            // "Check for Updates" secondary button (when in updater mode)
+            // Secondary "Cancel" / "Close" button when in installer mode
             Rectangle {
-                visible: root.activeTab === 0 && !updateInstaller.isDownloading && !updateInstaller.isInstalling && !updateInstaller.isReadyToRestart
+                visible: root.isStandalone || root.activeTab === 1
+                implicitWidth:  closeBtnText.implicitWidth + 24
+                implicitHeight: 30
+                radius: 7
+                color: closeMouse.containsMouse ? theme.surfaceHigh : theme.surface
+                border.color: theme.borderColor
+                border.width: 1
+
+                Text {
+                    id: closeBtnText
+                    anchors.centerIn: parent
+                    text: updateInstaller.status === "installed" ? "Close" : "Cancel"
+                    font.pixelSize: 11
+                    font.weight: Font.Medium
+                    color: theme.primaryText
+                }
+
+                MouseArea {
+                    id: closeMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        root.close()
+                        if (root.isStandalone) {
+                            Qt.quit()
+                        }
+                    }
+                }
+            }
+
+            // "Check for Updates" secondary button (when in updater mode and not standalone)
+            Rectangle {
+                visible: !root.isStandalone && root.activeTab === 0 && !updateInstaller.isDownloading && !updateInstaller.isInstalling && !updateInstaller.isReadyToRestart
                 implicitWidth:  126
                 implicitHeight: 30
                 radius: 7
-                color: checkMouse.containsMouse ? "#2C2C2E" : "#1C1C1E"
-                border.color: Qt.rgba(1, 1, 1, 0.12)
+                color: checkMouse.containsMouse ? theme.surfaceHigh : theme.surface
+                border.color: theme.borderColor
                 border.width: 1
 
                 Row {
@@ -753,14 +854,14 @@ Window {
                     Codicon {
                         icon: "refresh"
                         iconSize: 12
-                        iconColor: "#FFFFFF"
+                        iconColor: theme.primaryText
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     Text {
                         text: "Check Updates"
                         font.pixelSize: 11
                         font.weight: Font.Medium
-                        color: "#FFFFFF"
+                        color: theme.primaryText
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }
@@ -780,15 +881,23 @@ Window {
                 implicitWidth:  btnText.implicitWidth + 24
                 implicitHeight: 30
                 radius: 7
-                color: btnMouse.pressed ? Qt.darker(theme.accent, 1.25) : (btnMouse.containsMouse ? Qt.lighter(theme.accent, 1.1) : theme.accent)
+                color: {
+                    if (root.isStandalone || root.activeTab === 1) {
+                        if (updateInstaller.status === "installed") return "#30D158"
+                        if (updateInstaller.status === "installing") return "#636366"
+                    }
+                    return btnMouse.pressed ? Qt.darker(theme.accent, 1.25) : (btnMouse.containsMouse ? Qt.lighter(theme.accent, 1.1) : theme.accent)
+                }
                 Behavior on color { ColorAnimation { duration: 100 } }
 
                 Text {
                     id: btnText
                     anchors.centerIn: parent
                     text: {
-                        if (root.activeTab === 1) {
-                            return updateInstaller.status === "installed" ? "Installed ✓" : "Install to System"
+                        if (root.isStandalone || root.activeTab === 1) {
+                            if (updateInstaller.status === "installing") return "Installing..."
+                            if (updateInstaller.status === "installed") return "Launch Overtune 3"
+                            return "Install to System"
                         }
                         if (updateInstaller.isReadyToRestart) {
                             return "Restart & Update Now"
@@ -802,7 +911,7 @@ Window {
                         if (updateInstaller.hasUpdate) {
                             return "Download & Install Update"
                         }
-                        return "Got it"
+                        return "Check for Updates"
                     }
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
@@ -812,11 +921,21 @@ Window {
                 MouseArea {
                     id: btnMouse
                     anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: updateInstaller.status !== "installing"
+                    cursorShape: updateInstaller.status === "installing" ? Qt.ArrowCursor : Qt.PointingHandCursor
                     onClicked: {
-                        if (root.activeTab === 1) {
-                            updateInstaller.installToSystem(updateInstaller.installPath, updateInstaller.createDesktopShortcut, updateInstaller.createStartMenu)
+                        if (root.isStandalone || root.activeTab === 1) {
+                            if (updateInstaller.status === "installed") {
+                                updateInstaller.restartApplication()
+                                root.close()
+                                if (root.isStandalone) {
+                                    Qt.quit()
+                                }
+                                return
+                            }
+                            if (updateInstaller.status !== "installing") {
+                                updateInstaller.installToSystem(updateInstaller.installPath, updateInstaller.createDesktopShortcut, updateInstaller.createStartMenu)
+                            }
                             return
                         }
                         if (updateInstaller.isReadyToRestart) {
@@ -827,7 +946,7 @@ Window {
                             updateInstaller.startDownloadAndInstall()
                             return
                         }
-                        root.close()
+                        updateInstaller.checkForUpdates(false)
                     }
                 }
             }

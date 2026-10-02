@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(FilterDesigner VERSION 3.2.1 LANGUAGES CXX)
+project(FilterDesigner VERSION 3.2.3 LANGUAGES CXX)
 
 # ── C++20 ─────────────────────────────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD 20)
@@ -34,7 +34,7 @@ add_subdirectory(app)   # Qt 6 QML application
 set(CPACK_PACKAGE_NAME "Overtune3")
 set(CPACK_PACKAGE_VENDOR "Overtune DSP")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "High-Precision Digital Filter Design & Live Audio Lab")
-set(CPACK_PACKAGE_VERSION "3.2.1")
+set(CPACK_PACKAGE_VERSION "3.2.3")
 set(CPACK_PACKAGE_CONTACT "support@overtune.audio")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 

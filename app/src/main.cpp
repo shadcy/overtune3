@@ -17,7 +17,7 @@
 
 int main(int argc, char* argv[]) {
 #ifdef Q_OS_WIN
-    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.1");
+    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.3");
 #endif
     // Avoid GTK theme crash on Ubuntu Wayland/GNOME
     qputenv("QT_QPA_PLATFORMTHEME", "generic");
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
     QGuiApplication::setApplicationName("Overtune 3");
     QGuiApplication::setOrganizationName("Overtune");
-    QGuiApplication::setApplicationVersion("3.2.1");
+    QGuiApplication::setApplicationVersion("3.2.3");
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(QStringLiteral(":/FilterDesigner/icons/logo.png")));
@@ -81,7 +81,10 @@ int main(int argc, char* argv[]) {
     qml.rootContext()->setContextProperty("cliLaunchInstaller", launchInstaller);
     qml.rootContext()->setContextProperty("cliLaunchUpdater",   launchUpdater);
 
-    const QUrl url(u"qrc:/FilterDesigner/qml/Main.qml"_qs);
+    const QUrl url = launchInstaller
+        ? QUrl(u"qrc:/FilterDesigner/qml/InstallerApp.qml"_qs)
+        : QUrl(u"qrc:/FilterDesigner/qml/Main.qml"_qs);
+
     QObject::connect(&qml, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject* obj, const QUrl& objUrl) {
         if (!obj && url == objUrl) QCoreApplication::exit(-1);

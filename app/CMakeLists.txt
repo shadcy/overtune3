@@ -29,6 +29,7 @@ qt_add_qml_module(FilterDesigner
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/InstallerApp.qml
         qml/theme/Theme.qml
         qml/components/Sidebar.qml
         qml/components/SidebarItem.qml
@@ -90,6 +91,34 @@ qt_add_qml_module(FilterDesigner
         math/eq6_light.png
         math/eq7_dark.png
         math/eq7_light.png
+        math/axis_mag_db_dark.png
+        math/axis_mag_db_light.png
+        math/axis_mag_lin_dark.png
+        math/axis_mag_lin_light.png
+        math/axis_phase_dark.png
+        math/axis_phase_light.png
+        math/axis_group_delay_dark.png
+        math/axis_group_delay_light.png
+        math/axis_freq_hz_dark.png
+        math/axis_freq_hz_light.png
+        math/axis_freq_rad_dark.png
+        math/axis_freq_rad_light.png
+        math/axis_freq_norm_dark.png
+        math/axis_freq_norm_light.png
+        math/axis_re_z_dark.png
+        math/axis_re_z_light.png
+        math/axis_im_z_dark.png
+        math/axis_im_z_light.png
+        math/axis_unit_circle_dark.png
+        math/axis_unit_circle_light.png
+        math/axis_hn_dark.png
+        math/axis_hn_light.png
+        math/axis_sn_dark.png
+        math/axis_sn_light.png
+        math/axis_sample_n_dark.png
+        math/axis_sample_n_light.png
+        math/axis_signals_dark.png
+        math/axis_signals_light.png
         latex/theory_and_math.pdf
         latex/theory_and_math_page-1.png
         latex/theory_and_math_page-2.png

@@ -19,24 +19,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     PathRemoveFileSpecW(selfDir);
 
     WCHAR target[MAX_PATH];
-    // Check candidate 1: package root -> bin\ot3-installer.exe
-    wsprintfW(target, L"%s\\bin\\ot3-installer.exe", selfDir);
+    // Candidate 1: package root -> bin\ot3.exe
+    wsprintfW(target, L"%s\\bin\\ot3.exe", selfDir);
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Check candidate 2: package root -> bin\ot3.exe
-        wsprintfW(target, L"%s\\bin\\ot3.exe", selfDir);
+        // Candidate 2: package root -> bin\FilterDesigner.exe
+        wsprintfW(target, L"%s\\bin\\FilterDesigner.exe", selfDir);
     }
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Check candidate 3: already inside bin folder
+        // Candidate 3: already inside bin folder -> ot3.exe
         wsprintfW(target, L"%s\\ot3.exe", selfDir);
     }
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Check candidate 4: build folder
+        // Candidate 4: already inside bin folder -> FilterDesigner.exe
+        wsprintfW(target, L"%s\\FilterDesigner.exe", selfDir);
+    }
+    if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
+        // Candidate 5: build folder
         wsprintfW(target, L"%s\\build\\bin\\Release\\ot3.exe", selfDir);
     }
 
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
         MessageBoxW(NULL,
-            L"Unable to locate Overtune 3 executable (bin\\ot3.exe or bin\\ot3-installer.exe).\n\nPlease ensure the distribution package was extracted completely.",
+            L"Unable to locate Overtune 3 executable (bin\\ot3.exe).\n\nPlease ensure the distribution package was extracted completely.",
             L"Overtune 3 Installer",
             MB_ICONERROR | MB_OK);
         return 1;

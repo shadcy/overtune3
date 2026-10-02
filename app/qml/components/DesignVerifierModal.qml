@@ -7,7 +7,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2.1 — Design Verifier"
+    title: "Overtune 3.2.3 — Design Verifier"
     width:         520
     height:        Math.min(580, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 560)
     minimumWidth:  460
@@ -15,7 +15,7 @@ Window {
     maximumWidth:  600
     maximumHeight: 740
 
-    color: "#000000"
+    color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7"
     visible: false
     flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint
 

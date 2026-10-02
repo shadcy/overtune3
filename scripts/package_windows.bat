@@ -42,6 +42,9 @@ xcopy /s /e /y /q "%BIN_SRC%\*" "%STAGE_DIR%\bin\" >nul
 if not exist "%STAGE_DIR%\bin\FilterDesigner.exe" (
     copy /y "%STAGE_DIR%\bin\ot3.exe" "%STAGE_DIR%\bin\FilterDesigner.exe" >nul
 )
+if exist "%STAGE_DIR%\bin\ot3-installer.exe" (
+    copy /y "%STAGE_DIR%\bin\ot3-installer.exe" "%STAGE_DIR%\ot3-installer.exe" >nul
+)
 
 echo [2/4] Adding documentation and assets...
 if exist "%ROOT_DIR%\assets\logo.png" (

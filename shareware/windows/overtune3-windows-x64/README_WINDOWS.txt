@@ -1,6 +1,6 @@
 ========================================================================
   Overtune 3 (ot3) — Windows Installation & Deployment Instructions
-  Release 3.2.0 (x64) | Pure C++20 & Qt 6 Real-Time DSP Studio
+  Release 3.2.2 (x64) | Pure C++20 & Qt 6 Real-Time DSP Studio
 ========================================================================
 
 1. SYSTEM REQUIREMENTS
@@ -10,7 +10,15 @@
 - Display: 1280x800 minimum recommended resolution (HiDPI supported)
 - Audio: Any standard DirectSound / WASAPI audio output device
 
-2. PORTABLE EXECUTION (Zero Install)
+2. ONE-CLICK GUI INSTALLATION (Recommended)
+--------------------------------------------
+You can install Overtune 3 with a single click:
+  a. Double-click "ot3-installer.exe" in this folder.
+  b. The native installation dialog will launch automatically with full custom
+     options: customize destination folder, desktop shortcut, and Start menu.
+  c. Click "Install Overtune 3" to complete deployment.
+
+3. PORTABLE EXECUTION (Zero Install)
 ------------------------------------
 You can run Overtune 3 directly without installing or modifying system settings:
   a. Double-click "ot3.bat" or "run.bat" in the package folder.
@@ -18,9 +26,9 @@ You can run Overtune 3 directly without installing or modifying system settings:
          .\bin\ot3.exe
          (or .\bin\FilterDesigner.exe)
 
-3. AUTOMATED NATIVE INSTALLATION (Recommended)
-----------------------------------------------
-To integrate Overtune 3 into your Windows system (Start Menu, Desktop, Apps list):
+4. AUTOMATED POWERSHELL INSTALLATION
+------------------------------------
+To integrate Overtune 3 via script or headless CI:
   a. Open PowerShell in this folder.
   b. Run:
          powershell -ExecutionPolicy Bypass -File .\install_windows.ps1
@@ -38,19 +46,24 @@ To integrate Overtune 3 into your Windows system (Start Menu, Desktop, Apps list
   - Registers "Overtune 3 Studio" in Windows Settings / Installed Apps
   - Configures uninstaller scripts and atomic in-place updater
 
-4. IN-APP UPDATES & CLI MODES
+5. IN-APP UPDATES & CLI MODES
 -----------------------------
 - In-App: Click "Help" -> "Check for Updates..." or click the titlebar badge.
-- CLI Installer Mode:  ot3.exe --install (launches built-in installer GUI)
-- CLI Updater Mode:    ot3.exe --update  (checks remote patches)
+- Native Installer:   Double-click "ot3-installer.exe" (or ot3.exe --install)
+- Native Updater:     ot3.exe --update
 
-5. UNINSTALLATION
+6. UNINSTALLATION
 -----------------
 To remove Overtune 3 cleanly:
-  a. Go to Windows Settings -> Apps -> Installed Apps -> "Overtune 3 Studio" -> Uninstall.
-  b. Or run the uninstaller script directly:
+  a. In-App Uninstallation:
+     Open Overtune 3 -> Go to Settings (gear icon in sidebar) -> "System Integration & Uninstall"
+     -> Click "Uninstall Overtune 3". It will cleanly remove shortcuts, registry entries,
+     and self-delete the application directory before exiting.
+  b. Windows Settings:
+     Go to Windows Settings -> Apps -> Installed Apps -> "Overtune 3 Studio" -> Uninstall.
+  c. Or run the uninstaller script directly:
          powershell -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\Programs\Overtune3\uninstall.ps1"
-  c. Or run:
+  d. Or run:
          "%LOCALAPPDATA%\Programs\Overtune3\uninstall.bat"
 
 6. REBUILDING FROM SOURCE

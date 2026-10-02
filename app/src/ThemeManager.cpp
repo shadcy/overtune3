@@ -124,6 +124,14 @@ void ThemeManager::resetToDefaults() {
 }
 
 void ThemeManager::applySystemTheme() {
+#if defined(Q_OS_WIN)
+    QSettings winTheme(QStringLiteral("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"), QSettings::NativeFormat);
+    QVariant val = winTheme.value(QStringLiteral("AppsUseLightTheme"));
+    if (val.isValid()) {
+        m_dark = (val.toInt() == 0);
+        return;
+    }
+#endif
     const QColor windowColor = QGuiApplication::palette().color(QPalette::Window);
     m_dark = windowColor.lightness() < 128;
 }

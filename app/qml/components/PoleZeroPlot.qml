@@ -235,6 +235,41 @@ Item {
             ctx.fillStyle = theme.secondaryText
             ctx.font = "11px 'Stack Sans Headline', sans-serif"
 
+            function drawSquircleBadge(label, bx, by, isAccent) {
+                ctx.save()
+                ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
+                const m = ctx.measureText(label)
+                const padH = 6
+                const bw = m.width + padH * 2
+                const bh = 18
+                const x0 = bx - bw / 2
+                const y0 = by - bh / 2
+                const rad = 5
+
+                ctx.fillStyle = "#000000"
+                ctx.strokeStyle = isAccent ? theme.accent : "rgba(255, 255, 255, 0.25)"
+                ctx.lineWidth = 1
+                ctx.beginPath()
+                ctx.moveTo(x0 + rad, y0)
+                ctx.lineTo(x0 + bw - rad, y0)
+                ctx.arcTo(x0 + bw, y0, x0 + bw, y0 + rad, rad)
+                ctx.lineTo(x0 + bw, y0 + bh - rad)
+                ctx.arcTo(x0 + bw, y0 + bh, x0 + bw - rad, y0 + bh, rad)
+                ctx.lineTo(x0 + rad, y0 + bh)
+                ctx.arcTo(x0, y0 + bh, x0, y0 + bh - rad, rad)
+                ctx.lineTo(x0, y0 + rad)
+                ctx.arcTo(x0, y0, x0 + rad, y0, rad)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+
+                ctx.fillStyle = isAccent ? theme.accent : "#FFFFFF"
+                ctx.textAlign = "center"
+                ctx.textBaseline = "middle"
+                ctx.fillText(label, bx, by)
+                ctx.restore()
+            }
+
             // Real axis ticks
             ctx.textAlign = "center"
             ctx.textBaseline = "top"
@@ -242,20 +277,17 @@ Item {
             ctx.fillText("-0.5", cx - r * 0.5, cy + 4)
             ctx.fillText("+0.5", cx + r * 0.5, cy + 4)
             ctx.fillText("+1", cx + r, cy + 4)
-            ctx.fillText("Re(z)", cx + axisExt + 2, cy - 14)
+            drawSquircleBadge("Re{z}", Math.min(width - 24, cx + axisExt + 18), cy, false)
 
             // Imag axis ticks
             ctx.textAlign = "right"
             ctx.textBaseline = "middle"
             ctx.fillText("+j", cx - 4, cy - r)
             ctx.fillText("-j", cx - 4, cy + r)
-            ctx.fillText("Im(z)", cx - 4, cy - axisExt - 2)
+            drawSquircleBadge("Im{z}", cx, Math.max(14, cy - axisExt - 12), false)
 
             // Unit circle badge
-            ctx.fillStyle = theme.accent
-            ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
-            ctx.textAlign = "left"
-            ctx.fillText("|z|=1.0", cx + r * 0.72, cy - r * 0.72)
+            drawSquircleBadge("|z| = 1.0", cx + r * 0.72, cy - r * 0.72, true)
 
             // 5) Plot Poles (x) and Zeros (o)
             const pts = filterEngine.poleZeroData

@@ -59,10 +59,10 @@ Item {
     property string toastMessage: ""
     property bool toastVisible: false
 
-    readonly property real marginLeft:   64
+    readonly property real marginLeft:   80
     readonly property real marginRight:  20
     readonly property real marginTop:    48
-    readonly property real marginBottom: 46
+    readonly property real marginBottom: 56
     readonly property real plotW: Math.max(1, width  - marginLeft - marginRight)
     readonly property real plotH: Math.max(1, height - marginTop  - marginBottom)
 
@@ -358,57 +358,117 @@ Item {
         border.width: 1
     }
 
-    // ── Native QML Math Typography for Production Output ──────────────────────
-    // Y-Axis Label (Rotated 90 degrees)
+    // ── Native QML Math Typography with Squircle Background ──────────────────────
+    // Y-Axis Label (Rotated 90 degrees with solid black squircle badge, spaced from tick numbers)
     Item {
         x: 0
         y: root.marginTop
-        width: root.marginLeft - 4
+        width: 36
         height: root.plotH
-        
-        Text {
+
+        Rectangle {
             anchors.centerIn: parent
             rotation: -90
-            textFormat: Text.RichText
-            text: {
-                if (root.displayMode === 0) {
-                    return root.magScaleMode === 1 ? "Linear Magnitude |H(e<sup>jω</sup>)|" 
-                                                   : "Magnitude |H(e<sup>jω</sup>)| [dB]"
-                } else if (root.displayMode === 1) {
-                    return root.phaseWrapMode === 1 ? "Wrapped Phase ∠H(e<sup>jω</sup>) [°]" 
-                                                    : "Unwrapped Phase ∠H(e<sup>jω</sup>) [°]"
-                } else {
-                    return "Group Delay τ<sub>g</sub>(ω) [samples]"
+            width: yAxisRow.implicitWidth + 14
+            height: 24
+            radius: 6
+            color: "#000000"
+            border.color: "rgba(255, 255, 255, 0.22)"
+            border.width: 1
+
+            Row {
+                id: yAxisRow
+                anchors.centerIn: parent
+                spacing: 6
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 14
+                    fillMode: Image.PreserveAspectFit
+                    mipmap: true
+                    source: {
+                        const sfx = "_dark.png" // Always use white/light math glyphs on solid black background
+                        if (root.displayMode === 0) {
+                            return root.magScaleMode === 1
+                                ? "qrc:/FilterDesigner/math/axis_mag_lin" + sfx
+                                : "qrc:/FilterDesigner/math/axis_mag_db" + sfx
+                        } else if (root.displayMode === 1) {
+                            return "qrc:/FilterDesigner/math/axis_phase" + sfx
+                        } else {
+                            return "qrc:/FilterDesigner/math/axis_group_delay" + sfx
+                        }
+                    }
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: {
+                        if (root.displayMode === 0) {
+                            return root.magScaleMode === 1 ? "Linear" : "Magnitude"
+                        } else if (root.displayMode === 1) {
+                            return root.phaseWrapMode === 1 ? "Wrapped Phase" : "Unwrapped Phase"
+                        } else {
+                            return "Group Delay"
+                        }
+                    }
+                    font.pixelSize: 11
+                    font.family: "Stack Sans Headline"
+                    font.weight: Font.Medium
+                    color: "#FFFFFF"
                 }
             }
-            font.pixelSize: 12
-            font.family: "Stack Sans Headline"
-            font.weight: Font.Medium
-            color: theme.primaryText
         }
     }
 
-    // X-Axis Label
+    // X-Axis Label with solid black squircle badge (anchored safely below frequency tick numbers)
     Item {
         x: root.marginLeft
         y: root.marginTop + root.plotH
         width: root.plotW
         height: root.marginBottom
 
-        Text {
+        Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: 22
-            textFormat: Text.RichText
-            text: {
-                if (root.freqScale === 2) return "Normalized Radian Frequency ω [rad/sample]"
-                if (root.freqScale === 3) return "Normalized Digital Frequency [cycles/sample]"
-                return "Frequency f [Hz]"
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 6
+            width: xAxisRow.implicitWidth + 16
+            height: 24
+            radius: 6
+            color: "#000000"
+            border.color: "rgba(255, 255, 255, 0.22)"
+            border.width: 1
+
+            Row {
+                id: xAxisRow
+                anchors.centerIn: parent
+                spacing: 6
+
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 14
+                    fillMode: Image.PreserveAspectFit
+                    mipmap: true
+                    source: {
+                        const sfx = "_dark.png" // Always white math glyphs on solid black background
+                        if (root.freqScale === 2) return "qrc:/FilterDesigner/math/axis_freq_rad" + sfx
+                        if (root.freqScale === 3) return "qrc:/FilterDesigner/math/axis_freq_norm" + sfx
+                        return "qrc:/FilterDesigner/math/axis_freq_hz" + sfx
+                    }
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: {
+                        if (root.freqScale === 2) return "Normalized Radian Frequency"
+                        if (root.freqScale === 3) return "Digital Frequency"
+                        return "Frequency"
+                    }
+                    font.pixelSize: 11
+                    font.family: "Stack Sans Headline"
+                    font.weight: Font.Medium
+                    color: "#FFFFFF"
+                }
             }
-            font.pixelSize: 12
-            font.family: "Stack Sans Headline"
-            font.weight: Font.Medium
-            color: theme.primaryText
         }
     }
 

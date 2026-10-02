@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.3] - 2026-10-02
+
+### Added
+- **Native Installation Directory Browser**:
+  - Setup wizard and installer allow browsing and selecting custom installation targets via native system folder picker.
+- **Solid Black Plot Badges & Zero Number Overlap**:
+  - All axis labels (`FrequencyPlot`, `PoleZeroPlot`, `ImpulseStepPlot`, `SignalPlot`) feature solid black (`#000000`) squircle backgrounds with clear margins preventing any overlap with grid tick numbers.
+- **Complete Authentic Codicon Mapping**:
+  - Integrated full 461-glyph Codicon icon font dictionary, eliminating all missing glyph fallbacks across Settings, Updater, and Navigation.
+- **Adaptive Dark / Light Theming**:
+  - Standalone modals and installers dynamically adapt backgrounds, surfaces, and borders to the application's dark/light settings.
+- **Clean Apple-Grade UI Polish**:
+  - Version transition display (`v3.2.2 → v3.2.3`), dynamic button width auto-scaling, and clean minimal copywriting.
+
+---
+
+## [3.2.2] - 2026-10-02
+
+### Added
+- **Solid Squircle Plot Axis Badges**:
+  - Implemented solid squircle badge containers (`#12151E` in dark mode, `#FFFFFF` in light mode, with `radius: 6`, 1px borders, and balanced padding) behind all primary and secondary axis labels across the DSP workstation:
+    - **Frequency Plot**: Rotated Y-axis badge and bottom X-axis badge.
+    - **Pole-Zero Plot**: Solid squircle badges for $\text{Re}\{z\}$, $\text{Im}\{z\}$, and the $|z| = 1.0$ unit circle indicator, preventing line intersections and occlusions.
+    - **Impulse & Step Response Plot**: Crisp squircle badges for $h[n]/s[n]$ and discrete time sample index $n$.
+    - **Live Signal Simulation Plot**: Dedicated squircle badges for signal amplitudes $x[n], y[n]$ and sample index $n$.
+- **LaTeX-Compiled Mathematical Typography**:
+  - Embedded high-DPI transparent LaTeX formula renderings with solid, medium mathematical typography for $|H(e^{j\omega})|$ (Magnitude in dB and Linear $|H(e^{j\omega})|$), $\angle H(e^{j\omega})$ (Phase), $\tau_g(\omega)$ (Group Delay), $f\text{ [Hz]}$, $\omega\text{ [rad/sample]}$, $\text{Re}\{z\}$, $\text{Im}\{z\}$, $|z| = 1.0$, $h[n]$, $s[n]$, and $x[n], y[n]$.
+  - Combined with clean medium typography in unified QML badges for maximum readability and scientific publication elegance.
+
+---
+
 ## [3.2.1] - 2026-10-02
 
 ### Added

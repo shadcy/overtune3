@@ -71,7 +71,7 @@ Item {
         PageHeader {
             Layout.fillWidth: true
             title: "Settings"
-            badgeText: "v3.2.1"
+            badgeText: "v3.2.3"
             badgeIcon: "settings-gear"
 
             Rectangle {
@@ -444,16 +444,15 @@ Item {
                 // ── Installation & Updates ─────────────────────────────────────
                 Rectangle {
                     width: parent.width
-                    implicitHeight: updateCardCol.implicitHeight + 20
+                    implicitHeight: updateCardCol.implicitHeight + 14
                     radius: 12
                     color: theme.surface
                     border.color: theme.borderColor
                     border.width: 1
-                    clip: true
 
                     Column {
                         id: updateCardCol
-                        anchors { fill: parent; margins: 0 }
+                        width: parent.width
                         spacing: 0
 
                         Text {
@@ -486,16 +485,18 @@ Item {
                                         font.weight: Font.DemiBold; color: theme.primaryText
                                     }
                                     Text {
-                                        text: updateInstaller.hasUpdate ? ("Update v" + updateInstaller.latestVersion + " available") : "Up to date • Stable release channel"
+                                        text: updateInstaller.hasUpdate
+                                              ? ("Update v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion + " available")
+                                              : "Up to date • Latest stable release"
                                         font.pixelSize: 11
                                         color: updateInstaller.hasUpdate ? theme.accent : theme.secondaryText
                                     }
                                 }
 
                                 StyledButton {
-                                    text: "Check Updates"
+                                    text: "Check for Updates"
                                     primary: true
-                                    implicitWidth: 110; implicitHeight: 28
+                                    implicitHeight: 28
                                     onClicked: {
                                         const w = Window.window
                                         if (w && typeof w.checkUpdatesNow === "function") {
@@ -543,7 +544,7 @@ Item {
                                 StyledButton {
                                     text: "Installer Setup"
                                     primary: false
-                                    implicitWidth: 110; implicitHeight: 28
+                                    implicitHeight: 28
                                     onClicked: {
                                         const w = Window.window
                                         if (w && typeof w.showInstallerUpdater === "function") {
@@ -559,18 +560,15 @@ Item {
                 // ── About ─────────────────────────────────────────────────────
                 Rectangle {
                     width: parent.width
-                    implicitHeight: aboutCol2.implicitHeight + 24
-                    height: implicitHeight
+                    implicitHeight: aboutCol2.implicitHeight + 14
                     radius: 12
                     color: theme.surface
                     border.color: theme.borderColor
                     border.width: 1
-                    clip: true
-
 
                     Column {
                         id: aboutCol2
-                        anchors { fill: parent; margins: 0 }
+                        width: parent.width
                         spacing: 0
 
                         Text {
@@ -584,7 +582,7 @@ Item {
                         Repeater {
                             model: [
                                 { label: "App",       value: "Overtune 3 Studio" },
-                                { label: "Version",   value: "3.2.1" },
+                                { label: "Version",   value: "3.2.3" },
                                 { label: "DSP Engine",value: "C++20, zero dependencies" },
                                 { label: "UI",        value: "Qt 6 / QML" }
                             ]
@@ -615,7 +613,7 @@ Item {
                 // ── System Integration & Uninstall Card ──────────────────────
                 Rectangle {
                     width: parent.width
-                    height: maintCol.implicitHeight + 28
+                    implicitHeight: maintCol.implicitHeight + 28
                     radius: 12
                     color: theme.surface
                     border.color: theme.borderColor
@@ -623,7 +621,9 @@ Item {
 
                     Column {
                         id: maintCol
-                        anchors { fill: parent; margins: 16 }
+                        width: parent.width - 32
+                        x: 16
+                        y: 14
                         spacing: 12
 
                         Text {
@@ -656,22 +656,22 @@ Item {
                                     font.pixelSize: 11
                                     color: theme.secondaryText
                                     wrapMode: Text.WordWrap
-                                    width: 380
+                                    Layout.fillWidth: true
                                 }
                             }
 
                             Rectangle {
-                                implicitWidth: 84
+                                implicitWidth: 96
                                 implicitHeight: 30
                                 radius: 6
                                 color: uninsBtnMouse.pressed ? "#CC2D24" : (uninsBtnMouse.containsMouse ? "#E0382E" : "#B3261E")
 
                                 Row {
                                     anchors.centerIn: parent
-                                    spacing: 4
+                                    spacing: 5
                                     Codicon {
                                         icon: "trash"
-                                        iconSize: 12
+                                        iconSize: 13
                                         iconColor: "#FFFFFF"
                                         anchors.verticalCenter: parent.verticalCenter
                                     }

@@ -6,7 +6,7 @@ import QtQuick.Window
 Window {
     id: root
 
-    title: "Overtune 3.2.1 — What's New"
+    title: "Overtune 3.2.3 — What's New"
     width:         520
     height:        Math.min(620, Screen.desktopAvailableHeight ? Screen.desktopAvailableHeight - 80 : 600)
     minimumWidth:  460
@@ -14,7 +14,7 @@ Window {
     maximumWidth:  600
     maximumHeight: 760
 
-    color: "#000000"
+    color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7"
     visible: false
     flags: Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint
 
@@ -76,7 +76,7 @@ Window {
                     mipmap: true
                 }
 
-                // Bottom gradient fade to black
+                // Bottom gradient fade to match theme background
                 Rectangle {
                     anchors.bottom: parent.bottom
                     width: parent.width
@@ -84,7 +84,7 @@ Window {
                     gradient: Gradient {
                         orientation: Gradient.Vertical
                         GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 1.0; color: "#000000" }
+                        GradientStop { position: 1.0; color: theme.isDark ? (theme.oledMode ? "#000000" : "#111113") : "#F5F5F7" }
                     }
                 }
 
@@ -102,7 +102,7 @@ Window {
                     Text {
                         id: vLabel
                         anchors.centerIn: parent
-                        text: "v3.2.1"
+                        text: "v3.2.3"
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
                         color: "#FFFFFF"
@@ -117,10 +117,10 @@ Window {
             Text {
                 x: 36
                 width: parent.width - 72
-                text: "What's new in Overtune 3.2.1"
-                font.pixelSize: 30
+                text: "What's new in Overtune 3.2.3"
+                font.pixelSize: 28
                 font.weight: Font.Bold
-                color: "#FFFFFF"
+                color: theme.primaryText
                 lineHeight: 1.22
                 wrapMode: Text.Wrap
             }
@@ -130,10 +130,9 @@ Window {
             Text {
                 x: 36
                 width: parent.width - 72
-                text: "Major DSP precision upgrades, new plot windows, and a refined studio workflow — all in one release."
+                text: "Native installation directory selection, solid-contrast plot math badges, authentic Codicons, and refined UI styling."
                 font.pixelSize: 13
-                color: "#FFFFFF"
-                opacity: 0.45
+                color: theme.secondaryText
                 wrapMode: Text.Wrap
                 lineHeight: 1.55
             }
@@ -146,7 +145,7 @@ Window {
                 width: newLabel.implicitWidth + 14
                 height: newLabel.implicitHeight + 8
                 radius: 4
-                color: theme.accent // Dynamic accent color from settings
+                color: theme.accent
 
                 Text {
                     id: newLabel
@@ -163,12 +162,12 @@ Window {
 
             Repeater {
                 model: [
-                    { n: "1", title: "Standalone plot windows",
-                      desc: "Pop any plot into its own native window. Supports high-resolution PNG export, clipboard copy, and live auto-scaling across all plot types." },
-                    { n: "2", title: "Pole-zero multiplicity & Q readouts",
-                      desc: "MATLAB zplane-style multiplicity badges for coincident poles/zeros. Resonant Q-factor and natural frequency displayed on hover." },
-                    { n: "3", title: "Step response asymptotes & metrics",
-                      desc: "Theoretical DC gain reference line with stepinfo-style overshoot percentage and settling time annotations on the impulse/step plot." }
+                    { n: "1", title: "Target directory selection in installer",
+                      desc: "Choose any custom installation destination directly in the setup wizard via native folder picker." },
+                    { n: "2", title: "Solid black math badges in all plots",
+                      desc: "Mathematical symbols are rendered against solid black squircle badges with clear separation from axis numbers." },
+                    { n: "3", title: "Full authentic Codicon icon set",
+                      desc: "Zero missing glyphs or question mark icons across all views and settings dialogs." }
                 ]
 
                 delegate: Row {
@@ -177,18 +176,17 @@ Window {
                     bottomPadding: 20
                     spacing: 12
 
-                    // Fixed width number for perfect alignment
                     Text {
                         width: 18
                         text: modelData.n + "."
                         font.pixelSize: 13
                         font.weight: Font.Bold
-                        color: "#FFFFFF"
+                        color: theme.accent
                         topPadding: 1
                     }
 
                     Column {
-                        width: parent.width - 30 // parent width - spacing(12) - number width(18)
+                        width: parent.width - 30
                         spacing: 4
 
                         Text {
@@ -196,7 +194,7 @@ Window {
                             text: modelData.title
                             font.pixelSize: 13
                             font.weight: Font.Bold
-                            color: "#FFFFFF"
+                            color: theme.primaryText
                             wrapMode: Text.Wrap
                         }
 
@@ -204,8 +202,7 @@ Window {
                             width: parent.width
                             text: modelData.desc
                             font.pixelSize: 12
-                            color: "#FFFFFF"
-                            opacity: 0.55 // Adjusted for slightly better contrast
+                            color: theme.secondaryText
                             wrapMode: Text.Wrap
                             lineHeight: 1.55
                         }
@@ -218,7 +215,7 @@ Window {
             // Divider
             Rectangle {
                 x: 36; width: parent.width - 72; height: 1
-                color: "#FFFFFF"; opacity: 0.08
+                color: theme.borderColor
             }
 
             Item { width: 1; height: 28 }
@@ -229,7 +226,7 @@ Window {
                 width: improvedLabel.implicitWidth + 14
                 height: improvedLabel.implicitHeight + 8
                 radius: 4
-                color: theme.accent // Dynamic accent color from settings
+                color: theme.accent
 
                 Text {
                     id: improvedLabel
@@ -246,10 +243,10 @@ Window {
 
             Repeater {
                 model: [
-                    { n: "4", title: "MATLAB-grade DSP precision",
-                      desc: "Exact cutoff frequency anchoring into the analysis grid. Adaptive transition clustering down to 0.001 Hz. Zero discretization error at all band edges." },
-                    { n: "5", title: "Singularity-free group delay",
-                      desc: "Poisson-regularized group delay eliminates infinite spikes at unit-circle zeros. Smooth continuous phase unwrapping across Butterworth, Chebyshev, Elliptic, and Bessel designs." }
+                    { n: "4", title: "Clean version transitions & update flows",
+                      desc: "Accurate v3.2.2 → v3.2.3 version indicators and dynamic button layouts without text clipping." },
+                    { n: "5", title: "Clean Apple-inspired aesthetics",
+                      desc: "Disciplined typography, zero marketing filler, and harmonious dark/light mode surface hierarchy." }
                 ]
 
                 delegate: Row {
@@ -258,13 +255,12 @@ Window {
                     bottomPadding: 20
                     spacing: 12
 
-                    // Fixed width number for perfect alignment
                     Text {
                         width: 18
                         text: modelData.n + "."
                         font.pixelSize: 13
                         font.weight: Font.Bold
-                        color: "#FFFFFF"
+                        color: theme.accent
                         topPadding: 1
                     }
 
@@ -277,7 +273,7 @@ Window {
                             text: modelData.title
                             font.pixelSize: 13
                             font.weight: Font.Bold
-                            color: "#FFFFFF"
+                            color: theme.primaryText
                             wrapMode: Text.Wrap
                         }
 
@@ -285,8 +281,7 @@ Window {
                             width: parent.width
                             text: modelData.desc
                             font.pixelSize: 12
-                            color: "#FFFFFF"
-                            opacity: 0.55
+                            color: theme.secondaryText
                             wrapMode: Text.Wrap
                             lineHeight: 1.55
                         }
@@ -303,22 +298,20 @@ Window {
         id: footer
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         height: 60
-        color: "#0c0c0e"
+        color: theme.isDark ? "#0C0C0E" : "#EBEBED"
         z: 10
 
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 1
-            color: "#FFFFFF"
-            opacity: 0.08
+            color: theme.borderColor
         }
 
         Text {
             anchors { left: parent.left; leftMargin: 36; verticalCenter: parent.verticalCenter }
-            text: "Release 3.2.1 (2026)"
+            text: "Release 3.2.3 (2026)"
             font.pixelSize: 11
-            color: "#FFFFFF"
-            opacity: 0.25
+            color: theme.secondaryText
             font.letterSpacing: 0.2
         }
 
@@ -328,7 +321,7 @@ Window {
             implicitWidth:  80
             implicitHeight: 30
             radius: 7
-            color: closeMouse.pressed ? "#0071E3" : (closeMouse.containsMouse ? theme.accent : theme.accent)
+            color: closeMouse.pressed ? Qt.darker(theme.accent, 1.2) : theme.accent
             Behavior on color { ColorAnimation { duration: 100 } }
 
             Text {

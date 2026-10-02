@@ -983,7 +983,7 @@ Rectangle {
 
                 StyledMenuItem {
                     text: "Check for Updates..."
-                    shortcutText: "v3.2.1"
+                    shortcutText: updateInstaller.hasUpdate ? ("v" + updateInstaller.latestVersion) : ""
                     onTriggered: {
                         if (rootWindow && typeof rootWindow.checkUpdatesNow === "function") {
                             rootWindow.checkUpdatesNow()
@@ -1030,14 +1030,15 @@ Rectangle {
         }
         spacing: 6
 
-        // Update / Installer Quick Button
+        // Update Quick Button (Only shown when an update is available)
         Rectangle {
             id: updateBtn
+            visible: updateInstaller.hasUpdate
             height: 22
             implicitWidth: updateRow.implicitWidth + 14
             radius: 6
-            color: updateMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : (updateInstaller.hasUpdate ? Qt.darker(theme.accent, 1.3) : "transparent")
-            border.color: updateInstaller.hasUpdate ? theme.accent : (theme.isDark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.12))
+            color: updateMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : Qt.darker(theme.accent, 1.3)
+            border.color: theme.accent
             border.width: 1
             anchors.verticalCenter: parent.verticalCenter
             Behavior on color { ColorAnimation { duration: 120 } }

@@ -30,10 +30,10 @@ Item {
     }
 
 
-    readonly property real marginLeft:   52
+    readonly property real marginLeft:   68
     readonly property real marginRight:  18
     readonly property real marginTop:    48
-    readonly property real marginBottom: 34
+    readonly property real marginBottom: 48
     readonly property real plotW: Math.max(1, width  - marginLeft - marginRight)
     readonly property real plotH: Math.max(1, height - marginTop  - marginBottom)
 
@@ -378,10 +378,6 @@ Item {
                     ctx.fillText(xVal.toFixed(xDecimals), x, mT + pH + 5)
                 }
             }
-
-            ctx.fillStyle = theme.primaryText
-            ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
-            ctx.fillText("Discrete Sample Index n", mL + pW / 2, mT + pH + 18)
 
             // Render Signals (Strictly clipped to graph viewport)
             ctx.save()
@@ -1206,6 +1202,76 @@ Item {
             id: toastTimer
             interval: 2200
             onTriggered: root.toastVisible = false
+        }
+    }
+
+    // Y-Axis Squircle Badge (Solid Black background, positioned clear of tick numbers)
+    Rectangle {
+        x: 6
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: (root.marginTop - root.marginBottom) / 2
+        rotation: -90
+        width: ySigBadgeRow.implicitWidth + 12
+        height: 22
+        radius: 6
+        color: "#000000"
+        border.color: "rgba(255, 255, 255, 0.22)"
+        border.width: 1
+
+        Row {
+            id: ySigBadgeRow
+            anchors.centerIn: parent
+            spacing: 5
+            Image {
+                anchors.verticalCenter: parent.verticalCenter
+                height: 12
+                fillMode: Image.PreserveAspectFit
+                mipmap: true
+                source: "qrc:/FilterDesigner/math/axis_signals_dark.png"
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Signals"
+                font.pixelSize: 10
+                font.family: "Stack Sans Headline"
+                font.weight: Font.Medium
+                color: "#FFFFFF"
+            }
+        }
+    }
+
+    // X-Axis Squircle Badge (Solid Black background, positioned below tick numbers)
+    Rectangle {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: (root.marginLeft - root.marginRight) / 2
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 6
+        width: xSigBadgeRow.implicitWidth + 14
+        height: 22
+        radius: 6
+        color: "#000000"
+        border.color: "rgba(255, 255, 255, 0.22)"
+        border.width: 1
+
+        Row {
+            id: xSigBadgeRow
+            anchors.centerIn: parent
+            spacing: 5
+            Image {
+                anchors.verticalCenter: parent.verticalCenter
+                height: 12
+                fillMode: Image.PreserveAspectFit
+                mipmap: true
+                source: "qrc:/FilterDesigner/math/axis_sample_n_dark.png"
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Discrete Time"
+                font.pixelSize: 10
+                font.family: "Stack Sans Headline"
+                font.weight: Font.Medium
+                color: "#FFFFFF"
+            }
         }
     }
 

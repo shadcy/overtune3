@@ -37,10 +37,10 @@ Item {
     property string toastMessage: ""
     property bool toastVisible: false
 
-    readonly property real marginLeft:   50
+    readonly property real marginLeft:   68
     readonly property real marginRight:  18
     readonly property real marginTop:    48
-    readonly property real marginBottom: 34
+    readonly property real marginBottom: 48
 
     function refreshPoints() {
         points = mode === 0 ? filterEngine.impulseData : filterEngine.stepData
@@ -246,21 +246,6 @@ Item {
                 const x = toX(i)
                 ctx.fillText(String(i), x, mT + pH + 5)
             }
-
-            // Axis Mathematical Labels
-            ctx.fillStyle = theme.primaryText
-            ctx.font = "bold 11px 'Stack Sans Headline', sans-serif"
-            ctx.textAlign = "center"
-            ctx.fillText("Sample index n [discrete time]", mL + pW / 2, mT + pH + 18)
-
-            // Y Axis Label (LaTeX notation rotated)
-            ctx.save()
-            ctx.translate(14, mT + pH / 2)
-            ctx.rotate(-Math.PI / 2)
-            ctx.textAlign = "center"
-            ctx.textBaseline = "middle"
-            ctx.fillText(root.mode === 0 ? "h[n]" : "s[n]", 0, 0)
-            ctx.restore()
 
             const style = root.plotStyle // 0=Stem, 1=Line, 2=Step/ZOH, 3=Stem+Line
 
@@ -1003,6 +988,76 @@ Item {
             id: toastTimer
             interval: 2200
             onTriggered: root.toastVisible = false
+        }
+    }
+
+    // Y-Axis Squircle Badge (Solid Black background, positioned clear of tick numbers)
+    Rectangle {
+        x: 6
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: (root.marginTop - root.marginBottom) / 2
+        rotation: -90
+        width: yBadgeRow.implicitWidth + 12
+        height: 22
+        radius: 6
+        color: "#000000"
+        border.color: "rgba(255, 255, 255, 0.22)"
+        border.width: 1
+
+        Row {
+            id: yBadgeRow
+            anchors.centerIn: parent
+            spacing: 5
+            Image {
+                anchors.verticalCenter: parent.verticalCenter
+                height: 12
+                fillMode: Image.PreserveAspectFit
+                mipmap: true
+                source: "qrc:/FilterDesigner/math/axis_" + (root.mode === 0 ? "hn" : "sn") + "_dark.png"
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.mode === 0 ? "Impulse" : "Step"
+                font.pixelSize: 10
+                font.family: "Stack Sans Headline"
+                font.weight: Font.Medium
+                color: "#FFFFFF"
+            }
+        }
+    }
+
+    // X-Axis Squircle Badge (Solid Black background, positioned below tick numbers)
+    Rectangle {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: (root.marginLeft - root.marginRight) / 2
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 6
+        width: xBadgeRow.implicitWidth + 14
+        height: 22
+        radius: 6
+        color: "#000000"
+        border.color: "rgba(255, 255, 255, 0.22)"
+        border.width: 1
+
+        Row {
+            id: xBadgeRow
+            anchors.centerIn: parent
+            spacing: 5
+            Image {
+                anchors.verticalCenter: parent.verticalCenter
+                height: 12
+                fillMode: Image.PreserveAspectFit
+                mipmap: true
+                source: "qrc:/FilterDesigner/math/axis_sample_n_dark.png"
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Discrete Time"
+                font.pixelSize: 10
+                font.family: "Stack Sans Headline"
+                font.weight: Font.Medium
+                color: "#FFFFFF"
+            }
         }
     }
 
