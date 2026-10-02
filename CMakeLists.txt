@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
-project(FilterDesigner VERSION 3.2.4 LANGUAGES CXX)
+project(FilterDesigner VERSION 3.2.5 LANGUAGES CXX)
+
+include(CTest)
 
 # ── C++20 ─────────────────────────────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD 20)

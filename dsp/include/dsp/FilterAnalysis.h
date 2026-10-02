@@ -43,10 +43,13 @@ struct VerificationResult {
 
     // Reference Model Cross-Verification (point-by-point audit against canonical reference model)
     bool referenceModelVerified{true};
+    bool specificationOk{true};
     int matchedPoints{0};
     int totalPoints{0};
     double maxPointMagnitudeErrorDb{0.0};
     double maxPointPhaseErrorDeg{0.0};
+    double maxGroupDelayRelativeError{0.0};
+    double maxSpecificationErrorDb{0.0};
     double maxImpulseError{0.0};
     std::string stage2Details;
 

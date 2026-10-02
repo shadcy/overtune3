@@ -8,15 +8,15 @@ Official downloads are published on [GitHub Releases](https://github.com/shadcy/
 
 The packaging script writes working distribution artifacts to `dist/` and copies release-ready files to `dist/release/`.
 
-## Current Version: 3.2.4
+## Current Version: 3.2.5
 
-This release fixes Windows application launch after installation, aligns installer and application version information, supports a custom installation directory, and updates appearance handling, icons, and plot labels.
+This release improves filter analysis and verification accuracy, fixes Windows launch and installer version handling, and includes the latest interface and plotting updates.
 
 ## Publishing
 
 1. Build the Windows Release configuration and ensure the Qt runtime is deployed beside `ot3.exe`.
 2. Install NSIS and ensure `makensis` is available on `PATH`.
 3. Run `scripts/package_windows.bat`.
-4. Create a GitHub release tagged `v3.2.4` and attach the setup executable and portable archive from `dist/release/`. Include `SHA256SUMS.txt`.
+4. Create a GitHub release tagged `v3.2.5` and attach the setup executable and portable archive from `dist/release/`. Include `SHA256SUMS.txt`.
 
 Developed and maintained by [@/shadcy](https://github.com/shadcy).

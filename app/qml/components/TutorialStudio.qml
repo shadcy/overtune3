@@ -246,6 +246,7 @@ Rectangle {
     FileDialog {
         id: exportFileDialog
         title: "Export Tutorial Package (.json)"
+        options: FileDialog.DontUseNativeDialog
         fileMode: FileDialog.SaveFile
         nameFilters: ["Overtune Tutorial (*.json)", "JSON Files (*.json)"]
         onAccepted: {
@@ -262,6 +263,7 @@ Rectangle {
     FileDialog {
         id: importFileDialog
         title: "Import Student Tutorial (.json)"
+        options: FileDialog.DontUseNativeDialog
         fileMode: FileDialog.OpenFile
         nameFilters: ["Overtune Tutorial (*.json)", "JSON Files (*.json)"]
         onAccepted: {

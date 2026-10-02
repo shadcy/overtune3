@@ -109,27 +109,6 @@ Window {
                     }
                 }
 
-                // Version pill — top right
-                Rectangle {
-                    anchors { top: parent.top; right: parent.right; margins: 14 }
-                    height: 22
-                    width: vLabel.implicitWidth + 22
-                    radius: 11
-                    color: "#000000"
-                    opacity: 0.8
-                    border.color: "#FFFFFF"
-                    border.width: 1
-
-                    Text {
-                        id: vLabel
-                        anchors.centerIn: parent
-                        text: "v" + updateInstaller.currentVersion
-                        font.pixelSize: 11
-                        font.weight: Font.DemiBold
-                        color: "#FFFFFF"
-                        font.letterSpacing: 0.8
-                    }
-                }
             }
 
             // ── Headline ──────────────────────────────────────────────────────
@@ -148,17 +127,7 @@ Window {
 
             Item { width: 1; height: 10 }
 
-            Text {
-                x: 36
-                width: parent.width - 72
-                text: "Choose an install folder, set up shortcuts, and use the app's selected appearance."
-                font.pixelSize: 13
-                color: theme.secondaryText
-                wrapMode: Text.Wrap
-                lineHeight: 1.55
-            }
-
-            Item { width: 1; height: 32 }
+            Item { width: 1; height: 20 }
 
             // ── NEW Section ───────────────────────────────────────────────────
             Rectangle {

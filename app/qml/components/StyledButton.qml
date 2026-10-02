@@ -17,6 +17,7 @@ Button {
     // true  → blue filled  (#0A84FF family)
     // false → ghost        (border only, theme-adaptive)
     property bool primary: true
+    property bool danger: false
 
     // Subtle press-down scale
     scale: root.pressed ? 0.96 : 1.0
@@ -25,6 +26,10 @@ Button {
     background: Rectangle {
         radius: 7   // squircle radius — matches "Got it" button exactly
         color: {
+            if (root.danger)
+                return root.pressed ? Qt.darker(theme.danger, 1.2)
+                     : hov.hovered ? Qt.lighter(theme.danger, 1.08)
+                     : theme.danger
             if (!root.enabled)
                 return root.primary ? "#0A84FF44" : "transparent"
             if (root.primary)
@@ -37,6 +42,8 @@ Button {
                  :                "transparent"
         }
         border.color: {
+            if (root.danger)
+                return "transparent"
             if (!root.enabled)
                 return root.primary ? "transparent" : theme.borderColor
             return root.primary ? "transparent" : theme.borderColor
@@ -51,7 +58,7 @@ Button {
         color: {
             if (!root.enabled)
                 return root.primary ? "#FFFFFF88" : theme.secondaryText
-            return root.primary ? "#FFFFFF" : theme.primaryText
+            return (root.primary || root.danger) ? "#FFFFFF" : theme.primaryText
         }
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment:   Text.AlignVCenter

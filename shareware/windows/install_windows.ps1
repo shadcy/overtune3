@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $AppName = "Overtune 3"
 $AppId = "Overtune3"
 $ExeName = "ot3.exe"
-$Version = "3.2.4"
+$Version = "3.2.5"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "         Overtune 3 - Windows Native Installer            " -ForegroundColor White

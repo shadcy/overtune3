@@ -305,6 +305,7 @@ Item {
     FileDialog {
         id: wavDialog
         title: "Open WAV File"
+        options: FileDialog.DontUseNativeDialog
         nameFilters: ["WAV files (*.wav)", "All files (*)"]
         onAccepted: {
             simulation.loadWav(selectedFile.toString().replace("file://", ""))
@@ -314,6 +315,7 @@ Item {
     FileDialog {
         id: csvDialog
         title: "Open CSV File"
+        options: FileDialog.DontUseNativeDialog
         nameFilters: ["CSV files (*.csv *.txt)", "All files (*)"]
         onAccepted: {
             simulation.loadCsv(selectedFile.toString().replace("file://", ""))

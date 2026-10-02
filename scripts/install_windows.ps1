@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $AppName = "Overtune 3"
 $AppId = "Overtune3"
 $ExeName = "ot3.exe"
-$Version = "3.2.4"
+$Version = "3.2.5"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "         Overtune 3 - Windows Native Installer            " -ForegroundColor White
@@ -27,6 +27,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 # Candidate paths to locate binaries and deployed dependencies
 $Candidates = @(
     (Join-Path $ScriptDir "bin\$ExeName"),
+    (Join-Path $ScriptDir "..\build\windows-release\bin\$ExeName"),
     (Join-Path $ScriptDir "bin\FilterDesigner.exe"),
     (Join-Path $ScriptDir $ExeName),
     (Join-Path $ScriptDir "FilterDesigner.exe"),

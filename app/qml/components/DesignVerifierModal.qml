@@ -162,7 +162,7 @@ Window {
                     spacing: 4
 
                     Text {
-                        text: "Stage 2 Verifier :)"
+                        text: "Design verification"
                         font.pixelSize: 24
                         font.weight: Font.Bold
                         color: "#FFFFFF"
@@ -170,7 +170,7 @@ Window {
                     }
 
                     Text {
-                        text: "Automated 2-stage mathematical audit for stability & precision."
+                        text: "Stability, response, phase and numerical checks."
                         font.pixelSize: 13
                         color: "#FFFFFF"
                         opacity: 0.6
@@ -274,9 +274,11 @@ Window {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         Text {
-                            text: (root.verResult && root.verResult.referenceModelVerified === false)
-                                    ? ("Reference Model Discrepancy (Max error: " + Number(root.verResult.maxPointMagnitudeErrorDb).toFixed(3) + " dB)")
-                                    : "Verification Flagged Mathematical Anomalies"
+                            text: (root.verResult && root.verResult.specificationOk === false)
+                                    ? ("Filter specification missed by " + Number(root.verResult.maxSpecificationErrorDb).toFixed(3) + " dB")
+                                    : ((root.verResult && root.verResult.referenceModelVerified === false)
+                                       ? ("Model discrepancy: " + Number(root.verResult.maxPointMagnitudeErrorDb).toFixed(3) + " dB")
+                                       : "Verification flagged a numerical or stability issue")
                             font.pixelSize: 12
                             font.weight: Font.Bold
                             color: "#FF3B30"
@@ -307,7 +309,7 @@ Window {
 
         Text {
             anchors { left: parent.left; leftMargin: 24; verticalCenter: parent.verticalCenter }
-            text: "Overtune 3 Engine Audit"
+            text: "Overtune 3 DSP verification"
             font.pixelSize: 11
             color: "#FFFFFF"
             opacity: 0.4

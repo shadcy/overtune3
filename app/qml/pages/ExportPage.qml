@@ -376,6 +376,7 @@ Item {
     FileDialog {
         id: saveDialog
         title: "Save Filter Source Code"
+        options: FileDialog.DontUseNativeDialog
         fileMode: FileDialog.SaveFile
         nameFilters: {
             const ext = [

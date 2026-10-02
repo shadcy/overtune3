@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.2.5] - 2026-10-02
+
+### Fixed
+- Corrected filter specification normalization and strengthened numerical verification across supported families and topologies.
+- Improved frequency, phase, group-delay, pole-zero, and impulse-response analysis around critical poles and zeros.
+- Synchronized Windows application and installer version metadata.
+
 ## [3.2.4] - 2026-10-02
 
 ### Fixed

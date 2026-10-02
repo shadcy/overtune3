@@ -165,9 +165,13 @@ QVariantMap FilterEngine::verifyDesign() {
   map["maxTransientPeak"] = ver.maxTransientPeak;
   map["biboStabilityOk"] = ver.biboStabilityOk;
   map["referenceModelVerified"] = ver.referenceModelVerified;
+  map["specificationOk"] = ver.specificationOk;
   map["matchedPoints"] = ver.matchedPoints;
   map["totalPoints"] = ver.totalPoints;
   map["maxPointMagnitudeErrorDb"] = ver.maxPointMagnitudeErrorDb;
+  map["maxPointPhaseErrorDeg"] = ver.maxPointPhaseErrorDeg;
+  map["maxGroupDelayRelativeError"] = ver.maxGroupDelayRelativeError;
+  map["maxSpecificationErrorDb"] = ver.maxSpecificationErrorDb;
   map["maxImpulseError"] = ver.maxImpulseError;
   map["stage2Details"] = QString::fromStdString(ver.stage2Details);
   map["summary"] = QString::fromStdString(ver.summary);
@@ -298,7 +302,7 @@ void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
     if (!polePrimary[i]) continue;
     int count = 1;
     for (size_t j = i + 1; j < numPoles; ++j) {
-      if (std::abs(r.poles[i] - r.poles[j]) < 0.02) {
+      if (std::abs(r.poles[i] - r.poles[j]) < 1e-7) {
         count++;
         polePrimary[j] = false;
       }
@@ -324,7 +328,7 @@ void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
     if (!zeroPrimary[i]) continue;
     int count = 1;
     for (size_t j = i + 1; j < numZeros; ++j) {
-      if (std::abs(r.zeros[i] - r.zeros[j]) < 0.02) {
+      if (std::abs(r.zeros[i] - r.zeros[j]) < 1e-7) {
         count++;
         zeroPrimary[j] = false;
       }

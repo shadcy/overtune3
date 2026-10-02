@@ -10,15 +10,17 @@ popd
 set "DIST_DIR=%ROOT_DIR%\dist"
 set "RELEASE_DIR=%DIST_DIR%\release"
 set "PKG_NAME=overtune3-windows-x64"
-set "STAGE_DIR=%ROOT_DIR%\shareware\windows\%PKG_NAME%"
+set "STAGE_DIR=%DIST_DIR%\staging\%PKG_NAME%"
 
 echo ========================================================
-echo   Packaging Overtune 3.2.4 for Windows x64
+echo   Packaging Overtune 3.2.5 for Windows x64
 echo ========================================================
 echo Root directory: %ROOT_DIR%
 
 set "BIN_SRC="
-if exist "%ROOT_DIR%\build\bin\Release\ot3.exe" (
+if exist "%ROOT_DIR%\build\windows-release\bin\ot3.exe" (
+    set "BIN_SRC=%ROOT_DIR%\build\windows-release\bin"
+) else if exist "%ROOT_DIR%\build\bin\Release\ot3.exe" (
     set "BIN_SRC=%ROOT_DIR%\build\bin\Release"
 ) else if exist "%ROOT_DIR%\build\bin\ot3.exe" (
     set "BIN_SRC=%ROOT_DIR%\build\bin"
@@ -39,6 +41,7 @@ mkdir "%STAGE_DIR%\assets"
 
 echo [1/4] Copying binary and deployed Qt runtime...
 xcopy /s /e /y /q "%BIN_SRC%\*" "%STAGE_DIR%\bin\" >nul
+if exist "%STAGE_DIR%\bin\dsp_tests.exe" del /q "%STAGE_DIR%\bin\dsp_tests.exe"
 
 if not exist "%STAGE_DIR%\bin\FilterDesigner.exe" (
     copy /y "%STAGE_DIR%\bin\ot3.exe" "%STAGE_DIR%\bin\FilterDesigner.exe" >nul
@@ -55,6 +58,9 @@ if exist "%ROOT_DIR%\assets\logo.png" (
 if exist "%ROOT_DIR%\assets\logo.ico" (
     copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\assets\" >nul
     copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\" >nul
+)
+if exist "%ROOT_DIR%\assets\banner.png" (
+    copy /y "%ROOT_DIR%\assets\banner.png" "%STAGE_DIR%\assets\" >nul
 )
 if exist "%ROOT_DIR%\shareware\windows\README_WINDOWS.txt" (
     copy /y "%ROOT_DIR%\shareware\windows\README_WINDOWS.txt" "%STAGE_DIR%\" >nul
@@ -123,9 +129,9 @@ if errorlevel 1 (
 )
 
 echo.
-echo [OK] Windows shareware package created successfully:
+echo [OK] Windows distribution package created successfully:
 echo   - Folder:  %STAGE_DIR%
-echo   - Archive: %ROOT_DIR%\shareware\windows\%PKG_NAME%.zip
+echo   - Archive: %DIST_DIR%\%PKG_NAME%.zip
 echo   - Dist:    %DIST_DIR%\%PKG_NAME%.zip
 echo   - Setup:   %DIST_DIR%\Overtune3-Setup-x64.exe
 echo   - Release: %RELEASE_DIR%

@@ -63,14 +63,35 @@ FilterCoefficients designBessel(const FilterSpec& spec) {
     if (n < 1 || n > 10)
         throw std::out_of_range("Bessel filter: order must be 1..10");
 
-    const ComplexVec& poles = BESSEL_POLES[n - 1];
+    const ComplexVec& prototypePoles = BESSEL_POLES[n - 1];
 
-    // Frequency-normalise: the Bessel poles are normalised to -3 dB at Ω=1.
-    // Scale so that the group delay is unity at ω = 0.
-    // For magnitude −3 dB normalisation multiply by w_{-3dB}(n) — approximated.
-    // For simplicity we use the standard group-delay normalisation poles directly.
+    // The tabulated poles have unit group-delay normalization. Find the
+    // prototype's -3 dB frequency so the UI cutoff retains its usual meaning.
+    auto prototypeMagnitude = [&](double omega) {
+        Complex denominator{1.0, 0.0};
+        double dcDenominator = 1.0;
+        for (const auto& pole : prototypePoles) {
+            denominator *= Complex{0.0, omega} - pole;
+            dcDenominator *= std::abs(pole);
+        }
+        return dcDenominator / std::abs(denominator);
+    };
+    double lo = 0.0;
+    double hi = 1.0;
+    while (prototypeMagnitude(hi) > std::sqrt(0.5) && hi < 1e6)
+        hi *= 2.0;
+    for (int i = 0; i < 80; ++i) {
+        const double mid = (lo + hi) * 0.5;
+        if (prototypeMagnitude(mid) > std::sqrt(0.5)) lo = mid;
+        else hi = mid;
+    }
+    const double cutoffScale = 1.0 / ((lo + hi) * 0.5);
+    ComplexVec normalizedPoles;
+    normalizedPoles.reserve(prototypePoles.size());
+    for (const auto& pole : prototypePoles)
+        normalizedPoles.push_back(pole * cutoffScale);
 
-    return bilinearTransform(poles, {}, 1.0, spec);
+    return bilinearTransform(normalizedPoles, {}, 1.0, spec);
 }
 
 } // namespace dsp::internal

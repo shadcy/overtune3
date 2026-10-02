@@ -7,7 +7,7 @@ set -euo pipefail
 APP_NAME="Overtune 3"
 APP_ID="overtune3"
 BIN_NAME="ot3"
-VERSION="3.2.4"
+VERSION="3.2.5"
 
 # Target directories
 if [[ $EUID -eq 0 ]]; then

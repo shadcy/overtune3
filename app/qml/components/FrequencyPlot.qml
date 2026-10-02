@@ -1333,6 +1333,7 @@ Item {
     FileDialog {
         id: savePlotDialog
         title: "Save Plot Image"
+        options: FileDialog.DontUseNativeDialog
         fileMode: FileDialog.SaveFile
         nameFilters: ["PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)", "All files (*)"]
         defaultSuffix: "png"

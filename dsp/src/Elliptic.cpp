@@ -66,8 +66,8 @@ static JacobiResult jacobiEllipj(double u, double k) {
     return { sn, cn, dn };
 }
 
-// Solve degree equation for elliptic modulus k:
-// K(k) / K'(k) = n * (K(k1) / K'(k1))
+// Solve the elliptic degree equation for modulus k:
+// K(k) / K'(k) = n * K(k1) / K'(k1).
 static double solveEllipticK(int n, double k1) {
     const double K1 = ellipticK(k1);
     const double K1p = ellipticK(std::sqrt(std::max(0.0, 1.0 - k1 * k1)));
@@ -95,6 +95,10 @@ FilterCoefficients designElliptic(const FilterSpec& spec) {
     const double Rs = std::max(Rp + 1.0, spec.stopbandDb);
 
     const double eps_sq = std::pow(10.0, 0.1 * Rp) - 1.0;
+    if (n == 1) {
+        const double pole = -1.0 / std::sqrt(eps_sq);
+        return bilinearTransform({Complex{pole, 0.0}}, {}, -pole, spec);
+    }
     const double k1_sq = eps_sq / (std::pow(10.0, 0.1 * Rs) - 1.0);
     const double k1 = std::sqrt(std::clamp(k1_sq, 1e-12, 1.0 - 1e-12));
     const double k1p = std::sqrt(std::max(0.0, 1.0 - k1 * k1));

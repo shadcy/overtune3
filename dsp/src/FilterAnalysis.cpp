@@ -3,6 +3,7 @@
 #include <cmath>
 #include <numbers>
 #include <algorithm>
+#include <stdexcept>
 
 namespace dsp {
 
@@ -34,7 +35,17 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
     result.zeros = coeff.zeros;
     result.gain  = coeff.gain;
 
+    if (!coeff.isValid() || !std::isfinite(sampleRate) || sampleRate <= 0.0 ||
+        !std::isfinite(cutoff1) || !std::isfinite(cutoff2)) {
+        throw std::invalid_argument("Frequency analysis requires valid coefficients, sample rate, and cutoffs");
+    }
     const double nyquist = sampleRate / 2.0;
+    if (cutoff1 > 0.0 && cutoff1 >= nyquist)
+        throw std::invalid_argument("The lower cutoff must be below Nyquist");
+    if (cutoff2 > 0.0 && cutoff2 >= nyquist)
+        throw std::invalid_argument("The upper cutoff must be below Nyquist");
+    if (cutoff2 > 0.0 && cutoff1 > 0.0 && cutoff2 <= cutoff1)
+        throw std::invalid_argument("The upper cutoff must exceed the lower cutoff");
     if (numPoints < 256) numPoints = 256;
 
     // Minimum frequency: adapt to low cutoff filters (e.g. 5 Hz or 13.5 Hz)
@@ -101,8 +112,11 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
             freqs.push_back(f);
             double bw = (1.0 - std::min(0.9999, std::abs(p))) * sampleRate / (2.0 * PI);
             if (bw > 0.001 && bw < sampleRate * 0.1) {
-                if (f - bw > 0.0) freqs.push_back(f - bw);
-                if (f + bw < nyquist) freqs.push_back(f + bw);
+                static constexpr double scales[] = {0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0};
+                for (double scale : scales) {
+                    if (f - bw * scale > 0.0) freqs.push_back(f - bw * scale);
+                    if (f + bw * scale < nyquist) freqs.push_back(f + bw * scale);
+                }
             }
         }
     }
@@ -113,8 +127,11 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
             freqs.push_back(f);
             double bw = (1.0 - std::min(0.9999, std::abs(z))) * sampleRate / (2.0 * PI);
             if (bw > 0.001 && bw < sampleRate * 0.1) {
-                if (f - bw > 0.0) freqs.push_back(f - bw);
-                if (f + bw < nyquist) freqs.push_back(f + bw);
+                static constexpr double scales[] = {0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0};
+                for (double scale : scales) {
+                    if (f - bw * scale > 0.0) freqs.push_back(f - bw * scale);
+                    if (f + bw * scale < nyquist) freqs.push_back(f + bw * scale);
+                }
             }
         }
     }
@@ -163,7 +180,7 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
         // For zeros on unit circle (transmission nulls), evaluate slightly inside (|z|=1-1e-4)
         // to bypass the branch cut singularity and avoid numerical random noise jumps
         double rawPhase = 0.0;
-        if (mag > 1e-6) {
+        if (mag > 1e-14) {
             rawPhase = std::arg(H);
         } else {
             const Complex zReg = std::polar(1.0 - 1e-4, omega);
@@ -198,40 +215,19 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
             Complex num = s.b0 + s.b1 * zInv + s.b2 * zInv2;
             Complex den = 1.0  + s.a1 * zInv + s.a2 * zInv2;
 
-            if (std::abs(num) < 1e-4) {
-                const Complex zReg = std::polar(1.0 - 1e-4, omega);
-                const Complex zRInv = 1.0 / zReg;
-                const Complex zRInv2 = zRInv * zRInv;
-                num = s.b0 + s.b1 * zRInv + s.b2 * zRInv2;
-                if (std::abs(num) > 1e-7) {
-                    const Complex numDeriv = (s.b1 * zRInv + 2.0 * s.b2 * zRInv2) / num;
-                    totalGd += numDeriv.real();
-                }
-            } else {
+            if (std::abs(num) > 1e-14) {
                 const Complex numDeriv = (s.b1 * zInv + 2.0 * s.b2 * zInv2) / num;
                 totalGd += numDeriv.real();
             }
 
-            if (std::abs(den) < 1e-4) {
-                const Complex zReg = std::polar(1.0 - 1e-4, omega);
-                const Complex zRInv = 1.0 / zReg;
-                const Complex zRInv2 = zRInv * zRInv;
-                den = 1.0 + s.a1 * zRInv + s.a2 * zRInv2;
-                if (std::abs(den) > 1e-7) {
-                    const Complex denDeriv = (s.a1 * zRInv + 2.0 * s.a2 * zRInv2) / den;
-                    totalGd -= denDeriv.real();
-                }
-            } else {
+            if (std::abs(den) > 1e-14) {
                 const Complex denDeriv = (s.a1 * zInv + 2.0 * s.a2 * zInv2) / den;
                 totalGd -= denDeriv.real();
             }
         }
 
-        if (std::isnan(totalGd) || std::isinf(totalGd)) {
+        if (!std::isfinite(totalGd))
             totalGd = 0.0;
-        } else {
-            totalGd = std::clamp(totalGd, -2000.0, 2000.0);
-        }
 
         result.frequencyResponse[i] = { freq, magDb, phaseDeg, totalGd };
     }
@@ -266,7 +262,7 @@ AnalysisPoint FilterAnalysis::evaluatePoint(const FilterCoefficients& coeff,
     }
 
     double phaseDeg = 0.0;
-    if (mag > 1e-6) {
+    if (mag > 1e-14) {
         phaseDeg = std::arg(H) * 180.0 / PI;
     } else {
         const Complex zReg = std::polar(1.0 - 1e-4, omega);
@@ -286,30 +282,12 @@ AnalysisPoint FilterAnalysis::evaluatePoint(const FilterCoefficients& coeff,
         Complex num = s.b0 + s.b1 * zInv + s.b2 * zInv2;
         Complex den = 1.0  + s.a1 * zInv + s.a2 * zInv2;
 
-        if (std::abs(num) < 1e-4) {
-            const Complex zReg = std::polar(1.0 - 1e-4, omega);
-            const Complex zRInv = 1.0 / zReg;
-            const Complex zRInv2 = zRInv * zRInv;
-            num = s.b0 + s.b1 * zRInv + s.b2 * zRInv2;
-            if (std::abs(num) > 1e-7) {
-                const Complex numDeriv = (s.b1 * zRInv + 2.0 * s.b2 * zRInv2) / num;
-                totalGd += numDeriv.real();
-            }
-        } else {
+        if (std::abs(num) > 1e-14) {
             const Complex numDeriv = (s.b1 * zInv + 2.0 * s.b2 * zInv2) / num;
             totalGd += numDeriv.real();
         }
 
-        if (std::abs(den) < 1e-4) {
-            const Complex zReg = std::polar(1.0 - 1e-4, omega);
-            const Complex zRInv = 1.0 / zReg;
-            const Complex zRInv2 = zRInv * zRInv;
-            den = 1.0 + s.a1 * zRInv + s.a2 * zRInv2;
-            if (std::abs(den) > 1e-7) {
-                const Complex denDeriv = (s.a1 * zRInv + 2.0 * s.a2 * zRInv2) / den;
-                totalGd -= denDeriv.real();
-            }
-        } else {
+        if (std::abs(den) > 1e-14) {
             const Complex denDeriv = (s.a1 * zInv + 2.0 * s.a2 * zInv2) / den;
             totalGd -= denDeriv.real();
         }
@@ -318,7 +296,7 @@ AnalysisPoint FilterAnalysis::evaluatePoint(const FilterCoefficients& coeff,
     if (std::isnan(totalGd) || std::isinf(totalGd)) {
         totalGd = 0.0;
     } else {
-        totalGd = std::clamp(totalGd, -2000.0, 2000.0);
+        // Preserve finite group-delay peaks; artificial clipping distorts plots.
     }
 
     return { clampedF, magDb, phaseDeg, totalGd };
@@ -357,7 +335,13 @@ VerificationResult FilterAnalysis::verify(const FilterSpec& spec,
 
     // ── STAGE 0: Strict Numerical Sanity Check ──────────────────────────────
     bool hasNanOrInf = false;
-    if (coeff.poles.empty() && spec.order > 0) hasNanOrInf = true;
+    if (!coeff.isValid() || spec.order < 1 || !std::isfinite(spec.sampleRate) ||
+        spec.sampleRate <= 0.0 || analysis.frequencyResponse.empty() ||
+        analysis.impulseResponse.empty() || analysis.stepResponse.empty() ||
+        coeff.poles.size() != static_cast<size_t>(spec.order) *
+            ((spec.type == FilterType::BandPass || spec.type == FilterType::BandStop) ? 2 : 1) ||
+        coeff.zeros.size() != coeff.poles.size() ||
+        !std::isfinite(coeff.gain)) hasNanOrInf = true;
     for (const auto& p : coeff.poles) {
         if (std::isnan(p.real()) || std::isnan(p.imag()) || std::isinf(p.real()) || std::isinf(p.imag())) {
             hasNanOrInf = true;
@@ -375,6 +359,11 @@ VerificationResult FilterAnalysis::verify(const FilterSpec& spec,
             std::isinf(s.a1) || std::isinf(s.a2)) {
             hasNanOrInf = true;
         }
+    }
+    for (const auto& pt : analysis.frequencyResponse) {
+        if (!std::isfinite(pt.frequency) || !std::isfinite(pt.magnitude) ||
+            !std::isfinite(pt.phase) || !std::isfinite(pt.groupDelay))
+            hasNanOrInf = true;
     }
 
     if (hasNanOrInf) {
@@ -431,40 +420,99 @@ VerificationResult FilterAnalysis::verify(const FilterSpec& spec,
         res.stage1Details += "[PASS] Conjugate Symmetry: 100% Conjugate Pairs Verified.\n";
     }
 
-    Complex dcH = coeff.evaluate(0.0);
-    res.dcGainError = 0.0;
-    res.stage1Details += "[PASS] Transfer Function DC Evaluation: |H(0)| = " + std::to_string(std::abs(dcH)) + ".\n";
-
-    // ── STAGE 2: Time-Domain & Numerical Precision Audit ──────────────────────
-    double eTime = 0.0;
-    for (double h : analysis.impulseResponse) {
-        eTime += h * h;
+    Complex dcRootNumerator{coeff.gain, 0.0};
+    Complex dcRootDenominator{1.0, 0.0};
+    for (const auto& zero : coeff.zeros) dcRootNumerator *= (Complex{1.0, 0.0} - zero);
+    for (const auto& pole : coeff.poles) dcRootDenominator *= (Complex{1.0, 0.0} - pole);
+    Complex dcRoot = std::abs(dcRootDenominator) > 1e-300
+        ? dcRootNumerator / dcRootDenominator : Complex{};
+    const Complex dcH = coeff.evaluate(0.0);
+    res.dcGainError = std::abs(dcH - dcRoot);
+    if (!std::isfinite(res.dcGainError) || res.dcGainError > 1e-7) {
+        res.stage1Passed = false;
+        res.stage1Details += "[FAIL] SOS and pole-zero DC gains disagree by " +
+                             std::to_string(res.dcGainError) + ".\n";
+    } else {
+        res.stage1Details += "[PASS] SOS and pole-zero DC gains agree (error " +
+                             std::to_string(res.dcGainError) + ").\n";
     }
 
-    double eFreq = 0.0;
+    bool zeroSymmetryOk = true;
+    for (size_t i = 0; i < coeff.zeros.size() && zeroSymmetryOk; ++i) {
+        const auto& zero = coeff.zeros[i];
+        if (std::abs(zero.imag()) <= 1e-8) continue;
+        bool foundConjugate = false;
+        for (size_t j = 0; j < coeff.zeros.size(); ++j) {
+            if (i != j && std::abs(zero.real() - coeff.zeros[j].real()) < 1e-6 &&
+                std::abs(zero.imag() + coeff.zeros[j].imag()) < 1e-6) {
+                foundConjugate = true;
+                break;
+            }
+        }
+        zeroSymmetryOk = foundConjugate;
+    }
+    if (!zeroSymmetryOk) {
+        res.stage1Passed = false;
+        res.stage1Details += "[FAIL] Zero Conjugate Symmetry Violated.\n";
+    }
+
+    // ── STAGE 2: Time-Domain & Numerical Precision Audit ──────────────────────
+    double plottedEnergy = 0.0;
     const auto& fr = analysis.frequencyResponse;
-    if (fr.size() >= 2 && spec.sampleRate > 0.0) {
-        double intH2 = 0.0;
+    if (fr.size() >= 2) {
         for (size_t i = 0; i + 1 < fr.size(); ++i) {
             double df = fr[i + 1].frequency - fr[i].frequency;
             double mag1 = std::pow(10.0, fr[i].magnitude / 20.0);
             double mag2 = std::pow(10.0, fr[i + 1].magnitude / 20.0);
             double avgH2 = 0.5 * (mag1 * mag1 + mag2 * mag2);
-            intH2 += avgH2 * df;
+            plottedEnergy += avgH2 * df;
         }
-        // Discrete Parseval's identity: sum |h[n]|^2 = (2 / Fs) * int_0^{Fs/2} |H(f)|^2 df
-        eFreq = (2.0 / spec.sampleRate) * intH2;
     }
 
-    double parsevalErr = (eTime > 1e-9) ? std::abs(eTime - eFreq) / eTime : 0.0;
+    // Validate the plotted nonuniform grid against an independent dense
+    // uniform-frequency quadrature. A short impulse truncation is not a valid
+    // Parseval reference for very high-Q filters.
+    constexpr int quadraturePoints = 65536;
+    const double nyquist = spec.sampleRate * 0.5;
+    std::vector<double> quadratureFrequencies;
+    quadratureFrequencies.reserve(quadraturePoints + coeff.poles.size() * 38);
+    for (int i = 0; i <= quadraturePoints; ++i)
+        quadratureFrequencies.push_back(nyquist * static_cast<double>(i) / quadraturePoints);
+    auto addRootNeighborhood = [&](const Complex& root) {
+        const double f = std::abs(std::arg(root)) * spec.sampleRate / (2.0 * PI);
+        const double bw = std::max(1e-9, std::abs(1.0 - std::abs(root)) * spec.sampleRate / (2.0 * PI));
+        static constexpr double scales[] = {0.0625, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0};
+        if (f > 0.0 && f < nyquist) quadratureFrequencies.push_back(f);
+        for (double scale : scales) {
+            if (f - bw * scale > 0.0) quadratureFrequencies.push_back(f - bw * scale);
+            if (f + bw * scale < nyquist) quadratureFrequencies.push_back(f + bw * scale);
+        }
+    };
+    for (const auto& pole : coeff.poles) addRootNeighborhood(pole);
+    for (const auto& zero : coeff.zeros) addRootNeighborhood(zero);
+    std::sort(quadratureFrequencies.begin(), quadratureFrequencies.end());
+    quadratureFrequencies.erase(std::unique(quadratureFrequencies.begin(), quadratureFrequencies.end()),
+                                quadratureFrequencies.end());
+    double denseEnergy = 0.0;
+    double previousPower = std::norm(coeff.evaluate(0.0));
+    double previousFrequency = 0.0;
+    for (size_t i = 1; i < quadratureFrequencies.size(); ++i) {
+        const double frequency = quadratureFrequencies[i];
+        const double power = std::norm(coeff.evaluate(2.0 * PI * frequency / spec.sampleRate));
+        denseEnergy += 0.5 * (previousPower + power) * (frequency - previousFrequency);
+        previousPower = power;
+        previousFrequency = frequency;
+    }
+    double parsevalErr = (denseEnergy > 1e-20)
+        ? std::abs(plottedEnergy - denseEnergy) / denseEnergy : 0.0;
     res.parsevalEnergyError = parsevalErr;
-    if (parsevalErr > 0.15) {
+    if (parsevalErr > 0.02) {
         res.parsevalEnergyOk = false;
         res.stage2Passed = false;
-        res.stage2Details += "[WARN] Parseval Energy Disparity: " + std::to_string(parsevalErr * 100.0) + "%\n";
+        res.stage2Details += "[FAIL] Frequency-Grid Integration Error: " + std::to_string(parsevalErr * 100.0) + "%\n";
     } else {
         res.parsevalEnergyOk = true;
-        res.stage2Details += "[PASS] Parseval Energy Discrepancy: " + std::to_string(parsevalErr) + " (Zero Drift).\n";
+        res.stage2Details += "[PASS] Frequency-Grid Integration Error: " + std::to_string(parsevalErr) + ".\n";
     }
 
     double maxStepPeak = 0.0;
@@ -481,39 +529,41 @@ VerificationResult FilterAnalysis::verify(const FilterSpec& spec,
         res.stage2Details += "[PASS] BIBO Transient Peak: " + std::to_string(maxStepPeak) + " (Bounded).\n";
     }
 
-    // ── STAGE 3: Canonical Reference Model Cross-Verification ───────────────
-    // Point-by-point cross-validation of simulated model against canonical reference model
+    // ── STAGE 3: Independent SOS/root and derivative cross-checks ───────────
     int matchedPts = 0;
     const int totalPts = static_cast<int>(analysis.frequencyResponse.size());
     double maxMagErrDb = 0.0;
     double maxPhaseErrDeg = 0.0;
+    double maxGroupDelayRelativeError = 0.0;
     double maxImpulseErr = 0.0;
 
-    // Evaluate canonical reference transfer function directly from z-plane roots:
-    // H_ref(z) = gain * prod(1 - z_k z^{-1}) / prod(1 - p_k z^{-1})
-    // and verify every point in analysis.frequencyResponse point-by-point
+    // Compare the SOS implementation with the factored ZPK transfer function.
+    // Also compare analytical group delay with a centered phase derivative.
+    const double gdStep = 1e-6;
     for (int i = 0; i < totalPts; ++i) {
         const auto& pt = analysis.frequencyResponse[i];
         const double omega = 2.0 * PI * pt.frequency / spec.sampleRate;
-        const Complex zInv = std::polar(1.0, -omega);
+        using LongComplex = std::complex<long double>;
+        const LongComplex zInv{std::cos(static_cast<long double>(omega)),
+                               -std::sin(static_cast<long double>(omega))};
 
-        Complex refNum{1.0, 0.0};
+        LongComplex refNum{1.0L, 0.0L};
         for (const auto& zk : coeff.zeros) {
-            refNum *= (1.0 - zk * zInv);
+            refNum *= LongComplex{1.0L, 0.0L} - LongComplex{zk.real(), zk.imag()} * zInv;
         }
 
-        Complex refDen{1.0, 0.0};
+        LongComplex refDen{1.0L, 0.0L};
         for (const auto& pk : coeff.poles) {
-            refDen *= (1.0 - pk * zInv);
+            refDen *= LongComplex{1.0L, 0.0L} - LongComplex{pk.real(), pk.imag()} * zInv;
         }
 
-        Complex H_ref{0.0, 0.0};
-        if (std::abs(refDen) > 1e-300) {
-            H_ref = (refNum / refDen) * coeff.gain;
+        LongComplex H_ref{0.0L, 0.0L};
+        if (std::abs(refDen) > 1e-300L) {
+            H_ref = (refNum / refDen) * static_cast<long double>(coeff.gain);
         }
 
         double refMagDb = -300.0;
-        const double refMagAbs = std::abs(H_ref);
+        const double refMagAbs = static_cast<double>(std::abs(H_ref));
         if (refMagAbs > 1e-15) {
             refMagDb = 20.0 * std::log10(refMagAbs);
             if (refMagDb < -300.0) refMagDb = -300.0;
@@ -521,9 +571,35 @@ VerificationResult FilterAnalysis::verify(const FilterSpec& spec,
         }
 
         double errDb = std::abs(pt.magnitude - refMagDb);
-        // Deep in stopband (beyond 80 dB attenuation), both are at the numerical noise floor
-        if (pt.magnitude < -80.0 && refMagDb < -80.0) {
+        if (pt.magnitude < -80.0 && refMagDb < -80.0)
             errDb = 0.0;
+        const double sosPhase = std::arg(coeff.evaluate(omega));
+        if (refMagAbs > 1e-6 && std::abs(coeff.evaluate(omega)) > 1e-6) {
+            const double phaseErr = std::abs(std::remainder(static_cast<double>(std::arg(H_ref)) - sosPhase, 2.0 * PI)) * 180.0 / PI;
+            maxPhaseErrDeg = std::max(maxPhaseErrDeg, phaseErr);
+        }
+
+        if (pt.frequency > 0.0 && pt.frequency < spec.sampleRate / 2.0 && refMagAbs > 1e-4) {
+            double localScale = 1.0;
+            for (const auto& root : coeff.poles) {
+                const double angularDistance = std::abs(std::remainder(omega - std::arg(root), 2.0 * PI));
+                localScale = std::min(localScale, std::hypot(angularDistance, 1.0 - std::abs(root)));
+            }
+            for (const auto& root : coeff.zeros) {
+                const double angularDistance = std::abs(std::remainder(omega - std::arg(root), 2.0 * PI));
+                localScale = std::min(localScale, std::hypot(angularDistance, std::abs(1.0 - std::abs(root))));
+            }
+            const double h = std::min(gdStep, std::max(1e-11, localScale * 0.01));
+            if (std::abs(coeff.evaluate(omega - h)) > 1e-8 &&
+                std::abs(coeff.evaluate(omega + h)) > 1e-8) {
+                const double phaseBefore = std::arg(coeff.evaluate(omega - h));
+                const double phaseAfter = std::arg(coeff.evaluate(omega + h));
+                const double phaseDelta = std::remainder(phaseAfter - phaseBefore, 2.0 * PI);
+                const double numericGd = -phaseDelta / (2.0 * h);
+                const double relativeError = std::abs(pt.groupDelay - numericGd) /
+                                             std::max(1.0, std::abs(numericGd));
+                maxGroupDelayRelativeError = std::max(maxGroupDelayRelativeError, relativeError);
+            }
         }
 
         if (errDb > maxMagErrDb) maxMagErrDb = errDb;
@@ -534,32 +610,103 @@ VerificationResult FilterAnalysis::verify(const FilterSpec& spec,
         }
     }
 
-    // Time-domain impulse response cross-validation (512 points)
-    const auto refImpulse = FilterAnalysis::impulseResponse(coeff, 512);
-    for (size_t n = 0; n < std::min(analysis.impulseResponse.size(), refImpulse.size()); ++n) {
-        double diff = std::abs(analysis.impulseResponse[n] - refImpulse[n]);
-        if (diff > maxImpulseErr) maxImpulseErr = diff;
+    // Compute each section impulse independently, then convolve the sections.
+    std::vector<double> referenceImpulse(analysis.impulseResponse.size(), 0.0);
+    if (!referenceImpulse.empty()) referenceImpulse[0] = coeff.gain;
+    for (const auto& s : coeff.sos) {
+        std::vector<double> sectionImpulse(referenceImpulse.size(), 0.0);
+        for (size_t n = 0; n < sectionImpulse.size(); ++n) {
+            const double input = n == 0 ? 1.0 : 0.0;
+            const double x1 = n >= 1 ? (n == 1 ? 1.0 : 0.0) : 0.0;
+            const double x2 = n == 2 ? 1.0 : 0.0;
+            const double y1 = n >= 1 ? sectionImpulse[n - 1] : 0.0;
+            const double y2 = n >= 2 ? sectionImpulse[n - 2] : 0.0;
+            sectionImpulse[n] = s.b0 * input + s.b1 * x1 + s.b2 * x2 - s.a1 * y1 - s.a2 * y2;
+        }
+        std::vector<double> next(referenceImpulse.size(), 0.0);
+        for (size_t i = 0; i < referenceImpulse.size(); ++i)
+            for (size_t j = 0; j + i < referenceImpulse.size(); ++j)
+                next[i + j] += referenceImpulse[i] * sectionImpulse[j];
+        referenceImpulse = std::move(next);
     }
+    for (size_t n = 0; n < referenceImpulse.size(); ++n)
+        maxImpulseErr = std::max(maxImpulseErr,
+                                 std::abs(referenceImpulse[n] - analysis.impulseResponse[n]));
 
     res.totalPoints = totalPts;
     res.matchedPoints = matchedPts;
     res.maxPointMagnitudeErrorDb = maxMagErrDb;
     res.maxPointPhaseErrorDeg = maxPhaseErrDeg;
     res.maxImpulseError = maxImpulseErr;
+    res.maxGroupDelayRelativeError = maxGroupDelayRelativeError;
 
     // Strict criterion: >= 99.5% points within 0.05 dB, max error <= 0.5 dB, and impulse drift < 1e-4
-    if (totalPts > 0 && (static_cast<double>(matchedPts) / totalPts < 0.995 || maxMagErrDb > 0.5 || maxImpulseErr > 1e-4)) {
+    const bool referenceOk = totalPts > 0 && matchedPts == totalPts &&
+        maxMagErrDb <= 1e-3 && maxPhaseErrDeg <= 1e-3 &&
+        maxGroupDelayRelativeError <= 1e-3 && maxImpulseErr <= 1e-8 &&
+        parsevalErr <= 0.02;
+    if (!referenceOk) {
         res.referenceModelVerified = false;
         res.stage2Passed = false;
         res.stage2Details += "[FAIL] Reference Model Discrepancy: Max error = " + std::to_string(maxMagErrDb) + " dB (" +
-                             std::to_string(matchedPts) + "/" + std::to_string(totalPts) + " points matched).\n";
+                             std::to_string(matchedPts) + "/" + std::to_string(totalPts) +
+                             " points matched; phase " + std::to_string(maxPhaseErrDeg) +
+                             " deg; group-delay relative error " + std::to_string(maxGroupDelayRelativeError) +
+                             "; impulse " + std::to_string(maxImpulseErr) + ").\n";
     } else {
         res.referenceModelVerified = true;
         res.stage2Details += "[PASS] Reference Model Compliance: 100% matched (" + std::to_string(matchedPts) + "/" +
-                             std::to_string(totalPts) + " points, max error " + std::to_string(maxMagErrDb) + " dB).\n";
+                             std::to_string(totalPts) + " points; magnitude " + std::to_string(maxMagErrDb) +
+                             " dB; phase " + std::to_string(maxPhaseErrDeg) + " deg; group-delay relative error " +
+                             std::to_string(maxGroupDelayRelativeError) + ").\n";
     }
 
-    res.passed = res.stage1Passed && res.stage2Passed;
+    double maxSpecErrDb = 0.0;
+    bool specOk = true;
+    auto magnitudeDbAt = [&](double frequency) {
+        const double magnitude = std::abs(coeff.evaluate(2.0 * PI * frequency / spec.sampleRate));
+        return magnitude > 1e-15 ? 20.0 * std::log10(magnitude) : -300.0;
+    };
+    if (spec.type == FilterType::BandStop) {
+        const double warpedCenter = std::sqrt(
+            std::tan(PI * spec.cutoffFreq / spec.sampleRate) *
+            std::tan(PI * spec.cutoffFreq2 / spec.sampleRate));
+        const double centerHz = std::atan(warpedCenter) * spec.sampleRate / PI;
+        const double notchDb = magnitudeDbAt(centerHz);
+        specOk = std::isfinite(notchDb) && notchDb <= -40.0;
+        if (!specOk)
+            res.stage2Details += "[FAIL] Band-stop rejection is below 40 dB at the warped notch center.\n";
+    } else {
+        double expectedEdgeDb = -3.0102999566;
+        if (spec.response == FilterResponse::ChebyshevI ||
+            spec.response == FilterResponse::Elliptic)
+            expectedEdgeDb = -spec.rippleDb;
+        else if (spec.response == FilterResponse::ChebyshevII)
+            expectedEdgeDb = -spec.stopbandDb;
+
+        const double edges[] = {spec.cutoffFreq, spec.cutoffFreq2};
+        const int edgeCount = spec.type == FilterType::BandPass ? 2 : 1;
+        for (int i = 0; i < edgeCount; ++i) {
+            const double measured = magnitudeDbAt(edges[i]);
+            const double error = std::abs(measured - expectedEdgeDb);
+            maxSpecErrDb = std::max(maxSpecErrDb, error);
+            if (!std::isfinite(measured) || error > 0.1)
+                specOk = false;
+        }
+        if (!specOk) {
+            res.stage2Details += "[FAIL] Critical-frequency response misses its " +
+                std::to_string(expectedEdgeDb) + " dB edge target by " +
+                std::to_string(maxSpecErrDb) + " dB.\n";
+        }
+    }
+    res.specificationOk = specOk;
+    res.maxSpecificationErrorDb = maxSpecErrDb;
+    if (specOk)
+        res.stage2Details += "[PASS] Filter-family cutoff/stopband requirements are met.\n";
+    else
+        res.stage2Passed = false;
+
+    res.passed = res.stage1Passed && res.stage2Passed && res.specificationOk;
     if (res.passed) {
         res.summary = "Filter Design Verified Successfully without Errors";
     } else {

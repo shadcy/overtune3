@@ -8,6 +8,7 @@ Window {
     id: root
     property bool isStandalone: false
     property int activeTab: 0 // 0 = Auto-Updater, 1 = System Installer
+    readonly property bool updateBusy: updateInstaller.isChecking || updateInstaller.isDownloading || updateInstaller.isInstalling || updateInstaller.isReadyToRestart || updateInstaller.status === "verifying"
 
     title: (isStandalone || activeTab === 1) ? "Overtune " + updateInstaller.currentVersion + " Setup" : "Overtune " + updateInstaller.currentVersion + " — Installer & Auto-Updater"
     width:         520
@@ -107,7 +108,7 @@ Window {
             width: scrollView.availableWidth
             spacing: 0
 
-            // ── 16:9 Banner Header ────────────────────────────────────────────
+            // ── Banner ───────────────────────────────────────────────────────
             Item {
                 width: parent.width
                 height: root.width * 9.0 / 16.0   // 292.5 px
@@ -133,31 +134,6 @@ Window {
                     }
                 }
 
-                // Updater / Installer Pill — Top Right
-                Rectangle {
-                    anchors { top: parent.top; right: parent.right; margins: 14 }
-                    height: 22
-                    width: pillLabel.implicitWidth + 22
-                    radius: 11
-                    color: "#000000"
-                    opacity: 0.85
-                    border.color: "#FFFFFF"
-                    border.width: 1
-
-                    Text {
-                        id: pillLabel
-                        anchors.centerIn: parent
-                        text: (root.isStandalone || root.activeTab === 1)
-                              ? (updateInstaller.status === "installed" ? "INSTALLED ✓" : "SYSTEM INSTALLER")
-                              : (updateInstaller.hasUpdate ? "UPDATE AVAILABLE" : "UP TO DATE")
-                        font.pixelSize: 10
-                        font.weight: Font.Bold
-                        color: (root.isStandalone || root.activeTab === 1)
-                               ? (updateInstaller.status === "installed" ? "#30D158" : "#FFFFFF")
-                               : (updateInstaller.hasUpdate ? theme.accent : "#30D158")
-                        font.letterSpacing: 1.2
-                    }
-                }
             }
 
             // ── Content Padding Container ─────────────────────────────────────
@@ -168,66 +144,47 @@ Window {
 
                 Item { width: 1; height: 2 }
 
-                // Headline + Subtitle
+                // Headline
                 Column {
                     width: parent.width
-                    spacing: 4
+                    spacing: 0
 
                     Text {
                         text: (root.isStandalone || root.activeTab === 1)
                               ? (updateInstaller.status === "installed" ? "Overtune " + updateInstaller.currentVersion + " Ready to Launch" : "Install Overtune " + updateInstaller.currentVersion + " to " + updateInstaller.osName)
-                              : (updateInstaller.hasUpdate ? ("Update: v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion) : ("Overtune " + updateInstaller.currentVersion + " is Up to Date"))
+                              : (updateInstaller.isChecking ? "Checking for updates"
+                                 : (updateInstaller.hasUpdate ? ("Update: v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion)
+                                    : ("Overtune " + updateInstaller.currentVersion + " is up to date")))
                         font.pixelSize: 24
                         font.weight: Font.Bold
                         color: theme.primaryText
                         lineHeight: 1.2
-                    }
-
-                    Text {
-                        text: (root.isStandalone || root.activeTab === 1)
-                              ? (updateInstaller.status === "installed"
-                                 ? "Installation completed successfully. You can launch Overtune " + updateInstaller.currentVersion + " now or close this wizard."
-                                 : "Setup native system integration, desktop shortcuts, and Start menu registration.")
-                              : (updateInstaller.hasUpdate ? ("Upgrade from v" + updateInstaller.currentVersion + " to v" + updateInstaller.latestVersion + " is ready to install.") : ("You are currently running the latest stable release (v" + updateInstaller.currentVersion + ")."))
-                        font.pixelSize: 13
-                        color: theme.secondaryText
                         wrapMode: Text.Wrap
                         width: parent.width
                     }
+
                 }
 
                 // ── Mode Switcher Tabs (Segmented control) ────────────────────
                 Rectangle {
                     visible: !root.isStandalone
                     width: parent.width
-                    height: 34
-                    radius: 8
-                    color: theme.surfaceHigh
-                    border.color: theme.borderColor
-                    border.width: 1
+                    height: 36
+                    color: "transparent"
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 2
-                        spacing: 2
+                        spacing: 20
 
                         // Tab 0: In-App Updater
                         Rectangle {
-                            width: (parent.width - 2) / 2
+                            width: (parent.width - 20) / 2
                             height: parent.height
-                            radius: 6
-                            color: root.activeTab === 0 ? theme.surface : "transparent"
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            color: "transparent"
 
                             Row {
                                 anchors.centerIn: parent
-                                spacing: 6
-                                Codicon {
-                                    icon: "cloud-download"
-                                    iconSize: 13
-                                    iconColor: root.activeTab === 0 ? theme.accent : theme.secondaryText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                spacing: 0
                                 Text {
                                     text: "In-App Updater"
                                     font.pixelSize: 12
@@ -235,6 +192,12 @@ Window {
                                     color: root.activeTab === 0 ? theme.primaryText : theme.secondaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
+                            }
+
+                            Rectangle {
+                                anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                                height: 2
+                                color: root.activeTab === 0 ? theme.accent : "transparent"
                             }
 
                             MouseArea {
@@ -246,21 +209,13 @@ Window {
 
                         // Tab 1: System Installer
                         Rectangle {
-                            width: (parent.width - 2) / 2
+                            width: (parent.width - 20) / 2
                             height: parent.height
-                            radius: 6
-                            color: root.activeTab === 1 ? theme.surface : "transparent"
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            color: "transparent"
 
                             Row {
                                 anchors.centerIn: parent
-                                spacing: 6
-                                Codicon {
-                                    icon: "package"
-                                    iconSize: 13
-                                    iconColor: root.activeTab === 1 ? theme.accent : theme.secondaryText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                spacing: 0
                                 Text {
                                     text: "System Installer"
                                     font.pixelSize: 12
@@ -268,6 +223,12 @@ Window {
                                     color: root.activeTab === 1 ? theme.primaryText : theme.secondaryText
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
+                            }
+
+                            Rectangle {
+                                anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                                height: 2
+                                color: root.activeTab === 1 ? theme.accent : "transparent"
                             }
 
                             MouseArea {
@@ -279,19 +240,15 @@ Window {
                     }
                 }
 
-                // ── Progress Card ─────────────────────────────────────────────
-                Rectangle {
+                // ── Status and progress ──────────────────────────────────────
+                Item {
                     width: parent.width
-                    height: 84
-                    radius: 12
-                    color: theme.surface
-                    border.color: theme.borderColor
-                    border.width: 1
+                    visible: root.updateBusy || ((root.isStandalone || root.activeTab === 1) && updateInstaller.status === "installed")
+                    height: root.updateBusy ? 64 : 28
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 14
-                        spacing: 10
+                        spacing: 8
 
                         // Top row: status label + icon + percentage
                         RowLayout {
@@ -300,25 +257,6 @@ Window {
                             Row {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
-                                spacing: 8
-
-                                Codicon {
-                                    id: spinIcon
-                                    icon: updateInstaller.isChecking || updateInstaller.isDownloading || updateInstaller.isInstalling
-                                          ? "sync"
-                                          : (updateInstaller.status === "ready_to_restart" || updateInstaller.status === "installed"
-                                             ? "pass-filled" : (updateInstaller.status === "error" ? "error" : "info"))
-                                    iconSize: 14
-                                    iconColor: updateInstaller.status === "error" ? "#FF3B30" : theme.accent
-                                    anchors.verticalCenter: parent.verticalCenter
-
-                                    RotationAnimator {
-                                        target: spinIcon
-                                        running: updateInstaller.isChecking || updateInstaller.isDownloading || updateInstaller.isInstalling
-                                        from: 0; to: 360; duration: 800; loops: Animation.Infinite
-                                    }
-                                }
-
                                 Text {
                                     text: updateInstaller.isChecking ? "Checking for updates..."
                                           : (updateInstaller.isDownloading ? "Downloading update package..."
@@ -339,6 +277,7 @@ Window {
                                 font.pixelSize: 13
                                 font.weight: Font.Bold
                                 color: theme.accent
+                                visible: root.updateBusy
                                 Layout.alignment: Qt.AlignVCenter
                             }
                         }
@@ -348,6 +287,7 @@ Window {
                             id: progressTrack
                             width: parent.width
                             height: 6
+                            visible: root.updateBusy
                             radius: 3
                             color: theme.surfaceHigh
                             clip: true
@@ -362,9 +302,10 @@ Window {
                             }
                         }
 
-                        // Subtitle info line
+                            // Status detail
                         RowLayout {
                             width: parent.width
+                            visible: root.updateBusy
                             Text {
                                 text: updateInstaller.statusMessage
                                 font.pixelSize: 11
@@ -387,54 +328,30 @@ Window {
                 Column {
                     width: parent.width
                     spacing: 12
-                    visible: root.activeTab === 0
+                    visible: root.activeTab === 0 && updateInstaller.hasUpdate
 
                     // Release notes card
-                    Rectangle {
+                    Item {
                         width: parent.width
-                        implicitHeight: releaseCol.implicitHeight + 28
-                        radius: 12
-                        color: theme.surface
-                        border.color: theme.borderColor
-                        border.width: 1
+                        implicitHeight: releaseCol.implicitHeight + 8
 
                         Column {
                             id: releaseCol
-                            anchors { fill: parent; margins: 14 }
+                            anchors { fill: parent; topMargin: 4; bottomMargin: 4 }
                             spacing: 10
 
                             RowLayout {
                                 width: parent.width
 
-                                Rectangle {
-                                    width: newTag.implicitWidth + 12
-                                    height: 20
-                                    radius: 4
-                                    color: theme.accent
-
-                                    Text {
-                                        id: newTag
-                                        anchors.centerIn: parent
-                                        text: updateInstaller.hasUpdate ? ("v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion) : ("v" + updateInstaller.currentVersion)
-                                        font.pixelSize: 10
-                                        font.weight: Font.Bold
-                                        color: "#FFFFFF"
-                                    }
-                                }
-
                                 Text {
-                                    text: updateInstaller.releaseName
+                                    text: updateInstaller.hasUpdate
+                                          ? ("v" + updateInstaller.currentVersion + " → v" + updateInstaller.latestVersion)
+                                          : ("Overtune " + updateInstaller.currentVersion)
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
                                     color: theme.primaryText
                                     Layout.fillWidth: true
                                     elide: Text.ElideRight
-                                }
-
-                                Text {
-                                    text: updateInstaller.releaseDate
-                                    font.pixelSize: 11
-                                    color: theme.secondaryText
                                 }
                             }
 
@@ -451,15 +368,8 @@ Window {
                                     width: parent.width
                                     spacing: 8
 
-                                    Codicon {
-                                        icon: "check"
-                                        iconSize: 12
-                                        iconColor: theme.accent
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-
                                     Text {
-                                        width: parent.width - 24
+                                        width: parent.width
                                         text: modelData
                                         font.pixelSize: 12
                                         color: theme.primaryText
@@ -471,35 +381,6 @@ Window {
 
                             Item { width: 1; height: 4 }
 
-                            // Installed and release versions
-                            Rectangle {
-                                width: parent.width
-                                height: 26
-                                radius: 6
-                                color: theme.surfaceHigh
-                                border.color: theme.borderColor
-
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 8
-                                    anchors.rightMargin: 8
-
-                                    Codicon {
-                                        icon: "versions"
-                                        iconSize: 12
-                                        iconColor: "#30D158"
-                                    }
-
-                                    Text {
-                                        text: "Current v" + updateInstaller.currentVersion + "  ·  Latest v" + updateInstaller.latestVersion
-                                        font.pixelSize: 10
-                                        font.family: "Monospace"
-                                        color: theme.secondaryText
-                                        Layout.fillWidth: true
-                                        elide: Text.ElideRight
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -510,25 +391,14 @@ Window {
                     spacing: 12
                     visible: root.activeTab === 1
 
-                    Rectangle {
+                    Item {
                         width: parent.width
-                        implicitHeight: installConfigCol.implicitHeight + 28
-                        radius: 12
-                        color: theme.surface
-                        border.color: theme.borderColor
-                        border.width: 1
+                        implicitHeight: installConfigCol.implicitHeight + 8
 
                         Column {
                             id: installConfigCol
-                            anchors { fill: parent; margins: 14 }
+                            anchors { fill: parent; topMargin: 4; bottomMargin: 4 }
                             spacing: 12
-
-                            Text {
-                                text: "Installation Destination & Integration"
-                                font.pixelSize: 13
-                                font.weight: Font.DemiBold
-                                color: theme.primaryText
-                            }
 
                             // Destination directory with Browse button
                             Column {
@@ -555,13 +425,6 @@ Window {
                                         anchors.rightMargin: 6
                                         spacing: 8
 
-                                        Codicon {
-                                            icon: "folder"
-                                            iconSize: 14
-                                            iconColor: theme.accent
-                                            anchors.verticalCenter: parent.verticalCenter
-                                        }
-
                                         TextInput {
                                             id: pathInput
                                             text: updateInstaller.installPath
@@ -587,13 +450,7 @@ Window {
 
                                             Row {
                                                 anchors.centerIn: parent
-                                                spacing: 4
-                                                Codicon {
-                                                    icon: "folder-opened"
-                                                    iconSize: 12
-                                                    iconColor: theme.primaryText
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                }
+                                                spacing: 0
                                                 Text {
                                                     id: browseText
                                                     text: "Browse..."
@@ -696,26 +553,6 @@ Window {
                                     }
                                 }
 
-                                // Option 3: Command line symlink
-                                Row {
-                                    spacing: 8
-                                    width: parent.width
-
-                                    Codicon {
-                                        icon: "terminal"
-                                        iconSize: 14
-                                        iconColor: "#30D158"
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-
-                                    Text {
-                                        text: "CLI Tool: overtune3 command will be linked in PATH"
-                                        font.pixelSize: 12
-                                        color: theme.secondaryText
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                }
-
                                 Item { width: 1; height: 4 }
 
                                 // In-App Complete Uninstaller Button (visible when installed)
@@ -735,14 +572,14 @@ Window {
                                         Codicon {
                                             icon: "trash"
                                             iconSize: 13
-                                            iconColor: "#FF453A"
+                                            iconColor: theme.danger
                                         }
 
                                         Text {
                                             text: "Uninstall Overtune 3 from this system"
                                             font.pixelSize: 11
                                             font.weight: Font.Medium
-                                            color: "#FF453A"
+                                            color: theme.danger
                                             Layout.fillWidth: true
                                         }
 
@@ -750,7 +587,7 @@ Window {
                                             width: 76
                                             height: 24
                                             radius: 5
-                                            color: uninsMouse.pressed ? "#CC2D24" : (uninsMouse.containsMouse ? "#E0382E" : "#A8241D")
+                                            color: uninsMouse.pressed ? Qt.darker(theme.danger, 1.2) : (uninsMouse.containsMouse ? Qt.lighter(theme.danger, 1.08) : theme.danger)
 
                                             Text {
                                                 anchors.centerIn: parent
@@ -782,25 +619,66 @@ Window {
 
     Dialog {
         id: uninstallConfirmDialog
-        title: "Confirm Complete Uninstallation"
         anchors.centerIn: parent
         modal: true
-        standardButtons: Dialog.Yes | Dialog.No
+        width: Math.min(420, root.width - 32)
+        padding: 0
         background: Rectangle {
             color: theme.surface
             border.color: theme.borderColor
             border.width: 1
             radius: 8
         }
-        contentItem: Text {
-            text: "Are you sure you want to completely remove Overtune 3, its shortcuts, registry entries, and local files?"
-            color: theme.primaryText
-            font.pixelSize: 12
-            wrapMode: Text.WordWrap
-            width: 380
-        }
-        onAccepted: {
-            updateInstaller.uninstallFromSystem()
+        contentItem: Column {
+            spacing: 0
+
+            Item {
+                width: parent.width
+                height: 96
+
+                Text {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    text: "Remove Overtune 3 and its shortcuts from this device?"
+                    color: theme.primaryText
+                    font.family: theme.headlineFont
+                    font.pixelSize: 14
+                    verticalAlignment: Text.AlignVCenter
+                    wrapMode: Text.WordWrap
+                }
+            }
+
+            Rectangle { width: parent.width; height: 1; color: theme.borderColor }
+
+            Item {
+                width: parent.width
+                height: 58
+
+                Row {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 8
+
+                    StyledButton {
+                        text: "Cancel"
+                        primary: false
+                        implicitHeight: 32
+                        onClicked: uninstallConfirmDialog.close()
+                    }
+
+                    StyledButton {
+                        text: "Uninstall"
+                        primary: false
+                        danger: true
+                        implicitHeight: 32
+                        onClicked: {
+                            uninstallConfirmDialog.close()
+                            updateInstaller.uninstallFromSystem()
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -816,15 +694,6 @@ Window {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 1
             color: theme.borderColor
-        }
-
-        // Left caption
-        Text {
-            anchors { left: parent.left; leftMargin: 24; verticalCenter: parent.verticalCenter }
-            text: updateInstaller.osName + " • " + (updateInstaller.updateChannel === "stable" ? "Stable Channel" : "Beta Channel")
-            font.pixelSize: 11
-            color: theme.secondaryText
-            font.letterSpacing: 0.4
         }
 
         // Right button group
@@ -865,56 +734,19 @@ Window {
                 }
             }
 
-            // "Check for Updates" secondary button (when in updater mode and not standalone)
-            Rectangle {
-                visible: !root.isStandalone && root.activeTab === 0 && !updateInstaller.isDownloading && !updateInstaller.isInstalling && !updateInstaller.isReadyToRestart
-                implicitWidth:  126
-                implicitHeight: 30
-                radius: 7
-                color: checkMouse.containsMouse ? theme.surfaceHigh : theme.surface
-                border.color: theme.borderColor
-                border.width: 1
-
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 5
-                    Codicon {
-                        icon: "refresh"
-                        iconSize: 12
-                        iconColor: theme.primaryText
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                    Text {
-                        text: "Check Updates"
-                        font.pixelSize: 11
-                        font.weight: Font.Medium
-                        color: theme.primaryText
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
-
-                MouseArea {
-                    id: checkMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: updateInstaller.checkForUpdates(true)
-                }
-            }
-
             // Primary Dynamic Accent Button
             Rectangle {
                 id: actionBtn
-                implicitWidth:  btnText.implicitWidth + 24
-                implicitHeight: 30
+                implicitWidth: Math.max(120, btnText.implicitWidth + 28)
+                implicitHeight: 34
                 radius: 7
                 color: {
                     if (root.isStandalone || root.activeTab === 1) {
-                        if (updateInstaller.status === "installed") return "#30D158"
                         if (updateInstaller.status === "installing") return "#636366"
                     }
                     return btnMouse.pressed ? Qt.darker(theme.accent, 1.25) : (btnMouse.containsMouse ? Qt.lighter(theme.accent, 1.1) : theme.accent)
                 }
+                opacity: updateInstaller.isChecking ? 0.65 : 1
                 Behavior on color { ColorAnimation { duration: 100 } }
 
                 Text {
@@ -923,8 +755,11 @@ Window {
                     text: {
                         if (root.isStandalone || root.activeTab === 1) {
                             if (updateInstaller.status === "installing") return "Installing..."
-                            if (updateInstaller.status === "installed") return "Launch Overtune 3"
+                            if (updateInstaller.status === "installed") return "Launch"
                             return "Install to System"
+                        }
+                        if (updateInstaller.isChecking) {
+                            return "Checking..."
                         }
                         if (updateInstaller.isReadyToRestart) {
                             return "Restart & Update Now"
@@ -948,8 +783,9 @@ Window {
                 MouseArea {
                     id: btnMouse
                     anchors.fill: parent
-                    hoverEnabled: updateInstaller.status !== "installing"
-                    cursorShape: updateInstaller.status === "installing" ? Qt.ArrowCursor : Qt.PointingHandCursor
+                    enabled: !updateInstaller.isChecking && updateInstaller.status !== "installing" && updateInstaller.status !== "verifying" && !updateInstaller.isDownloading && !updateInstaller.isInstalling
+                    hoverEnabled: enabled
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onClicked: {
                         if (root.isStandalone || root.activeTab === 1) {
                             if (updateInstaller.status === "installed") {
@@ -963,6 +799,9 @@ Window {
                             if (updateInstaller.status !== "installing") {
                                 updateInstaller.installToSystem(updateInstaller.installPath, updateInstaller.createDesktopShortcut, updateInstaller.createStartMenu)
                             }
+                            return
+                        }
+                        if (updateInstaller.isChecking || updateInstaller.isDownloading || updateInstaller.isInstalling || updateInstaller.status === "verifying") {
                             return
                         }
                         if (updateInstaller.isReadyToRestart) {

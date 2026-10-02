@@ -33,3 +33,9 @@ else()
     target_compile_options(dsp PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+if(BUILD_TESTING)
+    add_executable(dsp_tests tests/FilterMathTests.cpp)
+    target_link_libraries(dsp_tests PRIVATE dsp)
+    add_test(NAME dsp_math COMMAND dsp_tests)
+endif()
+

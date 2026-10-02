@@ -186,8 +186,6 @@ void UpdateInstallerEngine::onCheckTimerTick() {
 
     if (m_simStep >= 10) {
         m_checkTimer->stop();
-        setProgress(1.0);
-
         m_latestVersion = currentVersion();
         m_hasUpdate = m_latestVersion != currentVersion();
         setStatus(QStringLiteral("up_to_date"), QStringLiteral("Overtune %1 is up to date.").arg(currentVersion()));

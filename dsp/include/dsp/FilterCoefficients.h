@@ -21,7 +21,7 @@ struct FilterCoefficients {
     ComplexVec          zeros;         // z-domain zeros
 
     [[nodiscard]] bool  isValid()  const noexcept { return !sos.empty(); }
-    [[nodiscard]] int   order()    const noexcept { return static_cast<int>(sos.size()) * 2; }
+    [[nodiscard]] int   order()    const noexcept { return static_cast<int>(poles.size()); }
 
     // Evaluate H(z) at a given normalised digital frequency ω ∈ [0, π]
     [[nodiscard]] Complex evaluate(double omega) const noexcept;

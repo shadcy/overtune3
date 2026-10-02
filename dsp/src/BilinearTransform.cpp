@@ -264,9 +264,8 @@ FilterCoefficients bilinearTransform(const ComplexVec& analogPoles,
     if (spec.type == FilterType::HighPass) {
         targetOmega = PI; // Nyquist
     } else if (spec.type == FilterType::BandPass) {
-        const double f0 = std::sqrt(spec.cutoffFreq * spec.cutoffFreq2);
-        targetOmega = 2.0 * PI * f0 / fs;
-        if (targetOmega >= PI) targetOmega = PI * 0.99;
+        const double analogCenter = std::sqrt(wc * wc2);
+        targetOmega = 2.0 * std::atan(analogCenter / (2.0 * fs));
     } else if (spec.type == FilterType::BandStop) {
         targetOmega = 0.0; // DC
     } else {
@@ -275,9 +274,18 @@ FilterCoefficients bilinearTransform(const ComplexVec& analogPoles,
 
     // Target magnitude
     double targetMag = analogGain;
-    if (spec.response == FilterResponse::ChebyshevI && (spec.order % 2 == 0) &&
-        spec.type == FilterType::LowPass) {
-        // Even-order Chebyshev I has ripple at DC: |H(0)| = 10^(-Rp/20)
+    if (spec.response == FilterResponse::Elliptic) {
+        // The elliptic prototype gain scalar is not itself the DC magnitude.
+        // Recover |H(0)| from the analog roots before carrying that passband
+        // reference through the frequency transformation.
+        for (const auto& zero : analogZeros)
+            targetMag *= std::abs(zero);
+        for (const auto& pole : analogPoles)
+            targetMag /= std::abs(pole);
+    }
+    if (spec.response == FilterResponse::ChebyshevI && (spec.order % 2 == 0)) {
+        // Even-order Chebyshev I has its lower ripple extremum at the
+        // prototype's zero-frequency reference, for every transformed topology.
         targetMag = analogGain * std::pow(10.0, -spec.rippleDb / 20.0);
     }
 
