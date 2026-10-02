@@ -28,6 +28,8 @@ target_compile_features(dsp PUBLIC cxx_std_20)
 
 if(MSVC)
     target_compile_options(dsp PRIVATE /W4 /WX)
+    target_compile_definitions(dsp PRIVATE _CRT_SECURE_NO_WARNINGS)
 else()
     target_compile_options(dsp PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
