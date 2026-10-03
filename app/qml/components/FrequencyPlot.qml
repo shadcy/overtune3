@@ -1163,9 +1163,10 @@ Item {
                     }
                 }
 
-                ToolTip.visible: autoScaleMouse.containsMouse
-                ToolTip.text: "Auto Scale / Fit View (Desmos)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: autoScaleMouse.containsMouse
+                    text: "Auto Scale / Fit View"
+                }
 
                 MouseArea {
                     id: autoScaleMouse
@@ -1211,9 +1212,11 @@ Item {
                     }
                 }
 
-                ToolTip.visible: curMouse.containsMouse
-                ToolTip.text: root.showCrosshair ? "Data Cursor Active (Click to Hide)" : "Enable Data Cursor / Inspector (+) (Default: Off)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: curMouse.containsMouse
+                    text: root.showCrosshair ? "Data Cursor Active (Click to Hide)" : "Enable Data Cursor / Inspector"
+                    shortcut: "+"
+                }
 
                 MouseArea {
                     id: curMouse
@@ -1240,9 +1243,11 @@ Item {
                     iconSize: 12
                     iconColor: saveMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: saveMouse.containsMouse
-                ToolTip.text: "Save Plot Image (PNG)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: saveMouse.containsMouse
+                    text: "Save Plot Image (PNG)"
+                    delay: 400
+                }
                 MouseArea { id: saveMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.exportPlotImage() }
             }
 
@@ -1258,9 +1263,11 @@ Item {
                     iconSize: 12
                     iconColor: copyMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: copyMouse.containsMouse
-                ToolTip.text: "Copy Plot to Clipboard"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: copyMouse.containsMouse
+                    text: "Copy Plot to Clipboard"
+                    delay: 400
+                }
                 MouseArea { id: copyMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.copyPlotImage() }
             }
 
@@ -1276,9 +1283,11 @@ Item {
                     iconSize: 12
                     iconColor: popoutMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: popoutMouse.containsMouse
-                ToolTip.text: "Open in Dedicated Window"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: popoutMouse.containsMouse
+                    text: "Open in Dedicated Window"
+                    delay: 400
+                }
                 MouseArea { id: popoutMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.openInNewWindow() }
             }
 
@@ -1293,9 +1302,11 @@ Item {
                     iconSize: 13
                     iconColor: menuBtnMouse.containsMouse || plotContextMenu.opened ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: menuBtnMouse.containsMouse && !plotContextMenu.opened
-                ToolTip.text: "Plot Settings & MATLAB Analysis Menu (Right-Click)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: menuBtnMouse.containsMouse && !plotContextMenu.opened
+                    text: "Plot Settings & Options"
+                    delay: 400
+                }
                 MouseArea {
                     id: menuBtnMouse
                     anchors.fill: parent
@@ -1511,7 +1522,7 @@ Item {
                 width: 28; height: 26; radius: 4
                 color: fZoomInMouse.containsMouse ? (theme.isDark ? "#3A3A3C" : "#EAEAEA") : "transparent"
                 Text { anchors.centerIn: parent; text: "+"; font.family: "Stack Sans Headline"; font.pixelSize: 18; font.weight: Font.DemiBold; color: theme.primaryText }
-                ToolTip.visible: fZoomInMouse.containsMouse; ToolTip.text: "Zoom In (+)"; ToolTip.delay: 350
+                CustomToolTip { visible: fZoomInMouse.containsMouse; text: "Zoom In"; shortcut: "+" }
                 MouseArea { id: fZoomInMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.zoomCenter(0.8) }
             }
             Rectangle { width: 20; height: 1; color: theme.borderColor; opacity: 0.6; anchors.horizontalCenter: parent.horizontalCenter }
@@ -1519,7 +1530,7 @@ Item {
                 width: 28; height: 26; radius: 4
                 color: fZoomOutMouse.containsMouse ? (theme.isDark ? "#3A3A3C" : "#EAEAEA") : "transparent"
                 Text { anchors.centerIn: parent; text: "−"; font.family: "Stack Sans Headline"; font.pixelSize: 18; font.weight: Font.DemiBold; color: theme.primaryText }
-                ToolTip.visible: fZoomOutMouse.containsMouse; ToolTip.text: "Zoom Out (−)"; ToolTip.delay: 350
+                CustomToolTip { visible: fZoomOutMouse.containsMouse; text: "Zoom Out"; shortcut: "−" }
                 MouseArea { id: fZoomOutMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.zoomCenter(1.25) }
             }
             Rectangle { width: 20; height: 1; color: theme.borderColor; opacity: 0.6; anchors.horizontalCenter: parent.horizontalCenter }
@@ -1527,7 +1538,7 @@ Item {
                 width: 28; height: 26; radius: 4
                 color: fAutoFitMouse.containsMouse ? (theme.isDark ? "#3A3A3C" : "#EAEAEA") : "transparent"
                 Codicon { anchors.centerIn: parent; icon: "screen-full"; iconSize: 13; iconColor: root.isCustomView ? theme.accent : theme.secondaryText }
-                ToolTip.visible: fAutoFitMouse.containsMouse; ToolTip.text: "Auto Scale / Fit View"; ToolTip.delay: 350
+                CustomToolTip { visible: fAutoFitMouse.containsMouse; text: "Auto Scale / Fit View" }
                 MouseArea { id: fAutoFitMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.autoScale(); root.showPlotToast("Auto-scaled to curve fit") } }
             }
         }

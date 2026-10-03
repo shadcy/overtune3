@@ -4,11 +4,15 @@ qt_standard_project_setup()
 
 set(APP_EXTRA_SOURCES)
 if(WIN32)
+    configure_file(app_version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/app_version.rc @ONLY)
     list(APPEND APP_EXTRA_SOURCES app.rc)
+    list(APPEND APP_EXTRA_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/app_version.rc)
 endif()
 
 # ── Application ───────────────────────────────────────────────────────────────
 set_source_files_properties(../assets/banner.png PROPERTIES QT_RESOURCE_ALIAS "icons/banner.png")
+set_source_files_properties(../assets/shadcy-for-white-bg.png PROPERTIES QT_RESOURCE_ALIAS "icons/shadcy-for-white-bg.png")
+set_source_files_properties(../assets/shadcy-for-black-bg.png PROPERTIES QT_RESOURCE_ALIAS "icons/shadcy-for-black-bg.png")
 
 qt_add_executable(FilterDesigner
     src/main.cpp
@@ -22,6 +26,10 @@ qt_add_executable(FilterDesigner
     src/ThemeManager.h
     src/UpdateInstallerEngine.cpp
     src/UpdateInstallerEngine.h
+    src/ChatController.cpp
+    src/ChatController.h
+    src/ChatPromptBudget.cpp
+    src/ChatPromptBudget.h
     ${APP_EXTRA_SOURCES}
 )
 
@@ -35,6 +43,7 @@ qt_add_qml_module(FilterDesigner
         qml/theme/Theme.qml
         qml/components/Sidebar.qml
         qml/components/SidebarItem.qml
+        qml/components/CustomToolTip.qml
         qml/components/Codicon.qml
         qml/components/PageHeader.qml
         qml/components/StandalonePlotWindow.qml
@@ -43,6 +52,7 @@ qt_add_qml_module(FilterDesigner
         qml/components/ImpulseStepPlot.qml
         qml/components/WhatsNewWindow.qml
         qml/components/InstallerUpdaterWindow.qml
+        qml/components/WindowingStudio.qml
 
         qml/components/FilterCard.qml
         qml/components/ParameterRow.qml
@@ -68,6 +78,8 @@ qt_add_qml_module(FilterDesigner
         qml/pages/ExportPage.qml
         qml/pages/DocsPage.qml
         qml/pages/SettingsPage.qml
+        qml/pages/ChatPage.qml
+        qml/components/ChatPlot.qml
     RESOURCES
         fonts/StackSansHeadline-Regular.ttf
         fonts/StackSansHeadline-Medium.ttf
@@ -121,6 +133,32 @@ qt_add_qml_module(FilterDesigner
         math/axis_sample_n_light.png
         math/axis_signals_dark.png
         math/axis_signals_light.png
+        math/win_rectangular_dark.png
+        math/win_rectangular_light.png
+        math/win_bartlett_dark.png
+        math/win_bartlett_light.png
+        math/win_hann_dark.png
+        math/win_hann_light.png
+        math/win_hamming_dark.png
+        math/win_hamming_light.png
+        math/win_blackman_dark.png
+        math/win_blackman_light.png
+        math/win_blackman_harris_dark.png
+        math/win_blackman_harris_light.png
+        math/win_nuttall_dark.png
+        math/win_nuttall_light.png
+        math/win_flat_top_dark.png
+        math/win_flat_top_light.png
+        math/win_kaiser_dark.png
+        math/win_kaiser_light.png
+        math/win_tukey_dark.png
+        math/win_tukey_light.png
+        math/win_gaussian_dark.png
+        math/win_gaussian_light.png
+        math/win_bohman_dark.png
+        math/win_bohman_light.png
+        math/win_lanczos_dark.png
+        math/win_lanczos_light.png
         latex/theory_and_math.pdf
         latex/theory_and_math_page-1.png
         latex/theory_and_math_page-2.png
@@ -135,6 +173,8 @@ qt_add_qml_module(FilterDesigner
         icons/16-9ar-logo.png
         icons/16-9ar-compliance.png
         icons/logo.png
+        ../assets/shadcy-for-white-bg.png
+        ../assets/shadcy-for-black-bg.png
         ../assets/banner.png
 )
 
@@ -149,11 +189,25 @@ target_link_libraries(FilterDesigner PRIVATE
     dsp
 )
 
+if(WIN32)
+    target_link_libraries(FilterDesigner PRIVATE crypt32)
+endif()
+
 target_include_directories(FilterDesigner PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_compile_definitions(FilterDesigner PRIVATE OVERTUNE_VERSION="${PROJECT_VERSION}")
+
+if(BUILD_TESTING)
+    add_executable(chat_prompt_tests
+        src/ChatPromptBudget.cpp
+        tests/ChatPromptBudgetTests.cpp
+    )
+    target_include_directories(chat_prompt_tests PRIVATE src)
+    target_link_libraries(chat_prompt_tests PRIVATE Qt6::Core)
+    add_test(NAME chat_prompt_budget COMMAND chat_prompt_tests)
+endif()
 
 set_target_properties(FilterDesigner PROPERTIES OUTPUT_NAME "ot3")
 

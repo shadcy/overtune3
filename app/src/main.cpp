@@ -2,13 +2,17 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QIcon>
+#include <QDir>
+#include <QFile>
 #include <QFont>
 #include <QFontDatabase>
+#include <QTextStream>
 #include "FilterEngine.h"
 #include "SimulationModel.h"
 #include "ExportModel.h"
 #include "ThemeManager.h"
 #include "UpdateInstallerEngine.h"
+#include "ChatController.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -17,7 +21,8 @@
 
 int main(int argc, char* argv[]) {
 #ifdef Q_OS_WIN
-    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.5");
+    const QString appUserModelId = QStringLiteral("Overtune.FilterDesigner.") + QStringLiteral(OVERTUNE_VERSION);
+    SetCurrentProcessExplicitAppUserModelID(reinterpret_cast<LPCWSTR>(appUserModelId.utf16()));
 #endif
     // Avoid GTK theme crash on Ubuntu Wayland/GNOME
     qputenv("QT_QPA_PLATFORMTHEME", "generic");
@@ -53,6 +58,7 @@ int main(int argc, char* argv[]) {
     ExportModel            exportModel;
     ThemeManager           theme;
     UpdateInstallerEngine  updateInstaller;
+    ChatController        chat(&engine);
 
     // Check CLI arguments or executable name for installer or update launch modes
     bool launchInstaller = false;
@@ -80,6 +86,7 @@ int main(int argc, char* argv[]) {
     qml.rootContext()->setContextProperty("exportModel",       &exportModel);
     qml.rootContext()->setContextProperty("theme",             &theme);
     qml.rootContext()->setContextProperty("updateInstaller",   &updateInstaller);
+    qml.rootContext()->setContextProperty("chat",              &chat);
     qml.rootContext()->setContextProperty("codiconFontFamily", codiconFontFamily);
     qml.rootContext()->setContextProperty("cliLaunchInstaller", launchInstaller);
     qml.rootContext()->setContextProperty("cliLaunchUpdater",   launchUpdater);
@@ -88,9 +95,24 @@ int main(int argc, char* argv[]) {
         ? QUrl(u"qrc:/FilterDesigner/qml/InstallerApp.qml"_qs)
         : QUrl(u"qrc:/FilterDesigner/qml/Main.qml"_qs);
 
+    QStringList qmlWarnings;
+    QObject::connect(&qml, &QQmlApplicationEngine::warnings, &qml,
+                     [&qmlWarnings](const QList<QQmlError> &warnings) {
+        for (const auto &warning : warnings)
+            qmlWarnings.append(warning.toString());
+    });
     QObject::connect(&qml, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject* obj, const QUrl& objUrl) {
-        if (!obj && url == objUrl) QCoreApplication::exit(-1);
+                     &app, [url, &qmlWarnings](QObject* obj, const QUrl& objUrl) {
+        if (!obj && url == objUrl) {
+            QFile log(QDir::temp().filePath(QStringLiteral("Overtune3-startup.log")));
+            if (log.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+                QTextStream stream(&log);
+                stream << "Failed to load " << url.toString() << Qt::endl;
+                for (const QString &warning : qmlWarnings)
+                    stream << warning << Qt::endl;
+            }
+            QCoreApplication::exit(-1);
+        }
     }, Qt::QueuedConnection);
 
     qml.load(url);

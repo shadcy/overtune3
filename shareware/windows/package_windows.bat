@@ -18,7 +18,11 @@ echo ========================================================
 echo Root directory: %ROOT_DIR%
 
 set "BIN_SRC="
-if exist "%ROOT_DIR%\build\bin\Release\ot3.exe" (
+if exist "%ROOT_DIR%\build\windows-release\bin\ot3.exe" (
+    set "BIN_SRC=%ROOT_DIR%\build\windows-release\bin"
+) else if exist "%ROOT_DIR%\build\windows-release\bin\Release\ot3.exe" (
+    set "BIN_SRC=%ROOT_DIR%\build\windows-release\bin\Release"
+) else if exist "%ROOT_DIR%\build\bin\Release\ot3.exe" (
     set "BIN_SRC=%ROOT_DIR%\build\bin\Release"
 ) else if exist "%ROOT_DIR%\build\bin\ot3.exe" (
     set "BIN_SRC=%ROOT_DIR%\build\bin"
@@ -37,9 +41,11 @@ if exist "%STAGE_DIR%" rmdir /s /q "%STAGE_DIR%"
 mkdir "%STAGE_DIR%"
 mkdir "%STAGE_DIR%\bin"
 mkdir "%STAGE_DIR%\assets"
+mkdir "%STAGE_DIR%\docs"
 
 echo [1/4] Copying binary and deployed Qt runtime...
 xcopy /s /e /y /q "%BIN_SRC%\*" "%STAGE_DIR%\bin\" >nul
+if exist "%STAGE_DIR%\bin\dsp_tests.exe" del /q "%STAGE_DIR%\bin\dsp_tests.exe"
 
 if not exist "%STAGE_DIR%\bin\FilterDesigner.exe" (
     copy /y "%STAGE_DIR%\bin\ot3.exe" "%STAGE_DIR%\bin\FilterDesigner.exe" >nul
@@ -56,6 +62,20 @@ if exist "%ROOT_DIR%\assets\logo.png" (
 if exist "%ROOT_DIR%\assets\logo.ico" (
     copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\assets\" >nul
     copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\bin\" >nul
+    copy /y "%ROOT_DIR%\assets\logo.ico" "%STAGE_DIR%\" >nul
+)
+if exist "%ROOT_DIR%\assets\banner.png" (
+    copy /y "%ROOT_DIR%\assets\banner.png" "%STAGE_DIR%\assets\" >nul
+)
+if exist "%ROOT_DIR%\latex\installation_guide.pdf" (
+    copy /y "%ROOT_DIR%\latex\installation_guide.pdf" "%STAGE_DIR%\Installation_Guide.pdf" >nul
+    copy /y "%ROOT_DIR%\latex\installation_guide.pdf" "%STAGE_DIR%\docs\Installation_Guide.pdf" >nul
+) else if exist "%ROOT_DIR%\shareware\Installation_Guide.pdf" (
+    copy /y "%ROOT_DIR%\shareware\Installation_Guide.pdf" "%STAGE_DIR%\Installation_Guide.pdf" >nul
+    copy /y "%ROOT_DIR%\shareware\Installation_Guide.pdf" "%STAGE_DIR%\docs\Installation_Guide.pdf" >nul
+)
+if exist "%ROOT_DIR%\docs\ai-integration.md" (
+    copy /y "%ROOT_DIR%\docs\ai-integration.md" "%STAGE_DIR%\docs\" >nul
 )
 if exist "%SCRIPT_DIR%README_WINDOWS.txt" (
     copy /y "%SCRIPT_DIR%README_WINDOWS.txt" "%STAGE_DIR%\" >nul

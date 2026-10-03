@@ -153,9 +153,10 @@ Item {
                                     iconColor: magPopMouse.containsMouse ? theme.primaryText : theme.secondaryText
                                 }
 
-                                ToolTip.visible: magPopMouse.containsMouse
-                                ToolTip.text: "Open Magnitude in Dedicated Window"
-                                ToolTip.delay: 300
+                                CustomToolTip {
+                                    visible: magPopMouse.containsMouse
+                                    text: "Open Magnitude in Dedicated Window"
+                                }
 
                                 MouseArea {
                                     id: magPopMouse
@@ -219,9 +220,10 @@ Item {
                                     iconColor: phasePopMouse.containsMouse ? theme.primaryText : theme.secondaryText
                                 }
 
-                                ToolTip.visible: phasePopMouse.containsMouse
-                                ToolTip.text: "Open Phase in Dedicated Window"
-                                ToolTip.delay: 300
+                                CustomToolTip {
+                                    visible: phasePopMouse.containsMouse
+                                    text: "Open Phase in Dedicated Window"
+                                }
 
                                 MouseArea {
                                     id: phasePopMouse
@@ -285,9 +287,10 @@ Item {
                                     iconColor: gdPopMouse.containsMouse ? theme.primaryText : theme.secondaryText
                                 }
 
-                                ToolTip.visible: gdPopMouse.containsMouse
-                                ToolTip.text: "Open Group Delay in Dedicated Window"
-                                ToolTip.delay: 300
+                                CustomToolTip {
+                                    visible: gdPopMouse.containsMouse
+                                    text: "Open Group Delay in Dedicated Window"
+                                }
 
                                 MouseArea {
                                     id: gdPopMouse
@@ -351,9 +354,10 @@ Item {
                                     iconColor: pzPopMouse.containsMouse ? theme.primaryText : theme.secondaryText
                                 }
 
-                                ToolTip.visible: pzPopMouse.containsMouse
-                                ToolTip.text: "Open Active Plot in Dedicated Window"
-                                ToolTip.delay: 300
+                                CustomToolTip {
+                                    visible: pzPopMouse.containsMouse
+                                    text: "Open Active Plot in Dedicated Window"
+                                }
 
                                 MouseArea {
                                     id: pzPopMouse

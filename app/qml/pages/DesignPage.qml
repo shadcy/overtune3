@@ -58,6 +58,12 @@ Item {
         }
     }
 
+    function openWindowingStudio() {
+        if (windowingStudio) {
+            windowingStudio.openStudio()
+        }
+    }
+
     Connections {
         target: filterEngine
         function onSpecChanged() {
@@ -104,44 +110,38 @@ Item {
         Rectangle {
             id: titleStrip
             anchors { top: parent.top; left: parent.left; right: parent.right }
-            height: 60
+            height: 44
             color: "transparent"
             z: 2
 
-            // Native Squircle Logo
-            Item {
-                id: logoSquircle
-                anchors {
-                    left: parent.left
-                    leftMargin: 14
-                    verticalCenter: parent.verticalCenter
-                }
-                width: 44
-                height: 44
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                spacing: 8
 
-                Image {
-                    anchors.fill: parent
-                    source: "qrc:/FilterDesigner/icons/logo.png"
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    mipmap: true
+                Text {
+                    text: "Filter Configuration"
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 14
+                    font.weight: Font.DemiBold
+                    color: theme.primaryText
+                    Layout.fillWidth: true
                 }
 
-                ToolTip.visible: logoHover.hovered
-                ToolTip.text: "Overtune 3 Studio"
-                ToolTip.delay: 300
-
-                HoverHandler {
-                    id: logoHover
-                    cursorShape: Qt.PointingHandCursor
-                }
-
-                TapHandler {
-                    onTapped: {
-                        const w = Window.window
-                        if (w && typeof w.showWhatsNew === "function") {
-                            w.showWhatsNew()
-                        }
+                Rectangle {
+                    height: 20
+                    width: typeBadge.implicitWidth + 12
+                    radius: 10
+                    color: theme.accentMuted
+                    Text {
+                        id: typeBadge
+                        anchors.centerIn: parent
+                        text: filterEngine.filterTypeName()
+                        color: theme.accent
+                        font.family: "Stack Sans Headline"
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
                     }
                 }
             }
@@ -200,14 +200,14 @@ Item {
                 topPadding: 10
                 bottomPadding: 24
 
-                Text {
+                StyledButton {
                     width: parent.width
-                    text: "Filter Configuration"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 15
-                    font.weight: Font.DemiBold
-                    color: theme.primaryText
-                    wrapMode: Text.WordWrap
+                    text: "Window Function Studio"
+                    primary: false
+                    implicitHeight: 32
+                    onClicked: {
+                        windowingStudio.openStudio()
+                    }
                 }
 
                 SectionHeader { text: "PRESET TEMPLATES"; width: parent.width }
@@ -1035,9 +1035,10 @@ Item {
                         iconColor: popTabMouse.containsMouse ? theme.primaryText : theme.secondaryText
                     }
 
-                    ToolTip.visible: popTabMouse.containsMouse
-                    ToolTip.text: "Open Frequency Plot in Dedicated Window"
-                    ToolTip.delay: 300
+                    CustomToolTip {
+                        visible: popTabMouse.containsMouse
+                        text: "Open Frequency Plot in Dedicated Window"
+                    }
 
                     MouseArea {
                         id: popTabMouse
@@ -1071,6 +1072,11 @@ Item {
     DesignVerifierModal {
         id: verifierModal
         transientParent: root.Window.window
+    }
+
+    WindowingStudio {
+        id: windowingStudio
+        hostWindow: root.Window.window
     }
 }
 

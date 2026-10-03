@@ -648,9 +648,10 @@ Item {
                     }
                 }
 
-                ToolTip.visible: playAnimMouse.containsMouse
-                ToolTip.text: root.isAnimating ? "Pause realtime filter animation" : "Play realtime animated filter propagation"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: playAnimMouse.containsMouse
+                    text: root.isAnimating ? "Pause Realtime Animation" : "Play Realtime Animation"
+                }
 
                 MouseArea {
                     id: playAnimMouse
@@ -685,9 +686,10 @@ Item {
                     iconColor: root.loopAnimation ? "#30D158" : (loopMouse.containsMouse ? theme.primaryText : theme.secondaryText)
                 }
 
-                ToolTip.visible: loopMouse.containsMouse
-                ToolTip.text: "Toggle Continuous Loop Sweep (Oscilloscope Mode)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: loopMouse.containsMouse
+                    text: "Continuous Loop Sweep"
+                }
 
                 MouseArea {
                     id: loopMouse
@@ -722,9 +724,10 @@ Item {
                     color: speedMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: speedMouse.containsMouse
-                ToolTip.text: "Animation Speed (Click to cycle 1x, 2x, 0.5x)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: speedMouse.containsMouse
+                    text: "Animation Speed (Cycle 1x, 2x, 0.5x)"
+                }
 
                 MouseArea {
                     id: speedMouse
@@ -777,9 +780,10 @@ Item {
                     }
                 }
 
-                ToolTip.visible: autoScaleSigMouse.containsMouse
-                ToolTip.text: "Auto Scale / Fit View (Desmos)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: autoScaleSigMouse.containsMouse
+                    text: "Auto Scale / Fit View"
+                }
 
                 MouseArea {
                     id: autoScaleSigMouse
@@ -808,9 +812,11 @@ Item {
                     iconSize: 12
                     iconColor: saveSigMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: saveSigMouse.containsMouse
-                ToolTip.text: "Save Signal Plot Image (PNG)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: saveSigMouse.containsMouse
+                    text: "Save Signal Plot Image (PNG)"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: saveSigMouse
@@ -836,9 +842,11 @@ Item {
                     iconSize: 12
                     iconColor: copySigMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: copySigMouse.containsMouse
-                ToolTip.text: "Copy Signal Image"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: copySigMouse.containsMouse
+                    text: "Copy Signal Image"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: copySigMouse
@@ -866,9 +874,11 @@ Item {
                     iconColor: popoutSigMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: popoutSigMouse.containsMouse
-                ToolTip.text: "Open Signal Scope in Dedicated Window"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: popoutSigMouse.containsMouse
+                    text: "Open Signal Scope in Dedicated Window"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: popoutSigMouse
@@ -896,9 +906,11 @@ Item {
                     iconColor: menuSigBtnMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: menuSigBtnMouse.containsMouse
-                ToolTip.text: "Signal Plot Settings & Options (Right-Click)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: menuSigBtnMouse.containsMouse
+                    text: "Signal Plot Settings & Options"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: menuSigBtnMouse
@@ -993,9 +1005,11 @@ Item {
                     font.weight: Font.DemiBold
                     color: theme.primaryText
                 }
-                ToolTip.visible: sigZoomInMouse.containsMouse
-                ToolTip.text: "Zoom In (+)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: sigZoomInMouse.containsMouse
+                    text: "Zoom In"
+                    shortcut: "+"
+                }
                 MouseArea {
                     id: sigZoomInMouse
                     anchors.fill: parent
@@ -1017,9 +1031,11 @@ Item {
                     font.weight: Font.DemiBold
                     color: theme.primaryText
                 }
-                ToolTip.visible: sigZoomOutMouse.containsMouse
-                ToolTip.text: "Zoom Out (−)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: sigZoomOutMouse.containsMouse
+                    text: "Zoom Out"
+                    shortcut: "−"
+                }
                 MouseArea {
                     id: sigZoomOutMouse
                     anchors.fill: parent
@@ -1039,9 +1055,10 @@ Item {
                     iconSize: 12
                     iconColor: root.isCustomView ? theme.accent : theme.secondaryText
                 }
-                ToolTip.visible: sigAutoFitMouse.containsMouse
-                ToolTip.text: "Auto Scale / Fit View (Double-click plot)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: sigAutoFitMouse.containsMouse
+                    text: "Auto Scale / Fit View"
+                }
                 MouseArea {
                     id: sigAutoFitMouse
                     anchors.fill: parent

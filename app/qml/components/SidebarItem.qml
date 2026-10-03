@@ -95,66 +95,15 @@ Item {
         }
     }
 
-    // ── Custom Styled Tooltip with Shortcut Badge ────────────────────────────
-    ToolTip {
+    CustomToolTip {
         id: tip
         visible: hov.hovered && !tapHandler.pressed
-        delay: 350
-        timeout: 4500
         x: root.width + 8
         y: Math.round((root.height - height) / 2)
-        topPadding: 5
-        bottomPadding: 5
-        leftPadding: 9
-        rightPadding: 9
-
-        enter: Transition {
-            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 130; easing.type: Easing.OutQuad }
-            NumberAnimation { property: "scale"; from: 0.94; to: 1.0; duration: 130; easing.type: Easing.OutQuad }
-        }
-        exit: Transition {
-            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 100; easing.type: Easing.InQuad }
-        }
-
-        contentItem: Row {
-            spacing: 8
-
-            Text {
-                text: root.text
-                color: theme.isDark ? "#FFFFFF" : "#1D1D1F"
-                font.family: "Stack Sans Headline"
-                font.pixelSize: 12
-                font.weight: Font.Medium
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Rectangle {
-                visible: root.shortcut !== ""
-                width: shortcutLabel.implicitWidth + 8
-                height: 18
-                radius: 4
-                color: theme.isDark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.07)
-                anchors.verticalCenter: parent.verticalCenter
-
-                Text {
-                    id: shortcutLabel
-                    anchors.centerIn: parent
-                    text: root.shortcut
-                    color: theme.isDark ? "#A0A0A5" : "#6E6E73"
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 10
-                    font.weight: Font.DemiBold
-                }
-            }
-        }
-
-        background: Rectangle {
-            color: theme.isDark ? "#222225" : "#FFFFFF"
-            border.color: theme.isDark ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.12)
-            border.width: 1
-            radius: 6
-        }
+        text: root.text
+        shortcut: root.shortcut
     }
+
 
     HoverHandler {
         id: hov

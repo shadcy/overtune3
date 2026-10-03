@@ -14,6 +14,7 @@ add_library(dsp STATIC
     src/FilterDesigner.cpp
     src/FilterAnalysis.cpp
     src/SignalProcessor.cpp
+    src/WindowFunctions.cpp
     src/CodeExporter.cpp
     src/WavReader.cpp
     src/CsvReader.cpp

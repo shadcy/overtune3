@@ -251,9 +251,10 @@ Item {
                     iconColor: popStripMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: popStripMouse.containsMouse
-                ToolTip.text: "Open Oscilloscope in Dedicated Window"
-                ToolTip.delay: 300
+                CustomToolTip {
+                    visible: popStripMouse.containsMouse
+                    text: "Open Oscilloscope in Dedicated Window"
+                }
 
                 MouseArea {
                     id: popStripMouse

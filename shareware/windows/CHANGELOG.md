@@ -7,6 +7,118 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.3.5] - 2026-10-03
+
+### Fixed & Refined
+- Moved the top navigation menu bar into the main window content column, eliminating sidebar overlap.
+- Positioned the `Sidebar` activity bar full height from window top to bottom with a crisp 1px separation divider.
+- Removed duplicate brand icon box from the menu bar to eliminate double-logo visual clutter with the Windows native titlebar.
+- Added direct access to DSP Window Function Studio in the View menu.
+
+## [3.3.4] - 2026-10-03
+
+### Fixed & Refined
+- Fixed navigation bar alignment by introducing a 48px brand logo box matching the sidebar activity bar width.
+- Aligned top menu bar items (`File`, `Edit`, ...) directly over the main content area.
+- Removed duplicate 44px logo in the design page left panel, streamlining the configuration header.
+- Re-compiled all 26 LaTeX formula images with tight mathematical cropping, eliminating clipping in Window Function Studio.
+- Removed cluttery secondary property pills and description text in Window Function Studio.
+
+## [3.3.3] - 2026-10-03
+
+### Added & Improved
+- Global premium custom tooltips styled identically to the Sidebar with dark/light themes, rounded corners, fluid animations, and shortcut badge pills.
+- Window Function Studio LaTeX-compiled mathematical formulas with one-click LaTeX source copy and TeX toggle.
+- Dual-domain analysis layout in Window Function Studio (Time Domain $w[n]$ and Frequency Spectrum $|W(\omega)|$ in dB) with interactive cursor inspection.
+- Clean dialog header without redundant close buttons or cluttery subtitles.
+
+## [3.3.2] - 2026-10-03
+
+### Fixed & Improved
+- Fixed Window Function Studio data rendering and redesigned layout with interactive coefficient plots and spectral metrics.
+- Refined navigation bar with clean, symmetric horizontal and vertical spacing.
+- Enhanced dropdown menu structure with improved padding, alignment, and responsive sizing.
+
+## [3.3.1] - 2026-10-03
+
+### Fixed
+- Improved top-level menu spacing and responsive layout.
+
+## [3.3.0] - 2026-10-03
+
+### Added
+- Added the DSP Window Function Studio with 13 standard windows, configurable sampling and normalization, validated parameters, animated coefficient plots, and spectral metrics.
+- Improved the responsive menu bar and added adaptive Omi prompt budgeting with automatic context recovery.
+- Promoted the release version to 3.3.0.
+
+## [3.2.8] - 2026-10-02
+
+### Added & Improved
+- **Chat Assistant Renamed to Omi**:
+  - Rebranded the AI DSP assistant from Shadcy to **Omi** across the application header, sidebar, menus, system prompt, and workspace titles.
+- **Fixed Chat Artifact Layout & Clutter**:
+  - Eliminated text overlapping in `SegmentedButton` by enforcing explicit cell bounds, clipping (`clip: true`), and text eliding (`Text.ElideRight`).
+  - Added sleek card framing (`radius: 12`, border, surface background) to `ChatPlot` with responsive tab sizing.
+- **Fixed Unwanted Filter Comparisons**:
+  - Resolved bug where requesting a specific filter family (e.g., elliptic) automatically injected the current Butterworth filter into the artifact display.
+  - Now only single variants are shown unless the user explicitly asks to compare responses or models multiple designs.
+- **Cleaned Chat Hardcoded Placeholders**:
+  - Removed fictitious model references ("6 Luna High") and hardcoded filter comparisons ("Compare Butterworth vs Chebyshev I").
+  - Provided genuine OpenRouter model choices (`google/gemini-2.0-flash-001`, `anthropic/claude-3.5-sonnet`, `openai/gpt-4o`, `deepseek/deepseek-chat`) and generalized DSP exploration shortcuts.
+
+## [3.2.7] - 2026-10-02
+
+### Improved
+- **Unified Settings UI**:
+  - Restructured the lower half of the Settings page (Updates, AI Assistant, About, Resources & Maintenance) into standardized cards (`radius: 12`, surface color, border, 16px bold section headers) matching the Appearance, Plots, and DSP & Export sections.
+  - Replaced unstyled controls and raw buttons with consistent `StyledButton`, themed `TextInput` fields, and clean hairline separators across all cards.
+  - Consolidated documentation access and uninstall action into a cohesive Resources & Maintenance card.
+
+## [3.2.6] - 2026-10-02
+
+### Added & Improved
+- **Modern Chat Assistant Interface**:
+  - Redesigned Chat prompt container with sleek floating card (`radius: 18`), multiline auto-sizing input field (`TextArea`), and bottom control bar matching modern design standards.
+  - Added attachment context menu (`+`), mode approval selector (`Approve for me`), model selector dropdown (`6 Luna High`, `Claude 3.5 Sonnet`, `Gemini 2.0 Flash`, `GPT-4o`, `DeepSeek`), microphone button, and interactive blue circular send/stop action button.
+  - Implemented request cancellation in C++ `ChatController` via blue stop button.
+- **Fixed Shadcy Theme Logos**:
+  - Reverted/swapped Shadcy assistant icon mappings so white icon is used on dark backgrounds (`theme.isDark`) and black icon is used on light backgrounds (`!theme.isDark`).
+
+## [3.2.5] - 2026-10-02
+
+### Fixed
+- Corrected filter specification normalization and strengthened numerical verification across supported families and topologies.
+- Improved frequency, phase, group-delay, pole-zero, and impulse-response analysis around critical poles and zeros.
+- Synchronized Windows application and installer version metadata.
+
+## [3.2.4] - 2026-10-02
+
+### Fixed
+- Windows setup now installs the executable and deployed Qt runtime in the paths used by shortcuts and the installer launcher.
+- Installer and update status now reports file-copy and system-integration failures instead of claiming success.
+- Installer, updater, and What's New windows follow the app's selected appearance and use the bundled banner.
+- Windows Installed Apps and app version labels use the release version.
+
+### Improved
+- Windows setup opens the installed app from its finish page and keeps custom install-directory support.
+- Installer/update copy and plot-label spacing have been refined.
+
+## [3.2.3] - 2026-10-02
+
+### Added
+- **Native Installation Directory Browser**:
+  - Setup wizard and installer allow browsing and selecting custom installation targets via native system folder picker.
+- **Solid Black Plot Badges & Zero Number Overlap**:
+  - All axis labels (`FrequencyPlot`, `PoleZeroPlot`, `ImpulseStepPlot`, `SignalPlot`) feature solid black (`#000000`) squircle backgrounds with clear margins preventing any overlap with grid tick numbers.
+- **Complete Authentic Codicon Mapping**:
+  - Integrated full 461-glyph Codicon icon font dictionary, eliminating all missing glyph fallbacks across Settings, Updater, and Navigation.
+- **Adaptive Dark / Light Theming**:
+  - Standalone modals and installers dynamically adapt backgrounds, surfaces, and borders to the application's dark/light settings.
+- **Clean Apple-Grade UI Polish**:
+  - Version transition display (`v3.2.2 → v3.2.3`), dynamic button width auto-scaling, and clean minimal copywriting.
+
+---
+
 ## [3.2.2] - 2026-10-02
 
 ### Added

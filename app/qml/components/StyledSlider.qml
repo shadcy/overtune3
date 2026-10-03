@@ -152,8 +152,9 @@ Item {
             }
         }
 
-        ToolTip.visible: valBoxMouse.containsMouse && !valInput.activeFocus
-        ToolTip.text: "Click to enter exact value manually"
-        ToolTip.delay: 350
+        CustomToolTip {
+            visible: valBoxMouse.containsMouse && !valInput.activeFocus
+            text: "Click to enter exact value manually"
+        }
     }
 }

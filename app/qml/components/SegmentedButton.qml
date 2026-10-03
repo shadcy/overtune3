@@ -5,7 +5,7 @@ import QtQuick.Controls
 Item {
     id: root
     implicitHeight: 28
-    implicitWidth: 200
+    implicitWidth: Math.max(200, (root.model ? root.model.length : 1) * 64)
     clip: true
 
     property var model: [] // Array of string ["Tab 1", "Tab 2"] or objects [{label: "...", icon: "..."}]
@@ -65,32 +65,42 @@ Item {
 
                     width: (bg.width - 4) / (root.model.length || 1)
                     height: parent.height
+                    clip: true
 
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: 5
-                        scale: segTap.pressed ? 0.94 : (segHov.hovered ? 1.04 : 1.0)
+                    Codicon {
+                        id: segmentIcon
+                        visible: segItem.segIcon !== ""
+                        icon: segItem.segIcon
+                        iconSize: 13
+                        iconColor: segItem.active ? (theme.isDark ? "#FFFFFF" : theme.accent) : theme.secondaryText
+                        anchors.left: parent.left
+                        anchors.leftMargin: 7
+                        anchors.verticalCenter: parent.verticalCenter
+                        Behavior on iconColor { ColorAnimation { duration: 140 } }
+                    }
+
+                    Text {
+                        anchors.fill: parent
+                        anchors.leftMargin: segItem.segIcon !== "" ? 21 : 4
+                        anchors.rightMargin: 4
+                        text: segItem.segLabel
+                        font.family: theme.bodyFont
+                        font.pixelSize: segItem.segLabel.length > 7 ? 9 : 10
+                        font.weight: segItem.active ? Font.DemiBold : Font.Normal
+                        color: segItem.active ? (theme.isDark ? "#FFFFFF" : theme.primaryText) : theme.secondaryText
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideNone
+                        wrapMode: Text.NoWrap
+                        scale: segTap.pressed ? 0.94 : (segHov.hovered ? 1.02 : 1.0)
                         Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+                        Behavior on color { ColorAnimation { duration: 140 } }
+                    }
 
-                        Codicon {
-                            visible: segItem.segIcon !== ""
-                            icon: segItem.segIcon
-                            iconSize: 13
-                            iconColor: segItem.active ? (theme.isDark ? "#FFFFFF" : theme.accent) : theme.secondaryText
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on iconColor { ColorAnimation { duration: 140 } }
-                        }
-
-                        Text {
-                            text: segItem.segLabel
-                            font.family: "Stack Sans Headline"
-                            font.pixelSize: 11
-                            font.weight: segItem.active ? Font.DemiBold : Font.Normal
-                            color: segItem.active ? (theme.isDark ? "#FFFFFF" : theme.primaryText) : theme.secondaryText
-                            elide: Text.ElideRight
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on color { ColorAnimation { duration: 140 } }
-                        }
+                    CustomToolTip {
+                        visible: segHov.hovered
+                        text: segItem.segLabel
+                        delay: 500
                     }
 
                     HoverHandler {

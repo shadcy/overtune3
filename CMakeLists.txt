@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(FilterDesigner VERSION 3.2.5 LANGUAGES CXX)
+project(FilterDesigner VERSION 3.3.5 LANGUAGES CXX)
 
 include(CTest)
 
@@ -22,6 +22,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #   cmake -DQT_ROOT=/opt/Qt/6.7.0/gcc_64 ..
 if(DEFINED QT_ROOT)
     list(PREPEND CMAKE_PREFIX_PATH "${QT_ROOT}")
+elseif(WIN32 AND EXISTS "C:/Qt/6.7.2/msvc2019_64")
+    list(PREPEND CMAKE_PREFIX_PATH "C:/Qt/6.7.2/msvc2019_64")
 endif()
 
 find_package(Qt6 6.4 COMPONENTS Core Gui Qml Quick QuickControls2 Multimedia Network REQUIRED)

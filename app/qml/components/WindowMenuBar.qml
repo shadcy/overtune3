@@ -5,25 +5,26 @@ import QtQuick.Layouts
 // WindowMenuBar.qml — Native-styled VS Code window titlebar menu
 Rectangle {
     id: root
-    height: 30
-    color: theme.isDark ? "#1E1E1E" : "#F3F3F3"
+    height: 36
+    color: theme.isDark ? "#1E1E20" : "#F5F6F8"
     border.color: theme.borderColor
     border.width: 1
     z: 90
 
     property var rootWindow: null
+    readonly property bool compact: width < 1000
 
     // Component for clean, styled MenuItems with shortcuts and checkmarks
     component StyledMenuItem: MenuItem {
         id: mi
         property string shortcutText: ""
 
-        implicitHeight: 26
+        implicitHeight: 28
         padding: 0
         leftPadding: 8
         rightPadding: 8
-        topPadding: 2
-        bottomPadding: 2
+        topPadding: 0
+        bottomPadding: 0
 
         arrow: Item {
             implicitWidth: 0
@@ -32,12 +33,12 @@ Rectangle {
         }
 
         contentItem: RowLayout {
-            spacing: 6
+            spacing: 8
 
-            // Checkmark indicator or indentation spacing
+            // Checkmark indicator slot
             Item {
-                Layout.preferredWidth: 14
-                Layout.preferredHeight: 14
+                Layout.preferredWidth: 16
+                Layout.preferredHeight: 16
                 visible: mi.checkable
 
                 Codicon {
@@ -65,12 +66,12 @@ Rectangle {
                 font.family: "Stack Sans Headline"
                 font.pixelSize: 11
                 color: theme.secondaryText
-                opacity: 0.7
+                opacity: 0.75
                 visible: mi.shortcutText !== ""
                 verticalAlignment: Text.AlignVCenter
             }
 
-            // Submenu chevron for items that open submenus (the ones with >)
+            // Submenu chevron for items that open submenus
             Codicon {
                 icon: "chevron-right"
                 iconSize: 10
@@ -81,9 +82,9 @@ Rectangle {
         }
 
         background: Rectangle {
-            implicitHeight: 26
-            color: mi.highlighted ? (theme.isDark ? "#32353A" : "#E2E5E9") : "transparent"
-            radius: 4
+            implicitHeight: 28
+            color: mi.highlighted ? (theme.isDark ? "#2C2F36" : "#EBF0F7") : "transparent"
+            radius: 5
         }
 
         HoverHandler {
@@ -93,14 +94,15 @@ Rectangle {
 
     // Component for styled Submenus
     component StyledMenu: Menu {
+        padding: 5
         delegate: MenuItem {
             id: smDelegateItem
-            implicitHeight: 26
+            implicitHeight: 28
             padding: 0
             leftPadding: 8
             rightPadding: 8
-            topPadding: 2
-            bottomPadding: 2
+            topPadding: 0
+            bottomPadding: 0
 
             arrow: Item {
                 implicitWidth: 0
@@ -109,11 +111,11 @@ Rectangle {
             }
 
             contentItem: RowLayout {
-                spacing: 6
+                spacing: 8
 
                 Item {
-                    Layout.preferredWidth: 14
-                    Layout.preferredHeight: 14
+                    Layout.preferredWidth: 16
+                    Layout.preferredHeight: 16
                     visible: smDelegateItem.checkable
 
                     Codicon {
@@ -146,9 +148,9 @@ Rectangle {
             }
 
             background: Rectangle {
-                implicitHeight: 26
-                color: smDelegateItem.highlighted ? (theme.isDark ? "#32353A" : "#E2E5E9") : "transparent"
-                radius: 4
+                implicitHeight: 28
+                color: smDelegateItem.highlighted ? (theme.isDark ? "#2C2F36" : "#EBF0F7") : "transparent"
+                radius: 5
             }
 
             HoverHandler {
@@ -157,11 +159,11 @@ Rectangle {
         }
 
         background: Rectangle {
-            implicitWidth: 240
-            color: theme.isDark ? "#25272B" : "#FFFFFF"
-            border.color: theme.borderColor
+            implicitWidth: 260
+            color: theme.isDark ? "#1E1F24" : "#FFFFFF"
+            border.color: theme.isDark ? "#32353D" : "#D5D9E0"
             border.width: 1
-            radius: 7
+            radius: 8
         }
     }
 
@@ -171,42 +173,66 @@ Rectangle {
         anchors {
             left: parent.left
             leftMargin: 8
+            right: rightCluster.left
+            rightMargin: 12
             verticalCenter: parent.verticalCenter
         }
-        spacing: 4
+        height: parent.height
 
-        // Top Window MenuBar
-        MenuBar {
-            id: mainMenuBar
-            anchors.verticalCenter: parent.verticalCenter
+        Flickable {
+            id: menuScroller
+            width: Math.max(0, parent.width)
+            height: parent.height
+            contentWidth: mainMenuBar.width
+            contentHeight: height
+            clip: true
+            interactive: contentWidth > width
+            flickableDirection: Flickable.HorizontalFlick
+            boundsBehavior: Flickable.StopAtBounds
 
-            background: Rectangle { color: "transparent" }
-
-            delegate: MenuBarItem {
-                id: mbi
-                contentItem: Text {
-                    text: mbi.text
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 12
-                    font.weight: Font.Normal
-                    color: mbi.highlighted ? theme.primaryText : (theme.isDark ? "#CCCCCC" : "#4B5563")
-                    verticalAlignment: Text.AlignVCenter
-                    horizontalAlignment: Text.AlignHCenter
-                }
-                background: Rectangle {
-                    color: mbi.highlighted ? (theme.isDark ? "#32353A" : "#E2E5E9") : (mbi.hovered ? (theme.isDark ? "#282B30" : "#EAEDF1") : "transparent")
-                    radius: 4
-                }
-                padding: 0
-                leftPadding: 7
-                rightPadding: 7
-                topPadding: 3
-                bottomPadding: 3
-
-                HoverHandler {
-                    cursorShape: Qt.PointingHandCursor
-                }
+            ScrollBar.horizontal: ScrollBar {
+                policy: menuScroller.contentWidth > menuScroller.width ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                height: 2
             }
+
+            // The complete menu set remains reachable by horizontal scrolling when compressed.
+            MenuBar {
+                id: mainMenuBar
+                width: Math.max(menuScroller.width, implicitWidth)
+                height: menuScroller.height
+                anchors.verticalCenter: parent.verticalCenter
+
+                background: Rectangle { color: "transparent" }
+
+                delegate: MenuBarItem {
+                    id: mbi
+                    implicitHeight: 28
+                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                    contentItem: Text {
+                        text: mbi.text
+                        font.family: "Stack Sans Headline"
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                        color: mbi.highlighted ? theme.primaryText : (mbi.hovered ? theme.primaryText : (theme.isDark ? "#D0D3D8" : "#4B5563"))
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    background: Rectangle {
+                        implicitHeight: 28
+                        color: mbi.highlighted ? (theme.isDark ? "#353840" : "#DDE1E8") : (mbi.hovered ? (theme.isDark ? "#2A2D33" : "#E6E9EE") : "transparent")
+                        radius: 6
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                    }
+                    padding: 0
+                    leftPadding: root.compact ? 8 : 11
+                    rightPadding: root.compact ? 8 : 11
+                    topPadding: 0
+                    bottomPadding: 0
+
+                    HoverHandler {
+                        cursorShape: Qt.PointingHandCursor
+                    }
+                }
 
             // ── 1. FILE MENU ──────────────────────────────────────────────────────────
             StyledMenu {
@@ -638,9 +664,24 @@ Rectangle {
                 }
 
                 StyledMenuItem {
-                    text: "Workspace Settings"
+                    text: "Omi"
                     shortcutText: "Ctrl+6"
                     onTriggered: { rootWindow.navigateTo(5); rootWindow.showTabName(); }
+                }
+
+                StyledMenuItem {
+                    text: "Workspace Settings"
+                    shortcutText: "Ctrl+7"
+                    onTriggered: { rootWindow.navigateTo(6); rootWindow.showTabName(); }
+                }
+
+                StyledMenuItem {
+                    text: "DSP Window Function Studio..."
+                    onTriggered: {
+                        if (rootWindow && typeof rootWindow.openWindowingStudio === "function") {
+                            rootWindow.openWindowingStudio()
+                        }
+                    }
                 }
 
                 MenuSeparator {}
@@ -1007,25 +1048,16 @@ Rectangle {
                     }
                 }
             }
+            }
         }
-    }
-
-    // Center cluster: Subtle status bar showing active filter & sample rate
-    Text {
-        anchors.centerIn: parent
-        text: "Overtune 3  —  " + filterEngine.filterResponseName() + " " + filterEngine.order + "th-Order " + filterEngine.filterTypeName() + " (" + (filterEngine.sampleRate / 1000).toFixed(1) + " kHz)"
-        font.family: "Stack Sans Headline"
-        font.pixelSize: 11
-        color: theme.secondaryText
-        opacity: 0.85
-        visible: parent.width > 720
     }
 
     // Right cluster: Auto-Scale Quick Button + Theme Switcher
     Row {
+        id: rightCluster
         anchors {
             right: parent.right
-            rightMargin: 8
+            rightMargin: 12
             verticalCenter: parent.verticalCenter
         }
         spacing: 6
@@ -1034,8 +1066,9 @@ Rectangle {
         Rectangle {
             id: updateBtn
             visible: updateInstaller.hasUpdate
-            height: 22
-            implicitWidth: updateRow.implicitWidth + 14
+            width: root.compact ? 26 : updateRow.implicitWidth + 16
+            height: 26
+            implicitWidth: updateRow.implicitWidth + 16
             radius: 6
             color: updateMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : Qt.darker(theme.accent, 1.3)
             border.color: theme.accent
@@ -1050,7 +1083,7 @@ Rectangle {
 
                 Codicon {
                     icon: updateInstaller.hasUpdate ? "cloud-download" : "package"
-                    iconSize: 11
+                    iconSize: 12
                     iconColor: updateInstaller.hasUpdate ? theme.accent : theme.secondaryText
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -1062,12 +1095,14 @@ Rectangle {
                     font.weight: Font.DemiBold
                     color: updateInstaller.hasUpdate ? "#FFFFFF" : theme.secondaryText
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: !root.compact
                 }
             }
 
-            ToolTip.visible: updateMouse.containsMouse
-            ToolTip.text: updateInstaller.hasUpdate ? "Update v" + updateInstaller.latestVersion + " is available!" : "Open Installer & Update Manager"
-            ToolTip.delay: 350
+            CustomToolTip {
+                visible: updateMouse.containsMouse
+                text: updateInstaller.hasUpdate ? "Update v" + updateInstaller.latestVersion + " is available!" : "Open Installer & Update Manager"
+            }
 
             MouseArea {
                 id: updateMouse
@@ -1085,8 +1120,9 @@ Rectangle {
         // Accent-colored squircle "What's New" button
         Rectangle {
             id: whatsNewBtn
-            height: 22
-            implicitWidth: whatsNewRow.implicitWidth + 14
+            width: root.compact ? 26 : whatsNewRow.implicitWidth + 16
+            height: 26
+            implicitWidth: whatsNewRow.implicitWidth + 16
             radius: 6
             color: whatsNewMouse.containsMouse ? Qt.darker(theme.accent, 1.15) : theme.accent
             anchors.verticalCenter: parent.verticalCenter
@@ -1099,7 +1135,7 @@ Rectangle {
 
                 Codicon {
                     icon: "info"
-                    iconSize: 11
+                    iconSize: 12
                     iconColor: "#FFFFFF"
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -1111,13 +1147,14 @@ Rectangle {
                     font.weight: Font.DemiBold
                     color: "#FFFFFF"
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: !root.compact
                 }
             }
 
-
-            ToolTip.visible: whatsNewMouse.containsMouse
-            ToolTip.text: "See What's New in Overtune 3"
-            ToolTip.delay: 350
+            CustomToolTip {
+                visible: whatsNewMouse.containsMouse
+                text: "See What's New in Overtune 3"
+            }
 
             MouseArea {
                 id: whatsNewMouse
@@ -1134,21 +1171,25 @@ Rectangle {
 
         // Auto Scale / Fit View quick button
         Rectangle {
-            width: 24
-            height: 22
-            radius: 4
+            width: 28
+            height: 26
+            radius: 6
+            Accessible.role: Accessible.Button
+            Accessible.name: "Auto scale plot"
             color: fitTopMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : "transparent"
+            anchors.verticalCenter: parent.verticalCenter
 
             Codicon {
                 anchors.centerIn: parent
                 icon: "screen-full"
-                iconSize: 12
+                iconSize: 13
                 iconColor: fitTopMouse.containsMouse ? theme.primaryText : theme.secondaryText
             }
 
-            ToolTip.visible: fitTopMouse.containsMouse
-            ToolTip.text: "Auto Scale / Fit View (Ctrl+0)"
-            ToolTip.delay: 350
+            CustomToolTip {
+                visible: fitTopMouse.containsMouse
+                text: "Auto Scale / Fit View (Ctrl+0)"
+            }
 
             MouseArea {
                 id: fitTopMouse
@@ -1161,10 +1202,13 @@ Rectangle {
 
         // Quick Theme Toggle Button
         Rectangle {
-            width: 24
-            height: 22
-            radius: 4
+            width: 28
+            height: 26
+            radius: 6
+            Accessible.role: Accessible.Button
+            Accessible.name: "Toggle color theme"
             color: themeTopMouse.containsMouse ? (theme.isDark ? "#32353A" : "#E2E5E9") : "transparent"
+            anchors.verticalCenter: parent.verticalCenter
 
             Codicon {
                 anchors.centerIn: parent
@@ -1173,9 +1217,10 @@ Rectangle {
                 iconColor: themeTopMouse.containsMouse ? theme.primaryText : theme.secondaryText
             }
 
-            ToolTip.visible: themeTopMouse.containsMouse
-            ToolTip.text: "Switch to " + (theme.isDark ? "Light" : "Dark") + " Theme (Ctrl+T)"
-            ToolTip.delay: 350
+            CustomToolTip {
+                visible: themeTopMouse.containsMouse
+                text: "Switch to " + (theme.isDark ? "Light" : "Dark") + " Theme (Ctrl+T)"
+            }
 
             MouseArea {
                 id: themeTopMouse

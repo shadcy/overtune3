@@ -25,6 +25,8 @@ Window {
     palette.highlight:       theme.accent
     palette.highlightedText: "#FFFFFF"
     palette.mid:             theme.borderColor
+    palette.toolTipBase:     theme.isDark ? "#222225" : "#FFFFFF"
+    palette.toolTipText:     theme.isDark ? "#FFFFFF" : "#1D1D1F"
 
     readonly property bool isNarrow: width < 820
     readonly property bool isCompact: width < 1100
@@ -43,18 +45,18 @@ Window {
         codiconFont.status === FontLoader.Ready
 
     function navigateTo(pageIndex) {
-        const n = Math.max(0, Math.min(5, pageIndex | 0))
+        const n = Math.max(0, Math.min(6, pageIndex | 0))
         if (sidebar.currentPage !== n)
             sidebar.currentPage = n
     }
 
     function nextTab() {
-        navigateTo((sidebar.currentPage + 1) % 6)
+        navigateTo((sidebar.currentPage + 1) % 7)
         showTabName()
     }
 
     function prevTab() {
-        navigateTo((sidebar.currentPage + 5) % 6)
+        navigateTo((sidebar.currentPage + 6) % 7)
         showTabName()
     }
 
@@ -65,6 +67,7 @@ Window {
             "Signal Simulation Studio",
             "Production Code Exporter",
             "Documentation & Theory",
+            "Omi",
             "Workspace Settings"
         ]
         showNotification("Workspace: " + names[sidebar.currentPage], false)
@@ -238,14 +241,15 @@ Window {
         onActivated: root.prevTab()
     }
 
-    // Direct Tab Select Shortcuts (Ctrl+1 .. Ctrl+6)
+    // Direct Tab Select Shortcuts (Ctrl+1 .. Ctrl+7)
     Shortcut { sequence: "Ctrl+1"; onActivated: { root.navigateTo(0); root.showTabName(); } }
     Shortcut { sequence: "Ctrl+2"; onActivated: { root.navigateTo(1); root.showTabName(); } }
     Shortcut { sequence: "Ctrl+3"; onActivated: { root.navigateTo(2); root.showTabName(); } }
     Shortcut { sequence: "Ctrl+4"; onActivated: { root.navigateTo(3); root.showTabName(); } }
     Shortcut { sequence: "Ctrl+5"; onActivated: { root.navigateTo(4); root.showTabName(); } }
     Shortcut { sequence: "Ctrl+6"; onActivated: { root.navigateTo(5); root.showTabName(); } }
-    Shortcut { sequence: "Ctrl+,"; onActivated: { root.navigateTo(5); root.showTabName(); } }
+    Shortcut { sequence: "Ctrl+7"; onActivated: { root.navigateTo(6); root.showTabName(); } }
+    Shortcut { sequence: "Ctrl+,"; onActivated: { root.navigateTo(6); root.showTabName(); } }
 
     // Plot Sub-tab Shortcuts on Design Studio (Alt+1: Magnitude, Alt+2: Phase, Alt+3: Group Delay)
     Shortcut {
@@ -324,20 +328,10 @@ Window {
         opacity: root.fontsReady ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        WindowMenuBar {
-            id: windowMenuBar
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
-            rootWindow: root
-        }
-
         Sidebar {
             id: sidebar
             anchors {
-                top: windowMenuBar.bottom
+                top: parent.top
                 left: parent.left
                 bottom: parent.bottom
             }
@@ -349,6 +343,16 @@ Window {
                 if (currentPage === 3)
                     exportModel.generate(filterEngine)
             }
+        }
+
+        WindowMenuBar {
+            id: windowMenuBar
+            anchors {
+                top: parent.top
+                left: sidebar.right
+                right: parent.right
+            }
+            rootWindow: root
         }
 
         Item {
@@ -397,6 +401,7 @@ Window {
                 SimulationPage { id: simulationPage; Layout.fillWidth: true; Layout.fillHeight: true }
                 ExportPage     { id: exportPage;     Layout.fillWidth: true; Layout.fillHeight: true }
                 DocsPage       { id: docsPage;       Layout.fillWidth: true; Layout.fillHeight: true }
+                ChatPage       { id: chatPage;       Layout.fillWidth: true; Layout.fillHeight: true }
                 SettingsPage   { id: settingsPage;   Layout.fillWidth: true; Layout.fillHeight: true }
             }
         }
@@ -412,6 +417,12 @@ Window {
 
     function checkUpdatesNow() {
         installerUpdaterWindow.checkUpdatesNow()
+    }
+
+    function openWindowingStudio() {
+        if (designPage && typeof designPage.openWindowingStudio === "function") {
+            designPage.openWindowingStudio()
+        }
     }
 
     WhatsNewWindow {

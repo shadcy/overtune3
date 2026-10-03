@@ -610,7 +610,14 @@ void UpdateInstallerEngine::restartApplication() {
         targetApp = installedBin;
     }
 
-    QProcess::startDetached(targetApp, QStringList());
+    if (!QFileInfo::exists(targetApp)) {
+        emit updateError(QStringLiteral("The installed application was not found: %1").arg(targetApp));
+        return;
+    }
+    if (!QProcess::startDetached(targetApp, QStringList(), QFileInfo(targetApp).absolutePath())) {
+        emit updateError(QStringLiteral("Windows could not start Overtune from: %1").arg(targetApp));
+        return;
+    }
     QCoreApplication::quit();
 }
 

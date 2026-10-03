@@ -216,9 +216,10 @@ Item {
                                             visible: theme.accentColorIndex === modelData.idx
                                         }
 
-                                        ToolTip.visible: sm.containsMouse
-                                        ToolTip.text: modelData.name
-                                        ToolTip.delay: 300
+                                        CustomToolTip {
+                                            visible: sm.containsMouse
+                                            text: modelData.name
+                                        }
 
                                         MouseArea {
                                             id: sm
@@ -461,14 +462,17 @@ Item {
                 // ── Installation & Updates ─────────────────────────────────────
                 Rectangle {
                     width: parent.width
-                    implicitHeight: updateCardCol.implicitHeight + 14
+                    implicitHeight: updateCardCol.implicitHeight + 16
+                    height: implicitHeight
                     radius: 12
-                    color: "transparent"
-                    border.width: 0
+                    color: theme.surface
+                    border.color: theme.borderColor
+                    border.width: 1
+                    clip: true
 
                     Column {
                         id: updateCardCol
-                        width: parent.width
+                        anchors { fill: parent; margins: 0 }
                         spacing: 0
 
                         Text {
@@ -491,7 +495,7 @@ Item {
                                     spacing: 2
                                     Text {
                                         text: "Overtune 3 · v" + updateInstaller.currentVersion
-                                        font.family: theme.headlineFont; font.pixelSize: 14
+                                        font.family: theme.headlineFont; font.pixelSize: 13
                                         font.weight: Font.DemiBold; color: theme.primaryText
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
@@ -502,7 +506,7 @@ Item {
                                               : "Up to date"
                                         font.family: theme.bodyFont
                                         font.pixelSize: 12
-                                        color: updateInstaller.hasUpdate ? theme.accent : theme.primaryText
+                                        color: updateInstaller.hasUpdate ? theme.accent : theme.secondaryText
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
                                     }
@@ -540,7 +544,7 @@ Item {
                                     spacing: 2
                                     Text {
                                         text: "System Installation"
-                                        font.family: theme.headlineFont; font.pixelSize: 14
+                                        font.family: theme.headlineFont; font.pixelSize: 13
                                         font.weight: Font.DemiBold; color: theme.primaryText
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
@@ -549,7 +553,7 @@ Item {
                                         text: updateInstaller.installPath
                                         font.family: theme.bodyFont
                                         font.pixelSize: 12
-                                        color: theme.primaryText
+                                        color: theme.secondaryText
                                         elide: Text.ElideMiddle
                                     }
                                 }
@@ -567,10 +571,173 @@ Item {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
 
+                // ── AI Provider ───────────────────────────────────────────────
+                Rectangle {
+                    width: parent.width
+                    implicitHeight: aiColumn.implicitHeight + 16
+                    height: implicitHeight
+                    radius: 12
+                    color: theme.surface
+                    border.color: theme.borderColor
+                    border.width: 1
+                    clip: true
+
+                    Column {
+                        id: aiColumn
+                        anchors { fill: parent; margins: 0 }
+                        spacing: 0
+
+                        // Section header row with status on right
+                        Item {
+                            width: parent.width; height: 44
+                            Text {
+                                anchors { left: parent.left; leftMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: "AI Assistant"
+                                font.family: theme.headlineFont
+                                font.pixelSize: 16; font.weight: Font.DemiBold
+                                color: theme.primaryText
+                            }
+                            Text {
+                                anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: chat.apiKeyConfigured ? "Connected" : "Not connected"
+                                color: chat.apiKeyConfigured ? theme.accent : theme.secondaryText
+                                font.family: theme.bodyFont
+                                font.pixelSize: 12
+                                font.weight: Font.Medium
+                            }
                             Rectangle {
                                 anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 16 }
                                 height: 1; color: theme.borderColor; opacity: 0.5
+                            }
+                        }
+
+                        // Model ID row
+                        Item {
+                            width: parent.width; height: 50
+                            Text {
+                                id: modelLabel
+                                anchors { left: parent.left; leftMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: "Model ID"
+                                font.family: "Stack Sans Headline"; font.pixelSize: 13
+                                color: theme.primaryText
+                            }
+                            Rectangle {
+                                anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter; left: modelLabel.right; leftMargin: 16 }
+                                height: 32
+                                radius: 6
+                                color: theme.background
+                                border.color: openRouterModel.activeFocus ? theme.accent : theme.borderColor
+                                border.width: 1
+
+                                TextInput {
+                                    id: openRouterModel
+                                    anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                                    verticalAlignment: TextInput.AlignVCenter
+                                    text: chat.modelName
+                                    color: theme.primaryText
+                                    selectedTextColor: "#FFFFFF"
+                                    selectionColor: theme.accent
+                                    font.family: "Stack Sans Headline"
+                                    font.pixelSize: 13
+                                    selectByMouse: true
+                                    onEditingFinished: chat.modelName = text
+                                    Text {
+                                        visible: !openRouterModel.text.length && !openRouterModel.activeFocus
+                                        text: "e.g. anthropic/claude-3.5-sonnet"
+                                        color: theme.secondaryText
+                                        font: openRouterModel.font
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+                            }
+                            Rectangle {
+                                anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 16 }
+                                height: 1; color: theme.borderColor; opacity: 0.5
+                            }
+                        }
+
+                        // API Key row
+                        Item {
+                            width: parent.width; height: 54
+                            Text {
+                                id: keyLabel
+                                anchors { left: parent.left; leftMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: "API Key"
+                                font.family: "Stack Sans Headline"; font.pixelSize: 13
+                                color: theme.primaryText
+                            }
+                            RowLayout {
+                                anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter; left: keyLabel.right; leftMargin: 16 }
+                                spacing: 8
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 32
+                                    radius: 6
+                                    color: theme.background
+                                    border.color: openRouterKey.activeFocus ? theme.accent : theme.borderColor
+                                    border.width: 1
+
+                                    TextInput {
+                                        id: openRouterKey
+                                        anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        echoMode: TextInput.Password
+                                        color: theme.primaryText
+                                        selectedTextColor: "#FFFFFF"
+                                        selectionColor: theme.accent
+                                        font.family: "Stack Sans Headline"
+                                        font.pixelSize: 13
+                                        selectByMouse: true
+                                        Text {
+                                            visible: !openRouterKey.text.length && !openRouterKey.activeFocus
+                                            text: chat.apiKeyConfigured ? "Key stored securely" : "Paste OpenRouter API key"
+                                            color: theme.secondaryText
+                                            font: openRouterKey.font
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+                                }
+
+                                StyledButton {
+                                    text: "Save"
+                                    primary: true
+                                    implicitWidth: 64
+                                    implicitHeight: 32
+                                    enabled: openRouterKey.text.trim().length > 0
+                                    onClicked: {
+                                        chat.saveApiKey(openRouterKey.text)
+                                        openRouterKey.clear()
+                                    }
+                                }
+
+                                StyledButton {
+                                    text: "Clear"
+                                    primary: false
+                                    implicitWidth: 64
+                                    implicitHeight: 32
+                                    enabled: chat.apiKeyConfigured
+                                    onClicked: chat.clearApiKey()
+                                }
+                            }
+                        }
+
+                        // Footer hint
+                        Item {
+                            width: parent.width; height: 32
+                            Text {
+                                anchors { left: parent.left; leftMargin: 16; right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: Qt.platform.os === "windows"
+                                      ? "Key is protected using Windows DPAPI encryption. Requests connect directly to OpenRouter."
+                                      : "Key is stored for this session. Requests connect directly to OpenRouter."
+                                color: theme.secondaryText
+                                font.family: theme.bodyFont
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
                             }
                         }
                     }
@@ -579,14 +746,17 @@ Item {
                 // ── About ─────────────────────────────────────────────────────
                 Rectangle {
                     width: parent.width
-                    implicitHeight: aboutCol2.implicitHeight + 14
+                    implicitHeight: aboutCol2.implicitHeight + 16
+                    height: implicitHeight
                     radius: 12
-                    color: "transparent"
-                    border.width: 0
+                    color: theme.surface
+                    border.color: theme.borderColor
+                    border.width: 1
+                    clip: true
 
                     Column {
                         id: aboutCol2
-                        width: parent.width
+                        anchors { fill: parent; margins: 0 }
                         spacing: 0
 
                         Text {
@@ -600,23 +770,23 @@ Item {
                         Repeater {
                             model: [
                                 { label: "Application", value: "Overtune 3" },
-                                { label: "Version", value: updateInstaller.currentVersion }
+                                { label: "Version", value: "v" + updateInstaller.currentVersion }
                             ]
                             delegate: Item {
-                                width: parent.width; height: 40
+                                width: parent.width; height: 44
                                 Text {
                                     id: aboutLabel
                                     anchors { left: parent.left; leftMargin: 16; verticalCenter: parent.verticalCenter }
                                     text: modelData.label
-                                    font.family: theme.headlineFont; font.pixelSize: 14
+                                    font.family: "Stack Sans Headline"; font.pixelSize: 13
                                     color: theme.primaryText
                                 }
                                 Text {
                                     anchors { left: aboutLabel.right; leftMargin: 12; right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
                                     text: modelData.value
-                                    font.family: theme.bodyFont; font.pixelSize: 14
+                                    font.family: theme.bodyFont; font.pixelSize: 13
                                     font.weight: Font.Medium
-                                    color: theme.primaryText
+                                    color: theme.secondaryText
                                     horizontalAlignment: Text.AlignRight
                                     elide: Text.ElideLeft
                                 }
@@ -630,94 +800,85 @@ Item {
                     }
                 }
 
-                // ── System Integration & Uninstall Card ──────────────────────
+                // ── Maintenance & Resources ──────────────────────────────────
                 Rectangle {
                     width: parent.width
-                    implicitHeight: maintCol.implicitHeight + 24
+                    implicitHeight: maintCol.implicitHeight + 16
+                    height: implicitHeight
                     radius: 12
-                    color: "transparent"
-                    border.width: 0
+                    color: theme.surface
+                    border.color: theme.borderColor
+                    border.width: 1
+                    clip: true
 
                     Column {
                         id: maintCol
-                        width: parent.width - 32
-                        x: 16
-                        y: 14
-                        spacing: 12
+                        anchors { fill: parent; margins: 0 }
+                        spacing: 0
 
                         Text {
-                        text: "Uninstall"
-                        font.family: theme.headlineFont
-                        font.pixelSize: 16
-                        font.weight: Font.DemiBold
-                        color: theme.primaryText
+                            x: 16; topPadding: 16; bottomPadding: 10
+                            text: "Resources & Maintenance"
+                            font.family: theme.headlineFont
+                            font.pixelSize: 16; font.weight: Font.DemiBold
+                            color: theme.primaryText
                         }
 
-                        RowLayout {
-                            width: parent.width
-                            spacing: 12
-
-                            Column {
-                                Layout.fillWidth: true
-                                spacing: 0
-
-                                Text {
-                                    text: "Remove the app and its shortcuts"
-                                    font.family: theme.headlineFont
-                                    font.pixelSize: 14
-                                    font.weight: Font.DemiBold
-                                    color: theme.primaryText
-                                }
-
+                        // Documentation Row
+                        Item {
+                            width: parent.width; height: 50
+                            Text {
+                                anchors { left: parent.left; leftMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: "DSP Theory & Documentation"
+                                font.family: "Stack Sans Headline"; font.pixelSize: 13
+                                color: theme.primaryText
                             }
-
+                            StyledButton {
+                                anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
+                                text: "Open"; primary: true
+                                implicitWidth: 84; implicitHeight: 30
+                                onClicked: root.openDocs()
+                            }
                             Rectangle {
-                                implicitWidth: 88
-                                implicitHeight: 30
-                                radius: 7
-                                color: uninsBtnMouse.pressed ? Qt.darker(theme.danger, 1.2) : (uninsBtnMouse.containsMouse ? Qt.lighter(theme.danger, 1.08) : theme.danger)
+                                anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 16 }
+                                height: 1; color: theme.borderColor; opacity: 0.5
+                            }
+                        }
 
-                                Row {
-                                    anchors.centerIn: parent
-                                    spacing: 0
+                        // Uninstall Row
+                        Item {
+                            width: parent.width; height: 50
+                            RowLayout {
+                                anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
+                                spacing: 12
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 2
                                     Text {
-                                        text: "Uninstall"
-                                        font.family: "Stack Sans Headline"
-                                        font.pixelSize: 12
-                                        font.weight: Font.Bold
-                                        color: "#FFFFFF"
-                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "Uninstall Overtune 3"
+                                        font.family: "Stack Sans Headline"; font.pixelSize: 13
+                                        color: theme.primaryText
+                                        Layout.fillWidth: true
+                                    }
+                                    Text {
+                                        text: "Remove application and desktop shortcuts"
+                                        font.family: theme.bodyFont; font.pixelSize: 12
+                                        color: theme.secondaryText
+                                        Layout.fillWidth: true
                                     }
                                 }
 
-                                MouseArea {
-                                    id: uninsBtnMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
+                                StyledButton {
+                                    text: "Uninstall"
+                                    primary: false
+                                    danger: true
+                                    implicitWidth: 84
+                                    implicitHeight: 30
                                     onClicked: settingsUninsDialog.open()
                                 }
                             }
                         }
-                    }
-                }
-
-                // ── Documentation ────────────────────────────────────────────
-                Item {
-                    width: parent.width; height: 48
-                    Text {
-                        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                        text: "DSP Theory & Tutorials"
-                        font.family: theme.headlineFont; font.pixelSize: 14
-                        font.weight: Font.DemiBold; color: theme.primaryText
-                        elide: Text.ElideRight
-                    }
-                    StyledButton {
-                        id: openBtn
-                        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-                        text: "Open"; primary: true
-                        implicitWidth: 72; implicitHeight: 30
-                        onClicked: root.openDocs()
                     }
                 }
 

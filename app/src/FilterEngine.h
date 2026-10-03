@@ -2,8 +2,10 @@
 #include "dsp/FilterAnalysis.h"
 #include "dsp/FilterCoefficients.h"
 #include "dsp/FilterSpec.h"
+#include "dsp/WindowFunctions.h"
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -88,6 +90,14 @@ public:
   Q_INVOKABLE QString exportCode(int format); // 0=C, 1=C++, 2=Python, 3=JSON
   Q_INVOKABLE QString filterTypeName() const;
   Q_INVOKABLE QString filterResponseName() const;
+  Q_INVOKABLE QString analysisArtifactsJson(int maxPoints = 512) const;
+  Q_INVOKABLE QString analyzeVariantJson(int order, const QString &response,
+                                         int maxPoints = 512) const;
+  Q_INVOKABLE QStringList windowNames() const;
+  Q_INVOKABLE QVariantMap computeWindow(const QString &name, int length,
+                                        bool periodic, double kaiserBeta,
+                                        double tukeyAlpha, double gaussianSigma,
+                                        int normalization) const;
 
   // Reset filter parameters to defaults
   Q_INVOKABLE void reset();
@@ -139,6 +149,7 @@ private:
   QTimer m_debounceTimer;
   dsp::FilterSpec m_spec;
   dsp::FilterCoefficients m_coeff;
+  dsp::AnalysisResult m_lastAnalysis;
   bool m_hasResults{false};
 
   QVariantList m_magnitudeData;

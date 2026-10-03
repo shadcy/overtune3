@@ -1,6 +1,8 @@
 #include "FilterEngine.h"
 #include "dsp/CodeExporter.h"
 #include "dsp/FilterDesigner.h"
+#include "dsp/FilterAnalysis.h"
+#include "dsp/WindowFunctions.h"
 #include <QClipboard>
 #include <QDebug>
 #include <QDir>
@@ -18,6 +20,99 @@
 #include <stdexcept>
 #include <QUrl>
 #include <QDateTime>
+#include <QMap>
+#include <algorithm>
+
+static QJsonObject makeAnalysisArtifact(const dsp::FilterSpec &spec,
+                                       const dsp::FilterCoefficients &coeff,
+                                       const dsp::AnalysisResult &analysis,
+                                       int maxPoints) {
+  QJsonObject root;
+  root["schema"] = "overtune.filter-analysis.v1";
+  QJsonObject specification;
+  specification["type"] = QString::fromStdString(spec.typeName());
+  specification["response"] = QString::fromStdString(spec.responseName());
+  specification["order"] = spec.order;
+  specification["sampleRateHz"] = spec.sampleRate;
+  specification["cutoff1Hz"] = spec.cutoffFreq;
+  specification["cutoff2Hz"] = spec.cutoffFreq2;
+  specification["passbandRippleDb"] = spec.rippleDb;
+  specification["stopbandAttenuationDb"] = spec.stopbandDb;
+  root["specification"] = specification;
+
+  QJsonObject transfer;
+  transfer["form"] = "digital SOS; H(z) = gain * product(B_i(z)/A_i(z))";
+  transfer["gain"] = coeff.gain;
+  QJsonArray sections;
+  for (const auto &s : coeff.sos) {
+    sections.append(QJsonArray{s.b0, s.b1, s.b2, s.a0, s.a1, s.a2});
+  }
+  transfer["sos"] = sections;
+  root["transferFunction"] = transfer;
+
+  auto complexArray = [](const dsp::ComplexVec &values) {
+    QJsonArray result;
+    for (const auto &v : values) result.append(QJsonArray{v.real(), v.imag()});
+    return result;
+  };
+  QJsonObject roots;
+  roots["representation"] = "[real, imaginary] pairs; z-plane units";
+  roots["poles"] = complexArray(analysis.poles);
+  roots["zeros"] = complexArray(analysis.zeros);
+  root["roots"] = roots;
+
+  QJsonObject frequency;
+  frequency["columns"] = QJsonArray{"frequencyHz", "magnitudeDb", "phaseDeg", "groupDelaySamples"};
+  QJsonArray points;
+  const int count = static_cast<int>(analysis.frequencyResponse.size());
+  const int kept = std::min(count, maxPoints);
+  for (int i = 0; i < kept; ++i) {
+    const int index = kept == 1 ? 0 : static_cast<int>((static_cast<long long>(i) * (count - 1)) / (kept - 1));
+    const auto &p = analysis.frequencyResponse[static_cast<size_t>(index)];
+    points.append(QJsonArray{p.frequency, p.magnitude, p.phase, p.groupDelay});
+  }
+  frequency["sourcePointCount"] = count;
+  frequency["sampling"] = "Log-spaced with cutoff and pole/zero neighborhood clustering; returned points retain source-grid index order.";
+  frequency["points"] = points;
+  root["frequencyResponse"] = frequency;
+
+  auto timeSeries = [](const std::vector<double> &values, int maxPoints) {
+    QJsonArray result;
+    const int count = static_cast<int>(values.size());
+    const int kept = std::min(count, maxPoints);
+    for (int i = 0; i < kept; ++i) {
+      const int index = kept == 1 ? 0 : static_cast<int>(
+          (static_cast<long long>(i) * (count - 1)) / (kept - 1));
+      result.append(QJsonArray{index, values[static_cast<size_t>(index)]});
+    }
+    return result;
+  };
+  QJsonObject time;
+  time["sampleIndexAndValue"] = true;
+  time["impulseSourcePointCount"] = static_cast<int>(analysis.impulseResponse.size());
+  time["stepSourcePointCount"] = static_cast<int>(analysis.stepResponse.size());
+  time["sampling"] = "Uniformly decimated; each point retains its original sample index.";
+  time["impulse"] = timeSeries(analysis.impulseResponse, maxPoints);
+  time["step"] = timeSeries(analysis.stepResponse, maxPoints);
+  root["timeResponse"] = time;
+
+  const auto verification = dsp::FilterAnalysis::verify(spec, coeff, analysis);
+  QJsonObject checks;
+  checks["passed"] = verification.passed;
+  checks["referenceModelVerified"] = verification.referenceModelVerified;
+  checks["specificationMet"] = verification.specificationOk;
+  checks["stable"] = verification.poleUnitCircleOk && verification.biboStabilityOk;
+  checks["maxPoleRadius"] = verification.maxPoleRadius;
+  checks["stabilityMargin"] = verification.stabilityMargin;
+  checks["maxMagnitudeErrorDb"] = verification.maxPointMagnitudeErrorDb;
+  checks["maxPhaseErrorDeg"] = verification.maxPointPhaseErrorDeg;
+  checks["maxGroupDelayRelativeError"] = verification.maxGroupDelayRelativeError;
+  checks["maxSpecificationErrorDb"] = verification.maxSpecificationErrorDb;
+  checks["maxImpulseError"] = verification.maxImpulseError;
+  checks["summary"] = QString::fromStdString(verification.summary);
+  root["verification"] = checks;
+  return root;
+}
 
 static QString presetsFilePath() {
   QString dir =
@@ -181,15 +276,92 @@ QVariantMap FilterEngine::verifyDesign() {
 void FilterEngine::designInternal() {
   try {
     m_coeff = dsp::designFilter(m_spec);
-    auto result = dsp::FilterAnalysis::compute(
+    m_lastAnalysis = dsp::FilterAnalysis::compute(
         m_coeff, m_spec.sampleRate, 3072, m_spec.cutoffFreq, m_spec.cutoffFreq2);
     m_hasResults = true;
-    publishResults(result);
+    publishResults(m_lastAnalysis);
     emit resultsChanged();
   } catch (const std::exception &e) {
     m_hasResults = false;
+    m_lastAnalysis = {};
     qWarning() << "[FilterEngine] designInternal() failed:" << e.what();
     emit errorOccurred(QString::fromStdString(e.what()));
+  }
+}
+
+QStringList FilterEngine::windowNames() const {
+  QStringList result;
+  for (const auto &name : dsp::WindowFunctions::names())
+    result.append(QString::fromStdString(name));
+  return result;
+}
+
+QVariantMap FilterEngine::computeWindow(const QString &name, int length,
+                                        bool periodic, double kaiserBeta,
+                                        double tukeyAlpha, double gaussianSigma,
+                                        int normalization) const {
+  QVariantMap result;
+  try {
+    if (normalization < 0 || normalization > 3)
+      throw std::invalid_argument("Unknown window normalization mode.");
+    dsp::WindowSpec spec;
+    spec.name = name.toStdString();
+    spec.length = length;
+    spec.periodic = periodic;
+    spec.kaiserBeta = kaiserBeta;
+    spec.tukeyAlpha = tukeyAlpha;
+    spec.gaussianSigma = gaussianSigma;
+    spec.normalization = static_cast<dsp::WindowNormalization>(normalization);
+    const auto window = dsp::WindowFunctions::generate(spec);
+    QVariantList coefficients;
+    coefficients.reserve(static_cast<qsizetype>(window.coefficients.size()));
+    for (double value : window.coefficients)
+      coefficients.append(value);
+    result[QStringLiteral("coefficients")] = coefficients;
+    result[QStringLiteral("sum")] = window.sum;
+    result[QStringLiteral("energy")] = window.energy;
+    result[QStringLiteral("coherentGain")] = window.coherentGain;
+    result[QStringLiteral("rms")] = window.rms;
+    result[QStringLiteral("enbwBins")] = window.equivalentNoiseBandwidthBins;
+    result[QStringLiteral("error")] = QString();
+  } catch (const std::exception &e) {
+    result[QStringLiteral("error")] = QString::fromUtf8(e.what());
+  }
+  return result;
+}
+
+QString FilterEngine::analysisArtifactsJson(int maxPoints) const {
+  if (!m_hasResults) return QStringLiteral("{}");
+  const int limit = qBound(32, maxPoints, 1024);
+  const auto artifact = makeAnalysisArtifact(m_spec, m_coeff, m_lastAnalysis, limit);
+  return QString::fromUtf8(QJsonDocument(artifact).toJson(QJsonDocument::Compact));
+}
+
+QString FilterEngine::analyzeVariantJson(int order, const QString &response,
+                                         int maxPoints) const {
+  static const QMap<QString, dsp::FilterResponse> responses = {
+      {QStringLiteral("butterworth"), dsp::FilterResponse::Butterworth},
+      {QStringLiteral("chebyshev_i"), dsp::FilterResponse::ChebyshevI},
+      {QStringLiteral("chebyshev_ii"), dsp::FilterResponse::ChebyshevII},
+      {QStringLiteral("elliptic"), dsp::FilterResponse::Elliptic},
+      {QStringLiteral("bessel"), dsp::FilterResponse::Bessel}};
+  const auto key = response.trimmed().toLower().replace(QLatin1Char(' '), QLatin1Char('_'));
+  if (!responses.contains(key) || order < 1 || order > 16)
+    return QStringLiteral("{\"error\":\"Unsupported response family or order.\"}");
+  try {
+    dsp::FilterSpec variant = m_spec;
+    variant.order = order;
+    variant.response = responses.value(key);
+    const auto coefficients = dsp::designFilter(variant);
+    const auto analysis = dsp::FilterAnalysis::compute(
+        coefficients, variant.sampleRate, 3072, variant.cutoffFreq, variant.cutoffFreq2);
+    const auto artifact = makeAnalysisArtifact(variant, coefficients, analysis,
+                                               qBound(32, maxPoints, 1024));
+    return QString::fromUtf8(QJsonDocument(artifact).toJson(QJsonDocument::Compact));
+  } catch (const std::exception &e) {
+    QJsonObject error;
+    error["error"] = QString::fromUtf8(e.what());
+    return QString::fromUtf8(QJsonDocument(error).toJson(QJsonDocument::Compact));
   }
 }
 

@@ -30,7 +30,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \renewcommand{\headrulewidth}{0pt}
-\rfoot{\footnotesize Page \thepage}
+\rfoot{\footnotesize Page \thepage\ of 3}
 \lfoot{\footnotesize \textit{Overtune 3 Studio --- Cross-Platform Deployment \& Installation Manual}}
 
 \begin{document}
@@ -40,9 +40,9 @@
 % ═════════════════════════════════════════════════════════════════
 \noindent
 \begin{tabular*}{\textwidth}{@{}l @{\extracolsep{\fill}} r@{}}
-\textbf{\large OVERTUNE DSP RESEARCH \& ENGINEERING} & \textbf{Release 3.0 (2026)} \\
+\textbf{\large OVERTUNE DSP RESEARCH \& ENGINEERING} & \textbf{Release 3.3.5 (2026)} \\
 Digital Filter Synthesis \& Real-Time DSP Studio & Architecture: x86\_64 \\
-\textbf{Executable: \texttt{ot3}} & Deployment Note 04
+\textbf{Executable: \texttt{ot3}} & Deployment Manual v3.3.5
 \end{tabular*}
 
 \vspace{6pt}
@@ -51,78 +51,71 @@ Digital Filter Synthesis \& Real-Time DSP Studio & Architecture: x86\_64 \\
 
 \begin{center}
 {\LARGE \textbf{Overtune 3 (\texttt{ot3}) --- System Installation Guide}}\\[6pt]
-{\large \textsc{Native Deployment, In-App Auto-Updater, and Portable Shareware Bundles}}
+{\large \textsc{Native Installer, In-App Auto-Updater, Portable ZIP, and Source Build}}
 \end{center}
 
 \vspace{14pt}
 
 \section*{1. System Overview \& Hardware Requirements}
 
-\textbf{Overtune 3} (\texttt{ot3}) is a high-precision digital filter design and live audio simulation workstation built on pure C++20 and Qt 6. It features automated Stage 2 compliance mathematical audits, sub-millidecibel magnitude precision, and SIMD-accelerated cascaded biquad evaluation.
+\textbf{Overtune 3} (\texttt{ot3}) is a high-precision digital filter design, audio simulation, and DSP study workstation built on modern C++20 and Qt 6. It features automated mathematical audits, sub-millidecibel magnitude precision, SIMD cascaded biquad evaluation, and interactive DSP Chat assistance.
 
 \begin{itemize}[leftmargin=20pt,itemsep=2pt]
+  \item \textbf{Windows Requirements:} Windows 10 (64-bit, 1809+) or Windows 11 (x64) with Microsoft Visual C++ 2015--2022 Redistributable.
   \item \textbf{Linux Requirements:} Any modern 64-bit Linux distribution (Ubuntu 22.04+, Fedora 38+, Arch Linux, Debian 12+) with GLIBC 2.34+ and Qt 6.4+ libraries.
-  \item \textbf{Windows Requirements:} Windows 10 (64-bit, 1809+) or Windows 11 (x64) with Microsoft Visual C++ 2022 Redistributable.
-  \item \textbf{Display:} Minimum recommended display resolution of $1280 \times 800$ with HiDPI display scaling support.
+  \item \textbf{Audio \& Display:} DirectSound or WASAPI audio output device; minimum $1280 \times 800$ resolution with HiDPI support.
 \end{itemize}
 
-\section*{2. Linux Installation \& Execution}
+\section*{2. Windows Installation \& Deployment}
 
-Overtune 3 provides three straightforward deployment methods on Linux platforms:
+Overtune 3 provides four convenient installation and execution options on Windows:
 
-\subsection*{Method A: Native Automated Setup (\texttt{install\_linux.sh})}
-The interactive installer integrates \texttt{ot3} into your desktop environment, creates desktop and application menu entries, registers icons, and links the CLI binary:
-\begin{lstlisting}[language=bash]
-# User-level installation (No root required - installs to ~/.local/share/overtune3)
-./scripts/install_linux.sh
+\subsection*{Method A: Standalone Native Installer (\texttt{ot3-installer.exe})}
+The dedicated graphical setup wizard handles complete deployment with no admin rights required:
+\begin{itemize}[leftmargin=20pt,itemsep=2pt]
+  \item Run \texttt{ot3-installer.exe} (or \texttt{Overtune3-Setup-x64.exe}) from \texttt{dist/}.
+  \item Configure target destination (defaults to \texttt{\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3}).
+  \item Automatically creates Start Menu and Desktop shortcuts and registers in Windows \textbf{Installed Apps}.
+\end{itemize}
 
-# System-wide installation (Installs to /opt/overtune3 and /usr/local/bin)
-sudo ./scripts/install_linux.sh
+\subsection*{Method B: Standalone Portable ZIP (Zero Installation)}
+Extract \texttt{overtune3-windows-x64.zip} to any folder. Run \texttt{run.bat} or \texttt{bin\textbackslash ot3.exe} directly. All Qt 6 libraries, QML modules, codecs, and fonts are self-contained.
+
+\subsection*{Method C: Automated PowerShell Setup (\texttt{install\_windows.ps1})}
+For automated, unattended, or CI/CD deployments:
+\begin{lstlisting}
+powershell -ExecutionPolicy Bypass -File .\scripts\install_windows.ps1
 \end{lstlisting}
-Once completed, launch Overtune 3 from your application menu or directly run \texttt{ot3} from any terminal.
+Optional flags: \texttt{-InstallDir "C:\textbackslash Path"}, \texttt{-NoDesktop}, \texttt{-NoStartMenu}.
 
-\subsection*{Method B: Standalone Portable Shareware Bundle}
-For zero-install portable deployment (e.g., from a USB drive or local directory):
-\begin{lstlisting}[language=bash]
-tar -xzf overtune3-linux-x86_64.tar.gz
-cd overtune3-linux-x86_64
-./ot3.sh
-\end{lstlisting}
-
-\subsection*{Method C: Building from Source}
-\begin{lstlisting}[language=bash]
-./build.sh                  # Builds optimized release binary in ./build/bin/ot3
-./build/bin/ot3             # Direct launch
+\subsection*{Method D: Compiling from Source}
+\begin{lstlisting}
+build.bat                 # Configures CMake, compiles Release, deploys Qt runtime
+run.bat                   # Runs the newly compiled release binary
 \end{lstlisting}
 
 \newpage
 
-\section*{3. Windows Installation \& Execution}
+\section*{3. Linux Installation \& Execution}
 
-Overtune 3 provides native PowerShell and NSIS installer packaging for Windows:
-
-\subsection*{Method A: PowerShell Automated Setup (\texttt{install\_windows.ps1})}
-Runs natively on any standard Windows 10/11 system without requiring external package managers:
-\begin{lstlisting}
-powershell -ExecutionPolicy Bypass -File .\scripts\install_windows.ps1
+\subsection*{Method A: Native Automated Setup (\texttt{install\_linux.sh})}
+\begin{lstlisting}[language=bash]
+./scripts/install_linux.sh          # User-level (~/.local/share/overtune3)
+sudo ./scripts/install_linux.sh     # System-wide (/opt/overtune3)
 \end{lstlisting}
-This installs \texttt{ot3.exe} to \texttt{\%LOCALAPPDATA\%\textbackslash Programs\textbackslash Overtune3}, creates Start Menu and Desktop shortcuts, registers the uninstaller in Windows Settings / Control Panel, and configures the background updater helper.
 
-\subsection*{Method B: Modern NSIS Setup Executable}
-Run \texttt{Overtune3-Setup-x64.exe} and follow the graphical setup wizard. Silent unattended deployment is supported with the \texttt{/S} switch.
+\subsection*{Method B: Standalone Portable Bundle}
+\begin{lstlisting}[language=bash]
+tar -xzf overtune3-linux-x86_64.tar.gz && cd overtune3-linux-x86_64 && ./ot3.sh
+\end{lstlisting}
 
-\subsection*{Method C: Standalone Portable ZIP}
-Extract \texttt{overtune3-windows-x64.zip} and double-click \texttt{bin\textbackslash ot3.exe}.
-
-\section*{4. In-App Auto-Updater \& In-Place Atomic Updates}
-
-Overtune 3 features a unified OLED modal updater window matching the What's New and Stage 2 Verifier interfaces. It handles live patch updates seamlessly:
+\section*{4. In-App Updates, AI Assistant \& Clean Uninstallation}
 
 \begin{itemize}[leftmargin=20pt,itemsep=3pt]
-  \item \textbf{Accessing Updates:} Select \textbf{Help $\rightarrow$ Check for Updates...} or click the \textbf{Installer / Update Ready} badge in the titlebar.
-  \item \textbf{Linux Atomic Patching:} Leverages POSIX atomic \texttt{unlink}/\texttt{rename} semantics. The running application binary is replaced smoothly in place without requiring process termination before write.
-  \item \textbf{Windows Detached Updater:} Bypasses Windows executable file-locking by spawning a detached helper script (\texttt{overtune\_update.bat}) that waits for the parent process PID to exit cleanly, replaces \texttt{ot3.exe} with \texttt{ot3.exe.new}, and restarts the updated studio application.
-  \item \textbf{Cryptographic SHA-256 Audit:} All downloaded payload chunks are validated against release cryptographic checksums before application.
+  \item \textbf{In-App Updates:} Access \textbf{Settings $\rightarrow$ Updates} and click \textbf{Check}. Downloads are verified against release SHA-256 hashes.
+  \item \textbf{AI DSP Assistant (Shadcy):} Configure OpenRouter model IDs and API keys in \textbf{Settings $\rightarrow$ AI Assistant}. On Windows, keys are encrypted securely using the Windows DPAPI.
+  \item \textbf{Uninstallation:} Click \textbf{Uninstall} in \textbf{Settings $\to$ Resources \& Maintenance}, via Windows \textbf{Settings $\to$ Apps $\to$ Installed apps}, or execute:
+  \lstinline[basicstyle=\footnotesize\ttfamily]!%LOCALAPPDATA%\Programs\Overtune3\uninstall.bat!
 \end{itemize}
 
 \section*{5. Command-Line Options \& Essential Shortcuts}
@@ -135,7 +128,7 @@ Overtune 3 features a unified OLED modal updater window matching the What's New 
 \midrule
 \texttt{ot3 --install} & CLI Flag & Launch directly into the native System Installation manager. \\
 \texttt{ot3 --update} & CLI Flag & Query release server and display available version patches. \\
-\texttt{Ctrl + 1} .. \texttt{6} & Keyboard & Navigate directly between Design, Analysis, Simulation, Export, Docs, Settings. \\
+\texttt{Ctrl + 1} .. \texttt{7} & Keyboard & Navigate between Design, Analysis, Simulation, Export, Docs, Settings, Chat. \\
 \texttt{Ctrl + 0} & Keyboard & Auto-scale and reset frequency, pole-zero, and impulse response plots. \\
 \texttt{F5} / \texttt{Space} & Keyboard & Start or pause the live real-time audio and DSP simulation engine. \\
 \texttt{Ctrl + T} & Keyboard & Toggle between OLED Dark and Studio Light visual themes. \\
@@ -143,7 +136,7 @@ Overtune 3 features a unified OLED modal updater window matching the What's New 
 \end{tabular}
 \end{center}
 
-\vspace{8pt}
-\noindent\textit{For support, bug reports, and full DSP mathematical derivations, refer to the in-app documentation page or open the \texttt{theory\_and\_math.pdf} manual.}
+\vspace{12pt}
+\noindent\textit{For full DSP derivations, refer to \texttt{theory\_and\_math.pdf} or open the in-app documentation browser.}
 
 \end{document}

@@ -16,13 +16,14 @@ Rectangle {
         { text: "Analysis",      icon: "graph",         index: 1, shortcut: "Ctrl+2" },
         { text: "Simulation",    icon: "play",          index: 2, shortcut: "Ctrl+3" },
         { text: "Export",        icon: "export",        index: 3, shortcut: "Ctrl+4" },
-        { text: "Documentation", icon: "book",          index: 4, shortcut: "Ctrl+5" }
+        { text: "Documentation", icon: "book",          index: 4, shortcut: "Ctrl+5" },
+        { text: "Omi",           icon: "comment-discussion", index: 5, shortcut: "Ctrl+6" }
     ]
 
     function getTargetY(pageIndex) {
-        if (pageIndex >= 0 && pageIndex < 5) {
+        if (pageIndex >= 0 && pageIndex < 6) {
             return 6 + pageIndex * 50;
-        } else if (pageIndex === 5) {
+        } else if (pageIndex === 6) {
             return root.height - 54;
         }
         return 6;
@@ -42,13 +43,13 @@ Rectangle {
     }
 
     onHeightChanged: {
-        if (currentPage === 5 && !slideAnim.running) {
-            indicatorY = getTargetY(5);
+        if (currentPage === 6 && !slideAnim.running) {
+            indicatorY = getTargetY(6);
         }
     }
 
     Component.onCompleted: {
-        indicatorY = getTargetY(currentPage);
+            indicatorY = getTargetY(currentPage);
     }
 
     ParallelAnimation {
@@ -166,10 +167,21 @@ Rectangle {
             id: settingsItem
             text: "Settings"
             icon: "settings-gear"
-            shortcut: "Ctrl+,"
-            selected: root.currentPage === 5
-            onClicked: root.currentPage = 5
+            shortcut: "Ctrl+7"
+            selected: root.currentPage === 6
+            onClicked: root.currentPage = 6
         }
+    }
+
+    // Right divider dividing Sidebar activity bar from the main window column
+    Rectangle {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: 1
+        color: theme.borderColor
+        opacity: 0.55
+        z: 10
     }
 
     Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutCubic } }

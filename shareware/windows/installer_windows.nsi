@@ -1,6 +1,6 @@
 !include "MUI2.nsh"
 
-!define APP_VERSION "3.2.5"
+!define APP_VERSION "3.3.5"
 !define APP_BIN "overtune3-windows-x64\bin"
 
 Name "Overtune 3"

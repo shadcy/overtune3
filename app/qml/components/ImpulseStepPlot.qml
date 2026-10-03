@@ -582,9 +582,11 @@ Item {
                     }
                 }
 
-                ToolTip.visible: curMouse.containsMouse
-                ToolTip.text: root.showCrosshair ? "Data Cursor Active (Click to Hide)" : "Enable Data Cursor / Inspector (+) (Default: Off)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: curMouse.containsMouse
+                    text: root.showCrosshair ? "Data Cursor Active (Click to Hide)" : "Enable Data Cursor / Inspector"
+                    shortcut: "+"
+                }
 
                 MouseArea {
                     id: curMouse
@@ -617,9 +619,11 @@ Item {
                     iconColor: saveMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: saveMouse.containsMouse
-                ToolTip.text: "Save Plot Image (PNG)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: saveMouse.containsMouse
+                    text: "Save Plot Image (PNG)"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: saveMouse
@@ -646,9 +650,11 @@ Item {
                     iconColor: copyMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: copyMouse.containsMouse
-                ToolTip.text: "Copy Plot to Clipboard"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: copyMouse.containsMouse
+                    text: "Copy Plot to Clipboard"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: copyMouse
@@ -676,9 +682,11 @@ Item {
                     iconColor: popoutMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: popoutMouse.containsMouse
-                ToolTip.text: "Open in Dedicated Window"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: popoutMouse.containsMouse
+                    text: "Open in Dedicated Window"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: popoutMouse
@@ -706,9 +714,11 @@ Item {
                     iconColor: menuBtnMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: menuBtnMouse.containsMouse
-                ToolTip.text: "Plot Settings & Options (Right-Click)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: menuBtnMouse.containsMouse
+                    text: "Plot Settings & Options"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: menuBtnMouse

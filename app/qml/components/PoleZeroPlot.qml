@@ -494,9 +494,10 @@ Item {
                     }
                 }
 
-                ToolTip.visible: autoScalePzMouse.containsMouse
-                ToolTip.text: "Auto Scale / Fit View (Desmos)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: autoScalePzMouse.containsMouse
+                    text: "Auto Scale / Fit View"
+                }
 
                 MouseArea {
                     id: autoScalePzMouse
@@ -543,9 +544,11 @@ Item {
                     }
                 }
 
-                ToolTip.visible: curPzMouse.containsMouse
-                ToolTip.text: root.showCrosshair ? "Root Inspector Active (Click to Hide)" : "Enable Data Cursor / Root Inspector (+) (Default: Off)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: curPzMouse.containsMouse
+                    text: root.showCrosshair ? "Root Inspector Active (Click to Hide)" : "Enable Data Cursor / Root Inspector"
+                    shortcut: "+"
+                }
 
                 MouseArea {
                     id: curPzMouse
@@ -577,9 +580,11 @@ Item {
                     iconSize: 12
                     iconColor: savePzMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: savePzMouse.containsMouse
-                ToolTip.text: "Save Z-Plane Image (PNG)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: savePzMouse.containsMouse
+                    text: "Save Z-Plane Image (PNG)"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: savePzMouse
@@ -605,9 +610,11 @@ Item {
                     iconSize: 12
                     iconColor: copyPzMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: copyPzMouse.containsMouse
-                ToolTip.text: "Copy Z-Plane Image"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: copyPzMouse.containsMouse
+                    text: "Copy Z-Plane Image"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: copyPzMouse
@@ -634,9 +641,11 @@ Item {
                     iconSize: 12
                     iconColor: popoutPzMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
-                ToolTip.visible: popoutPzMouse.containsMouse
-                ToolTip.text: "Open Z-Plane in Dedicated Window"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: popoutPzMouse.containsMouse
+                    text: "Open Z-Plane in Dedicated Window"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: popoutPzMouse
@@ -664,9 +673,11 @@ Item {
                     iconColor: menuPzBtnMouse.containsMouse ? theme.primaryText : theme.secondaryText
                 }
 
-                ToolTip.visible: menuPzBtnMouse.containsMouse
-                ToolTip.text: "Z-Plane Settings & Options (Right-Click)"
-                ToolTip.delay: 400
+                CustomToolTip {
+                    visible: menuPzBtnMouse.containsMouse
+                    text: "Z-Plane Settings & Options"
+                    delay: 400
+                }
 
                 MouseArea {
                     id: menuPzBtnMouse
@@ -810,9 +821,11 @@ Item {
                     font.weight: Font.DemiBold
                     color: theme.primaryText
                 }
-                ToolTip.visible: pzZoomInMouse.containsMouse
-                ToolTip.text: "Zoom In (+)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: pzZoomInMouse.containsMouse
+                    text: "Zoom In"
+                    shortcut: "+"
+                }
                 MouseArea {
                     id: pzZoomInMouse
                     anchors.fill: parent
@@ -841,9 +854,11 @@ Item {
                     font.weight: Font.DemiBold
                     color: theme.primaryText
                 }
-                ToolTip.visible: pzZoomOutMouse.containsMouse
-                ToolTip.text: "Zoom Out (−)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: pzZoomOutMouse.containsMouse
+                    text: "Zoom Out"
+                    shortcut: "−"
+                }
                 MouseArea {
                     id: pzZoomOutMouse
                     anchors.fill: parent
@@ -870,9 +885,10 @@ Item {
                     iconSize: 13
                     iconColor: root.isCustomView ? theme.accent : theme.secondaryText
                 }
-                ToolTip.visible: pzAutoFitMouse.containsMouse
-                ToolTip.text: "Auto Scale / Fit View (Double-click plot)"
-                ToolTip.delay: 350
+                CustomToolTip {
+                    visible: pzAutoFitMouse.containsMouse
+                    text: "Auto Scale / Fit View"
+                }
                 MouseArea {
                     id: pzAutoFitMouse
                     anchors.fill: parent

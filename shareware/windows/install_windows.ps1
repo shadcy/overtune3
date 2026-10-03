@@ -13,16 +13,30 @@ $ErrorActionPreference = "Stop"
 $AppName = "Overtune 3"
 $AppId = "Overtune3"
 $ExeName = "ot3.exe"
-$Version = "3.2.5"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$VersionFile = Join-Path $ScriptDir "version.txt"
+if (Test-Path -LiteralPath $VersionFile) {
+    $Version = (Get-Content -LiteralPath $VersionFile -Raw).Trim()
+} else {
+    $ProjectCandidates = @(
+        (Join-Path $ScriptDir "..\CMakeLists.txt"),
+        (Join-Path $ScriptDir "..\..\CMakeLists.txt"),
+        (Join-Path $ScriptDir "..\..\..\CMakeLists.txt")
+    )
+    $ProjectFile = $ProjectCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+    if ($ProjectFile) {
+        $ProjectText = [System.IO.File]::ReadAllText((Resolve-Path $ProjectFile).Path)
+        $VersionMatch = [regex]::Match($ProjectText, '(?m)^project\(FilterDesigner VERSION ([^\s]+) LANGUAGES CXX\)')
+        if ($VersionMatch.Success) { $Version = $VersionMatch.Groups[1].Value }
+    }
+    if (-not $Version) { throw "Could not determine the application version." }
+}
 
-Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "         Overtune 3 - Windows Native Installer            " -ForegroundColor White
 Write-Host "         Version: $Version (x64 Release)                  " -ForegroundColor Gray
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 Write-Host ""
-
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Candidate paths to locate binaries and deployed dependencies
 $Candidates = @(
@@ -32,6 +46,9 @@ $Candidates = @(
     (Join-Path $ScriptDir "FilterDesigner.exe"),
     (Join-Path $ScriptDir "..\build\bin\Release\$ExeName"),
     (Join-Path $ScriptDir "..\build\bin\$ExeName"),
+    (Join-Path $ScriptDir "..\build\windows-release\bin\$ExeName"),
+    (Join-Path $ScriptDir "..\..\build\windows-release\bin\$ExeName"),
+    (Join-Path $ScriptDir "..\..\..\build\windows-release\bin\$ExeName"),
     (Join-Path $ScriptDir "..\..\build\bin\Release\$ExeName"),
     (Join-Path $ScriptDir "..\..\build\bin\$ExeName"),
     (Join-Path $ScriptDir "..\dist\overtune3-windows-x64\bin\$ExeName"),
@@ -141,7 +158,7 @@ if (!$NoDesktop) {
     $Shortcut = $WshShell.CreateShortcut($DesktopShortcut)
     $Shortcut.TargetPath = $DestExe
     $Shortcut.WorkingDirectory = $InstallDir
-    $Shortcut.Description = "Overtune 3.2 - DSP Filter Designer and Audio Lab"
+    $Shortcut.Description = "$AppName $Version - DSP Filter Designer and Audio Lab"
     $Shortcut.IconLocation = $IconRef
     $Shortcut.Save()
 }
@@ -157,7 +174,7 @@ if (!$NoStartMenu) {
     $Shortcut = $WshShell.CreateShortcut($StartShortcut)
     $Shortcut.TargetPath = $DestExe
     $Shortcut.WorkingDirectory = $InstallDir
-    $Shortcut.Description = "Overtune 3.2 - DSP Filter Designer and Audio Lab"
+    $Shortcut.Description = "$AppName $Version - DSP Filter Designer and Audio Lab"
     $Shortcut.IconLocation = $IconRef
     $Shortcut.Save()
 }
@@ -169,7 +186,7 @@ if (!(Test-Path $UninstallKey)) {
     New-Item -Path $UninstallKey -Force | Out-Null
 }
 
-Set-ItemProperty -Path $UninstallKey -Name "DisplayName" -Value "Overtune 3.2 Studio"
+Set-ItemProperty -Path $UninstallKey -Name "DisplayName" -Value "$AppName Studio"
 Set-ItemProperty -Path $UninstallKey -Name "DisplayVersion" -Value $Version
 Set-ItemProperty -Path $UninstallKey -Name "Publisher" -Value "Shadcy"
 Set-ItemProperty -Path $UninstallKey -Name "InstallLocation" -Value $InstallDir

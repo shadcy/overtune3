@@ -19,22 +19,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     PathRemoveFileSpecW(selfDir);
 
     WCHAR target[MAX_PATH];
-    // Candidate 1: package root -> bin\ot3.exe
-    wsprintfW(target, L"%s\\bin\\ot3.exe", selfDir);
+    // Candidate 1: dist root -> packaged application -> bin\ot3.exe
+    wsprintfW(target, L"%s\\overtune3-windows-x64\\bin\\ot3.exe", selfDir);
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Candidate 2: package root -> bin\FilterDesigner.exe
+        // Candidate 2: package root -> bin\ot3.exe
+        wsprintfW(target, L"%s\\bin\\ot3.exe", selfDir);
+    }
+    if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
+        // Candidate 3: package root -> bin\FilterDesigner.exe
         wsprintfW(target, L"%s\\bin\\FilterDesigner.exe", selfDir);
     }
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Candidate 3: already inside bin folder -> ot3.exe
+        // Candidate 4: already inside bin folder -> ot3.exe
         wsprintfW(target, L"%s\\ot3.exe", selfDir);
     }
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Candidate 4: already inside bin folder -> FilterDesigner.exe
+        // Candidate 5: already inside bin folder -> FilterDesigner.exe
         wsprintfW(target, L"%s\\FilterDesigner.exe", selfDir);
     }
     if (GetFileAttributesW(target) == INVALID_FILE_ATTRIBUTES) {
-        // Candidate 5: build folder
+        // Candidate 6: legacy build folder
         wsprintfW(target, L"%s\\build\\bin\\Release\\ot3.exe", selfDir);
     }
 
