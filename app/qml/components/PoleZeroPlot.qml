@@ -19,6 +19,10 @@ Item {
     property bool showPolarGrid: true
     property bool showStabilityRegion: true
     property bool isDetached: false
+    // Pole/zero list cached per design; reading filterEngine.poleZeroData
+    // converts the whole list, too costly for every paint and mouse move
+    property var zpData: []
+    property bool _dataDirty: true
 
 
     function openInNewWindow() {
@@ -43,7 +47,7 @@ Item {
         panOffsetX = 0
         panOffsetY = 0
         let maxR = 1.0
-        const pts = filterEngine.poleZeroData
+        const pts = root.zpData
         if (pts) {
             for (let i = 0; i < pts.length; ++i) {
                 const re = Number(pts[i]["re"])
@@ -290,7 +294,7 @@ Item {
             drawSquircleBadge("|z| = 1.0", cx + r * 0.72, cy - r * 0.72, true)
 
             // 5) Plot Poles (x) and Zeros (o)
-            const pts = filterEngine.poleZeroData
+            const pts = root.zpData
             const n = pts ? pts.length : 0
 
             for (let i = 0; i < n; ++i) {
@@ -442,11 +446,11 @@ Item {
                     spacing: 5
                     Rectangle {
                         width: 6; height: 6; radius: 3
-                        color: filterEngine.isStable() ? "#34C759" : theme.danger
+                        color: filterEngine.stabilityMargin > 0 ? "#34C759" : theme.danger
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     Text {
-                        text: filterEngine.isStable() ? "Stable" : "Unstable"
+                        text: filterEngine.stabilityMargin > 0 ? "Stable" : "Unstable"
                         font.family: "Stack Sans Headline"
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
@@ -737,7 +741,7 @@ Item {
             const cy = height / 2 + 8 + root.panOffsetY
             const baseR = Math.min(width, height - 36) / 2 - 28
             const r  = baseR * root.zoomScale
-            const pts = filterEngine.poleZeroData
+            const pts = root.zpData
             const n = pts ? pts.length : 0
 
             let foundIdx = -1
@@ -969,7 +973,7 @@ Item {
         MenuItem {
             text: "Copy Poles and Zeros (JSON)"
             onTriggered: {
-                const pts = filterEngine.poleZeroData
+                const pts = root.zpData
                 filterEngine.copyText(JSON.stringify(pts, null, 2))
                 root.showPlotToast("Poles & Zeros JSON copied")
             }
@@ -1048,7 +1052,11 @@ Item {
 
     Connections {
         target: filterEngine
-        function onResultsChanged() { root.schedulePaint() }
+        function onResultsChanged() {
+            if (!root.visible) { root._dataDirty = true; return }
+            root.zpData = filterEngine.poleZeroData
+            root.schedulePaint()
+        }
     }
 
     Connections {
@@ -1056,8 +1064,16 @@ Item {
         function onThemeModeChanged() { root.schedulePaint() }
     }
 
-    Component.onCompleted: schedulePaint()
-    onVisibleChanged: { if (visible) schedulePaint() }
+    Component.onCompleted: {
+        zpData = filterEngine.poleZeroData
+        _dataDirty = false
+        schedulePaint()
+    }
+    onVisibleChanged: {
+        if (!visible) return
+        if (_dataDirty) { _dataDirty = false; zpData = filterEngine.poleZeroData }
+        schedulePaint()
+    }
     onWidthChanged:  schedulePaint()
     onHeightChanged: schedulePaint()
 }

@@ -152,12 +152,12 @@ Window {
 
             Repeater {
                 model: [
-                    { n: "1", title: "Choose an install folder",
-                      desc: "Select a destination in setup or type a path." },
-                    { n: "2", title: "Readable plot labels",
-                      desc: "Axis labels use solid black backgrounds and sit clear of tick values." },
-                    { n: "3", title: "Clear version details",
-                      desc: "See the installed and available versions in the update view." }
+                    { n: "1", title: "Linear-phase FIR filters",
+                      desc: "Design windowed-sinc FIR filters up to order 256 with 16 windows, including Kaiser, Dolph-Chebyshev, Gaussian and Tukey." },
+                    { n: "2", title: "IIR | FIR selector",
+                      desc: "Pick the structure first, then an IIR family or FIR window. Each keeps its own order, and captions explain what the cutoff means." },
+                    { n: "3", title: "More export targets",
+                      desc: "Export to MATLAB/Octave, Rust, WebAudio JavaScript and CSV alongside C, C++, Python and JSON." }
                 ]
 
                 delegate: Row {
@@ -233,10 +233,10 @@ Window {
 
             Repeater {
                 model: [
-                    { n: "4", title: "Clean version transitions & update flows",
-                      desc: "Accurate version indicators and installer layouts without text clipping." },
-                    { n: "5", title: "Theme-aware setup windows",
-                      desc: "Installer and update windows follow the app's dark or light appearance." }
+                    { n: "4", title: "Smooth live plots",
+                      desc: "Designs compute in the background, so curves follow a dragged cutoff without stalling, and hidden plots no longer slow down edits." },
+                    { n: "5", title: "More accurate filters",
+                      desc: "Bessel filters now match the reference design exactly, and high cutoffs on low-pass and high-pass filters design correctly." }
                 ]
 
                 delegate: Row {

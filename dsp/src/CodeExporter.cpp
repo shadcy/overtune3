@@ -310,7 +310,7 @@ std::string CodeExporter::genPython(const FilterCoefficients& coeff, const Filte
 def process_zi(x: np.ndarray, zi: np.ndarray = None):
     """Streaming filter with state persistence for real-time chunked audio."""
     if zi is None:
-        zi = signal.sosfilt_zi(sos) * (x[0] * gain if len(x) > 0 else 0.0)
+        zi = np.zeros((sos.shape[0], 2))   # start at rest, like process()
     y, zf = signal.sosfilt(sos, x * gain, zi=zi)
     return y, zf
 

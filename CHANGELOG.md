@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.3.0] - 2026-10-26
+
+Supported platforms: Windows 10 (64-bit, version 1809 or later) and Windows 11, x64.
+
+### Added
+- **FIR filter design**: linear-phase windowed-sinc low-pass, high-pass, band-pass and band-stop filters, order 1–256, with 16 windows (Rectangular, Hann, Hamming, Blackman, Kaiser, Bartlett, Bartlett-Hann, Blackman-Harris, Nuttall, Blackman-Nuttall, Flat Top, Gaussian, Tukey, Lanczos, Cosine, Dolph-Chebyshev), validated against SciPy.
+- **IIR | FIR structure selector** on the Design page, with a separate IIR family list, per-family and per-window hints, and each structure remembering its own order.
+- Design page captions explain what the cutoff means for the current family (−3 dB, passband edge, stopband edge or −6 dB for FIR) and show FIR tap count and delay.
+- **Discard** button for pending Design page edits; Filter Inspector shows the structure and biquad section count.
+- MATLAB/Octave, Rust, WebAudio JavaScript and CSV code exporters for IIR and FIR designs.
+
+### Fixed
+- Bessel filters of order 3 and above used inaccurate prototype poles (off by up to 0.12 at order 10); the table now matches SciPy to about 1e-12.
+- Low-pass and high-pass designs with a cutoff above the hidden second cutoff (2 kHz by default) failed to design, including the 10 kHz high-pass preset; Verify Design could also raise an unhandled error.
+- Exported Python `process_zi` started from a non-zero state, so chunked streaming output differed from `process()`.
+- Applying Design page edits or application presets no longer runs half-updated intermediate designs that could show false errors.
+- Stability and maximum pole radius in the Filter Inspector and pole-zero plot now refresh with each design.
+- File dialogs on Windows, WAV/CSV import edge cases, exporter headers and several settings that had no effect.
+
+### Improved
+- **Smoother plots**: live edits redesign on a background thread at up to one update per frame, so the curve follows a dragged cutoff instead of freezing; results reach the plots as packed buffers (about 40× less per-plot overhead), hidden plots skip work until shown, cutoff handles redraw on their own layer, and curves are decimated per pixel column without losing peaks or nulls.
+- FIR response and group-delay analysis is about 7× faster, and 256-tap FIR design about 75× faster.
+
 ## [3.2.5] - 2026-10-02
 
 ### Fixed

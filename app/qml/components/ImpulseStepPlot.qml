@@ -42,6 +42,8 @@ Item {
     readonly property real marginTop:    48
     readonly property real marginBottom: 48
 
+    property bool _dataDirty: false
+
     function refreshPoints() {
         points = mode === 0 ? filterEngine.impulseData : filterEngine.stepData
     }
@@ -1082,6 +1084,8 @@ Item {
     Connections {
         target: filterEngine
         function onResultsChanged() {
+            // Hidden plots catch up when shown instead of on every redesign
+            if (!root.visible) { root._dataDirty = true; return }
             root.refreshPoints()
             root.schedulePaint()
         }
@@ -1101,7 +1105,11 @@ Item {
         refreshPoints()
         schedulePaint()
     }
-    onVisibleChanged: { if (visible) schedulePaint() }
+    onVisibleChanged: {
+        if (!visible) return
+        if (_dataDirty) { _dataDirty = false; refreshPoints() }
+        schedulePaint()
+    }
     onWidthChanged:  schedulePaint()
     onHeightChanged: schedulePaint()
     onPointsChanged: schedulePaint()

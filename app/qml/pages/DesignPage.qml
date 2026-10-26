@@ -13,7 +13,16 @@ Item {
     clip: true
 
     readonly property var typeNames:     ["Low Pass", "High Pass", "Band Pass", "Band Stop"]
-    readonly property var responseNames: ["Butterworth", "Chebyshev I", "Chebyshev II", "Elliptic", "Bessel", "FIR (Windowed Sinc)"]
+    // IIR families, indexed like dsp::FilterResponse; FIR (5) has its own class toggle
+    readonly property var iirFamilyNames: ["Butterworth", "Chebyshev I", "Chebyshev II", "Elliptic", "Bessel"]
+    readonly property var iirFamilyHints: [
+        "Maximally flat passband, moderate roll-off",
+        "Equiripple passband, steeper roll-off than Butterworth",
+        "Flat passband, equiripple stopband (inverse Chebyshev)",
+        "Ripple in both bands, steepest transition for a given order",
+        "Maximally flat group delay, gentlest roll-off"
+    ]
+    readonly property int firResponse: 5
     readonly property var firWindowNames: filterEngine.firWindowNames()
     // Typical first-sidelobe level and use, indexed like dsp::FirWindow
     readonly property var firWindowHints: [
@@ -38,10 +47,32 @@ Item {
     readonly property bool shownUsesAtten: shownIsFir && (shownFirWindow === 4 || shownFirWindow === 15)
     readonly property int shownResponse: hasPendingChanges ? pendingResponse : filterEngine.filterResponse
     readonly property int shownFirWindow: hasPendingChanges ? pendingFirWindow : filterEngine.firWindow
-    readonly property bool shownIsFir: shownResponse === 5
-    readonly property bool isBand: filterEngine.filterType >= 2
+    readonly property bool shownIsFir: shownResponse === firResponse
+    readonly property int shownType: hasPendingChanges ? pendingType : filterEngine.filterType
+    readonly property int shownOrder: hasPendingChanges ? pendingOrder : filterEngine.order
+    readonly property double shownRipple: hasPendingChanges ? pendingRipple : filterEngine.rippleDb
+    readonly property double shownStopband: hasPendingChanges ? pendingStopband : filterEngine.stopbandDb
+    readonly property bool isBand: shownType >= 2
+    // High-pass / band-stop FIRs need an even order (odd tap count); the engine rounds up
+    readonly property int shownEffectiveOrder: shownIsFir && (shownType === 1 || shownType === 3) && shownOrder % 2 !== 0
+                                               ? shownOrder + 1 : shownOrder
+    // What the cutoff slider means for the shown family (same targets the verifier checks)
+    readonly property string cutoffMeaning: {
+        if (shownIsFir) return "Cutoff = −6.02 dB (half-amplitude) point of the windowed sinc"
+        switch (shownResponse) {
+        case 1: case 3: return "Cutoff = passband edge (−" + shownRipple.toFixed(1) + " dB ripple limit)"
+        case 2: return "Cutoff = stopband edge (−" + shownStopband.toFixed(0) + " dB)"
+        default: return "Cutoff = −3.01 dB point"
+        }
+    }
     readonly property bool narrowLayout: width < 680
     readonly property int pageMargin: width < 700 ? 10 : 16
+
+    // Last IIR family, restored when switching back from FIR
+    property int lastIirResponse: filterEngine.filterResponse !== firResponse ? filterEngine.filterResponse : 0
+    // Orders edited while pending, per class (-1 = use the engine's remembered order)
+    property int pendingIirOrderMemo: -1
+    property int pendingFirOrderMemo: -1
 
     property bool hasPendingChanges: false
     property int pendingType: filterEngine.filterType
@@ -66,22 +97,45 @@ Item {
         pendingStopband = filterEngine.stopbandDb
         pendingFirWindow = filterEngine.firWindow
         pendingFirWindowParam = filterEngine.firWindowParam
+        if (filterEngine.filterResponse !== firResponse)
+            lastIirResponse = filterEngine.filterResponse
+        pendingIirOrderMemo = -1
+        pendingFirOrderMemo = -1
         hasPendingChanges = false
     }
 
+    // Switch the pending design between IIR and FIR, keeping each class's order
+    function selectFilterClass(fir) {
+        if (fir === shownIsFir) return
+        if (!hasPendingChanges) syncPendingWithEngine()
+        if (fir) {
+            pendingIirOrderMemo = pendingOrder
+            lastIirResponse = pendingResponse
+            pendingResponse = firResponse
+            pendingOrder = pendingFirOrderMemo > 0 ? pendingFirOrderMemo : filterEngine.orderFor(firResponse)
+        } else {
+            pendingFirOrderMemo = pendingOrder
+            pendingResponse = lastIirResponse
+            pendingOrder = Math.min(pendingIirOrderMemo > 0 ? pendingIirOrderMemo : filterEngine.orderFor(lastIirResponse),
+                                    filterEngine.maxOrder(lastIirResponse))
+        }
+        hasPendingChanges = true
+    }
+
     function applyPendingChanges() {
-        filterEngine.filterType = pendingType
-        filterEngine.filterResponse = pendingResponse
-        filterEngine.order = pendingOrder
-        filterEngine.sampleRate = pendingSampleRate
-        filterEngine.cutoffFreq = pendingCutoff
-        filterEngine.cutoffFreq2 = pendingCutoff2
-        filterEngine.rippleDb = pendingRipple
-        filterEngine.stopbandDb = pendingStopband
-        filterEngine.firWindow = pendingFirWindow
-        filterEngine.firWindowParam = pendingFirWindowParam
-        filterEngine.design()
-        hasPendingChanges = false
+        filterEngine.applySpec({
+            filterType: pendingType,
+            filterResponse: pendingResponse,
+            order: pendingOrder,
+            sampleRate: pendingSampleRate,
+            cutoffFreq: pendingCutoff,
+            cutoffFreq2: pendingCutoff2,
+            rippleDb: pendingRipple,
+            stopbandDb: pendingStopband,
+            firWindow: pendingFirWindow,
+            firWindowParam: pendingFirWindowParam
+        })
+        syncPendingWithEngine()
         if (freqPlot) {
             freqPlot.refreshPoints()
             freqPlot.schedulePaint()
@@ -99,6 +153,16 @@ Item {
     }
 
     Component.onCompleted: syncPendingWithEngine()
+
+    // Secondary caption under a control; collapses when hidden
+    component Hint: Text {
+        width: parent ? parent.width : implicitWidth
+        height: visible ? implicitHeight : 0
+        font.family: "Stack Sans Headline"
+        font.pixelSize: 11
+        color: theme.secondaryText
+        wrapMode: Text.WordWrap
+    }
 
     property alias freqPlot: freqPlot
 
@@ -260,36 +324,25 @@ Item {
                             "Hi-Res Audio Filter (40k LP)",
                             "Ultrasonic Sensor (10k HP)"
                         ]
+                        // Applied as one spec so no half-updated (invalid) design runs in between
+                        readonly property var presetSpecs: [
+                            null,
+                            { filterType: 1, filterResponse: 0, order: 4, sampleRate: 48000, cutoffFreq: 30 },
+                            { filterType: 1, filterResponse: 0, order: 3, sampleRate: 48000, cutoffFreq: 80 },
+                            { filterType: 3, filterResponse: 3, order: 4, sampleRate: 48000, cutoffFreq: 48, cutoffFreq2: 52,
+                              rippleDb: 0.5, stopbandDb: 50 },
+                            { filterType: 3, filterResponse: 3, order: 4, sampleRate: 48000, cutoffFreq: 58, cutoffFreq2: 62,
+                              rippleDb: 0.5, stopbandDb: 50 },
+                            { filterType: 2, filterResponse: 1, order: 4, sampleRate: 8000, cutoffFreq: 300, cutoffFreq2: 3400,
+                              rippleDb: 0.5 },
+                            { filterType: 0, filterResponse: 3, order: 8, sampleRate: 48000, cutoffFreq: 20000,
+                              rippleDb: 0.1, stopbandDb: 70 },
+                            { filterType: 0, filterResponse: 0, order: 8, sampleRate: 96000, cutoffFreq: 40000 },
+                            { filterType: 1, filterResponse: 0, order: 4, sampleRate: 48000, cutoffFreq: 10000 }
+                        ]
                         onActivated: {
-                            if (currentIndex === 1) {
-                                filterEngine.filterType = 1; filterEngine.filterResponse = 0; filterEngine.order = 4;
-                                filterEngine.sampleRate = 48000; filterEngine.cutoffFreq = 30;
-                            } else if (currentIndex === 2) {
-                                filterEngine.filterType = 1; filterEngine.filterResponse = 0; filterEngine.order = 3;
-                                filterEngine.sampleRate = 48000; filterEngine.cutoffFreq = 80;
-                            } else if (currentIndex === 3) {
-                                filterEngine.sampleRate = 48000; filterEngine.filterType = 3; filterEngine.filterResponse = 3;
-                                filterEngine.order = 4; filterEngine.cutoffFreq = 48; filterEngine.cutoffFreq2 = 52;
-                                filterEngine.rippleDb = 0.5; filterEngine.stopbandDb = 50;
-                            } else if (currentIndex === 4) {
-                                filterEngine.sampleRate = 48000; filterEngine.filterType = 3; filterEngine.filterResponse = 3;
-                                filterEngine.order = 4; filterEngine.cutoffFreq = 58; filterEngine.cutoffFreq2 = 62;
-                                filterEngine.rippleDb = 0.5; filterEngine.stopbandDb = 50;
-                            } else if (currentIndex === 5) {
-                                filterEngine.sampleRate = 8000; filterEngine.filterType = 2; filterEngine.filterResponse = 1;
-                                filterEngine.order = 4; filterEngine.cutoffFreq = 300; filterEngine.cutoffFreq2 = 3400;
-                                filterEngine.rippleDb = 0.5;
-                            } else if (currentIndex === 6) {
-                                filterEngine.sampleRate = 48000; filterEngine.filterType = 0; filterEngine.filterResponse = 3;
-                                filterEngine.order = 8; filterEngine.cutoffFreq = 20000;
-                                filterEngine.rippleDb = 0.1; filterEngine.stopbandDb = 70;
-                            } else if (currentIndex === 7) {
-                                filterEngine.sampleRate = 96000; filterEngine.filterType = 0; filterEngine.filterResponse = 0;
-                                filterEngine.order = 8; filterEngine.cutoffFreq = 40000;
-                            } else if (currentIndex === 8) {
-                                filterEngine.sampleRate = 48000; filterEngine.filterType = 1; filterEngine.filterResponse = 0;
-                                filterEngine.order = 4; filterEngine.cutoffFreq = 10000;
-                            }
+                            const spec = presetSpecs[currentIndex]
+                            if (spec) filterEngine.applySpec(spec)
                             root.syncPendingWithEngine()
                         }
                     }
@@ -314,20 +367,44 @@ Item {
 
                 ParameterRow {
                     width: parent.width
-                    label: "Response"
+                    label: "Structure"
+                    SegmentedButton {
+                        width: parent.width
+                        implicitHeight: 28
+                        model: ["IIR", "FIR"]
+                        currentIndex: root.shownIsFir ? 1 : 0
+                        onActivated: function(idx) { root.selectFilterClass(idx === 1) }
+                    }
+                }
+
+                Hint {
+                    text: root.shownIsFir
+                          ? "Finite impulse response: exactly linear phase and always stable, at the cost of a high order"
+                          : "Infinite impulse response: steep roll-off at low order, non-linear phase"
+                }
+
+                ParameterRow {
+                    width: parent.width
+                    visible: !root.shownIsFir
+                    height: visible ? implicitHeight : 0
+                    label: "Family"
                     StyledCombo {
                         width: parent.width
-                        model: root.responseNames
-                        currentIndex: root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse
+                        model: root.iirFamilyNames
+                        currentIndex: root.shownIsFir ? root.lastIirResponse : root.shownResponse
                         onActivated: {
+                            if (!root.hasPendingChanges) root.syncPendingWithEngine()
                             root.pendingResponse = currentIndex
-                            if (currentIndex === 5 && root.pendingOrder < 16)
-                                root.pendingOrder = 64   // usable FIR default
-                            else if (currentIndex !== 5)
-                                root.pendingOrder = Math.min(root.pendingOrder, currentIndex === 4 ? 10 : 16)
+                            root.lastIirResponse = currentIndex
+                            root.pendingOrder = Math.min(root.pendingOrder, filterEngine.maxOrder(currentIndex))
                             root.hasPendingChanges = true
                         }
                     }
+                }
+
+                Hint {
+                    visible: !root.shownIsFir
+                    text: root.iirFamilyHints[root.shownResponse] || ""
                 }
 
                 ParameterRow {
@@ -340,6 +417,7 @@ Item {
                         model: root.firWindowNames
                         currentIndex: root.shownFirWindow
                         onActivated: {
+                            if (!root.hasPendingChanges) root.syncPendingWithEngine()
                             root.pendingFirWindow = currentIndex
                             // Gaussian needs sigma > 0; Tukey accepts 0..1
                             if (currentIndex === 11 && root.pendingFirWindowParam < 0.05)
@@ -349,15 +427,9 @@ Item {
                     }
                 }
 
-                Text {
+                Hint {
                     visible: root.shownIsFir
-                    height: visible ? implicitHeight : 0
-                    width: parent.width
                     text: root.firWindowHints[root.shownFirWindow] || ""
-                    font.family: "Stack Sans Headline"
-                    font.pixelSize: 11
-                    color: theme.secondaryText
-                    wrapMode: Text.WordWrap
                 }
 
                 ParameterRow {
@@ -392,8 +464,8 @@ Item {
                     StyledSlider {
                         width: parent.width
                         from: 1
-                        to: root.shownResponse === 4 ? 10 : (root.shownIsFir ? 256 : 16)
-                        value: root.hasPendingChanges ? root.pendingOrder : filterEngine.order
+                        to: filterEngine.maxOrder(root.shownResponse)
+                        value: root.shownOrder
                         stepSize: 1
                         valueDecimals: 0
                         onMoved: {
@@ -401,10 +473,20 @@ Item {
                             root.hasPendingChanges = true
                         }
                         onManualValueEntered: function(val) {
-                            root.pendingOrder = Math.round(val)
+                            root.pendingOrder = Math.max(1, Math.min(to, Math.round(val)))
                             root.hasPendingChanges = true
                         }
                     }
+                }
+
+                Hint {
+                    visible: root.shownIsFir
+                    text: (root.shownEffectiveOrder + 1) + " taps · "
+                          + (root.shownEffectiveOrder / 2) + " sample delay"
+                          + (root.shownEffectiveOrder !== root.shownOrder
+                             ? " · odd order raised to " + root.shownEffectiveOrder
+                               + " (high-pass/band-stop need an odd tap count)"
+                             : "")
                 }
 
                 ParameterRow {
@@ -473,6 +555,10 @@ Item {
                     }
                 }
 
+                Hint {
+                    text: root.isBand ? root.cutoffMeaning.replace("Cutoff =", "Each edge =") : root.cutoffMeaning
+                }
+
                 // Live Bandwidth & Q Readout Card for Band-pass / Band-stop
                 Rectangle {
                     visible: root.isBand
@@ -518,7 +604,7 @@ Item {
 
                 ParameterRow {
                     width: parent.width
-                    visible: (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 1 || (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 3
+                    visible: root.shownResponse === 1 || root.shownResponse === 3
                     height: visible ? implicitHeight : 0
                     label: "Ripple"
                     StyledSlider {
@@ -735,6 +821,12 @@ Item {
                         SubHeader { text: "DESIGN" }
 
                         FlatRow {
+                            lbl: "Structure"
+                            val: filterEngine.isFir ? "FIR · linear phase"
+                                                    : "IIR · " + filterEngine.sectionCount + " biquad section"
+                                                      + (filterEngine.sectionCount === 1 ? "" : "s")
+                        }
+                        FlatRow {
                             lbl: "Response"
                             val: filterEngine.responseName
                         }
@@ -816,15 +908,18 @@ Item {
                         // ── Analysis ─────────────────────────────────────────
                         SubHeader { text: "ANALYSIS" }
 
+                        // Bound to properties (stabilityMargin = 1 - max |pole|) so they
+                        // refresh on resultsChanged; invokable calls would not
                         FlatRow {
+                            readonly property bool stable: !filterEngine.hasResults || filterEngine.stabilityMargin > 0
                             lbl: "System"
-                            val: filterEngine.isStable() ? "Stable" : "Unstable"
-                            valColor: filterEngine.isStable() ? theme.accent : theme.danger
+                            val: !filterEngine.hasResults ? "—" : (stable ? "Stable" : "Unstable")
+                            valColor: stable ? theme.accent : theme.danger
                         }
                         FlatRow {
                             lbl: "Max Pole Radius"
-                            val: filterEngine.maxPoleRadius().toFixed(5)
-                            valColor: filterEngine.isStable() ? theme.primaryText : theme.danger
+                            val: filterEngine.hasResults ? (1 - filterEngine.stabilityMargin).toFixed(5) : "—"
+                            valColor: !filterEngine.hasResults || filterEngine.stabilityMargin > 0 ? theme.primaryText : theme.danger
                         }
                         FlatRow {
                             lbl: "Stability Margin"
@@ -903,8 +998,36 @@ Item {
                 width: parent.width - 24
                 height: 30
 
+                // Discard: drop the pending edits and show the active design again
                 Rectangle {
-                    anchors.fill: parent
+                    id: discardBtn
+                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+                    width: Math.min(96, parent.width * 0.32)
+                    radius: 7
+                    color: discardMouse.containsMouse ? (theme.isDark ? "#2E3136" : "#E4E7EB") : "transparent"
+                    border.color: theme.borderColor
+                    border.width: 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Discard"
+                        font.family: "Stack Sans Headline"
+                        font.pixelSize: 12
+                        font.weight: Font.DemiBold
+                        color: theme.primaryText
+                    }
+
+                    MouseArea {
+                        id: discardMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.syncPendingWithEngine()
+                    }
+                }
+
+                Rectangle {
+                    anchors { left: discardBtn.right; leftMargin: 8; right: parent.right; top: parent.top; bottom: parent.bottom }
                     radius: 7
                     color: applyMouse.pressed ? "#0071E3" : (applyMouse.containsMouse ? theme.accent : theme.accent)
                     Behavior on color { ColorAnimation { duration: 100 } }

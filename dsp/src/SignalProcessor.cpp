@@ -41,7 +41,7 @@ double SignalProcessor::processSample(double x) {
         m_firPos = (m_firPos + 1) % taps;
         return acc * m_coeff.gain;
     }
-    // Direct Form II Transposed biquad cascade
+    // Direct Form II biquad cascade
     double y = x * m_coeff.gain;
     for (size_t i = 0; i < m_coeff.sos.size(); ++i) {
         const auto& s = m_coeff.sos[i];

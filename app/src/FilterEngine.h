@@ -2,9 +2,11 @@
 #include "dsp/FilterAnalysis.h"
 #include "dsp/FilterCoefficients.h"
 #include "dsp/FilterSpec.h"
+#include <QByteArray>
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QThreadPool>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -46,6 +48,14 @@ class FilterEngine : public QObject {
   Q_PROPERTY(double edgeDb READ edgeDb NOTIFY specChanged)
 
   // ── Analysis result properties ──────────────────────────────────────────
+  // Packed native-endian float64 arrays, one value per analysis point. QML
+  // receives them as ArrayBuffers (wrap in Float64Array): a single copy instead
+  // of thousands of {x, y} objects. Preferred by the plots.
+  Q_PROPERTY(QByteArray frequencyBuffer READ frequencyBuffer NOTIFY resultsChanged)
+  Q_PROPERTY(QByteArray magnitudeBuffer READ magnitudeBuffer NOTIFY resultsChanged)
+  Q_PROPERTY(QByteArray phaseBuffer READ phaseBuffer NOTIFY resultsChanged)
+  Q_PROPERTY(QByteArray groupDelayBuffer READ groupDelayBuffer NOTIFY resultsChanged)
+  // Legacy {x, y} point lists, built only when first read after a design
   Q_PROPERTY(
       QVariantList magnitudeData READ magnitudeData NOTIFY resultsChanged)
   Q_PROPERTY(QVariantList phaseData READ phaseData NOTIFY resultsChanged)
@@ -66,6 +76,7 @@ class FilterEngine : public QObject {
 
 public:
   explicit FilterEngine(QObject *parent = nullptr);
+  ~FilterEngine() override;
 
   // Property getters
   int filterType() const { return static_cast<int>(m_spec.type); }
@@ -85,12 +96,16 @@ public:
   bool windowUsesParam() const { return m_spec.isFir() && m_spec.windowUsesParam(); }
   bool windowUsesAtten() const { return m_spec.isFir() && m_spec.windowUsesAtten(); }
 
-  QVariantList magnitudeData() const { return m_magnitudeData; }
-  QVariantList phaseData() const { return m_phaseData; }
-  QVariantList groupDelayData() const { return m_groupDelayData; }
+  QByteArray frequencyBuffer() const { return m_freqBuf; }
+  QByteArray magnitudeBuffer() const { return m_magBuf; }
+  QByteArray phaseBuffer() const { return m_phaseBuf; }
+  QByteArray groupDelayBuffer() const { return m_gdBuf; }
+  QVariantList magnitudeData() const;
+  QVariantList phaseData() const;
+  QVariantList groupDelayData() const;
   QVariantList poleZeroData() const { return m_poleZeroData; }
-  QVariantList impulseData() const { return m_impulseData; }
-  QVariantList stepData() const { return m_stepData; }
+  QVariantList impulseData() const;
+  QVariantList stepData() const;
   double steadyStateGain() const { return m_steadyStateGain; }
   double peakGainDb() const { return m_peakGainDb; }
   double peakFreqHz() const { return m_peakFreqHz; }
@@ -116,6 +131,14 @@ public:
 
   // QML-invokable methods
   Q_INVOKABLE void design();
+  // Sets any subset of the spec properties (same keys as the Q_PROPERTYs)
+  // and designs once, so a multi-field edit never passes through invalid
+  // intermediate specs.
+  Q_INVOKABLE void applySpec(const QVariantMap &spec);
+  // Order to use when switching to `response`: IIR and FIR each remember
+  // their last order, clamped to the family's limit.
+  Q_INVOKABLE int orderFor(int response) const;
+  Q_INVOKABLE int maxOrder(int response) const;
   Q_INVOKABLE QVariantMap verifyDesign();
   Q_INVOKABLE QString exportCode(int format); // 0=C, 1=C++, 2=Python, 3=JSON
   Q_INVOKABLE QString filterTypeName() const;
@@ -172,22 +195,60 @@ signals:
   void errorOccurred(const QString &message);
 
 private:
-  void scheduleDesign();
-  void designInternal();
-  void publishResults(const dsp::AnalysisResult &result);
+  // One design + analysis run. Built from a spec copy so it can run on the
+  // worker thread; `gen` is the spec generation it was computed from.
+  struct DesignOutcome {
+    quint64 gen{0};
+    dsp::FilterCoefficients coeff;
+    dsp::AnalysisResult analysis;
+    QString error;
+  };
+  static DesignOutcome runDesign(const dsp::FilterSpec &spec, int points,
+                                 double cutoff2, quint64 gen);
 
-  QTimer m_debounceTimer;
+  void scheduleDesign();
+  void startAsyncDesign();
+  void finishAsyncDesign(DesignOutcome &&outcome);
+  void designInternal();
+  void applyOutcome(DesignOutcome &&outcome);
+  void publishResults(const dsp::AnalysisResult &result);
+  void rememberOrder();
+  double analysisCutoff2() const;
+
+  static constexpr int kDefaultFirOrder = 64;
+
+  // Live edits (slider scrubbing, handle drags) redesign at most once per
+  // frame on m_pool; discrete edits design synchronously. Results are only
+  // published if newer than what is shown, so a slow run never overwrites a
+  // later one.
+  QTimer m_throttleTimer;
+  QThreadPool m_pool;
+  quint64 m_specGen{0};
+  quint64 m_publishedGen{0};
+  bool m_jobRunning{false};
+  bool m_jobPending{false};
+  QString m_lastError;
+
   int m_analysisPoints{3072};
   dsp::FilterSpec m_spec;
+  int m_iirOrder{dsp::FilterSpec{}.order};
+  int m_firOrder{kDefaultFirOrder};
   dsp::FilterCoefficients m_coeff;
   bool m_hasResults{false};
 
-  QVariantList m_magnitudeData;
-  QVariantList m_phaseData;
-  QVariantList m_groupDelayData;
+  QByteArray m_freqBuf;
+  QByteArray m_magBuf;
+  QByteArray m_phaseBuf;
+  QByteArray m_gdBuf;
+  QByteArray m_impulseBuf;
+  QByteArray m_stepBuf;
   QVariantList m_poleZeroData;
-  QVariantList m_impulseData;
-  QVariantList m_stepData;
+  // Lazily built legacy lists; cleared whenever new results are published
+  mutable QVariantList m_magnitudeList;
+  mutable QVariantList m_phaseList;
+  mutable QVariantList m_groupDelayList;
+  mutable QVariantList m_impulseList;
+  mutable QVariantList m_stepList;
 
   double m_steadyStateGain{1.0};
   double m_peakGainDb{0.0};

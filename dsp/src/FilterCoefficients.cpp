@@ -4,15 +4,16 @@
 namespace dsp {
 
 Complex FilterCoefficients::evaluate(double omega) const noexcept {
-    // z = e^{jω}
-    const Complex z = std::polar(1.0, omega);
     if (isFir()) {
-        // H(e^{jω}) = Σ h[n] e^{-jωn}
+        // H(e^{jω}) = Σ h[n] w^n with w = e^{-jω}, by Horner's rule (no per-tap trig)
+        const Complex w = std::polar(1.0, -omega);
         Complex acc{};
-        for (size_t n = 0; n < fir.size(); ++n)
-            acc += fir[n] * std::polar(1.0, -omega * static_cast<double>(n));
+        for (auto it = fir.rbegin(); it != fir.rend(); ++it)
+            acc = acc * w + *it;
         return gain * acc;
     }
+    // z = e^{jω}
+    const Complex z = std::polar(1.0, omega);
     Complex H{gain};
     for (const auto& s : sos) {
         const Complex num = s.b0 + s.b1 / z + s.b2 / (z * z);

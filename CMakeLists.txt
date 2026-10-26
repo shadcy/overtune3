@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(FilterDesigner VERSION 3.2.5 LANGUAGES CXX)
+project(FilterDesigner VERSION 3.3.0 LANGUAGES CXX)
 
 include(CTest)
 

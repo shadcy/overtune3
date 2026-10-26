@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <initializer_list>
+#include <limits>
 #include <numbers>
 #include <stdexcept>
 
@@ -166,6 +167,10 @@ static ComplexVec polynomialRoots(const std::vector<double>& coeffs) {
     for (int k = 0; k < degree; ++k)
         z[k] = std::polar(1.0 + 0.05 * k / degree, 2.0 * PI * k / degree + 0.4);
 
+    // Once converged, the steps only measure round-off noise (~1e-14 for long
+    // filters), so stop when they are tiny or have stopped shrinking.
+    double bestStep = std::numeric_limits<double>::infinity();
+    int stalled = 0;
     for (int iter = 0; iter < 1000; ++iter) {
         double maxStep = 0.0;
         for (int k = 0; k < degree; ++k) {
@@ -203,7 +208,13 @@ static ComplexVec polynomialRoots(const std::vector<double>& coeffs) {
             z[k] -= step;
             maxStep = std::max(maxStep, std::abs(step) / std::max(1.0, std::abs(z[k])));
         }
-        if (maxStep < 1e-14) break;
+        if (maxStep < 1e-13) break;
+        if (maxStep < 0.5 * bestStep) {
+            bestStep = maxStep;
+            stalled = 0;
+        } else if (maxStep < 1e-8 && ++stalled >= 8) {
+            break;
+        }
     }
 
     // Real-coefficient polynomial: snap near-real roots onto the real axis

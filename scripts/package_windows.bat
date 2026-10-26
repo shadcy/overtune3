@@ -13,15 +13,20 @@ set "PKG_NAME=overtune3-windows-x64"
 set "STAGE_DIR=%DIST_DIR%\staging\%PKG_NAME%"
 
 echo ========================================================
-echo   Packaging Overtune 3.2.5 for Windows x64
+echo   Packaging Overtune 3.3.0 for Windows x64
 echo ========================================================
 echo Root directory: %ROOT_DIR%
 
-set "BIN_SRC="
-if exist "%ROOT_DIR%\build\windows-release\bin\ot3.exe" (
-    set "BIN_SRC=%ROOT_DIR%\build\windows-release\bin"
-) else if exist "%ROOT_DIR%\build\bin\Release\ot3.exe" (
+rem BIN_SRC may be preset to package a specific build. Otherwise prefer the
+rem build.bat output, so an older preset build is never shipped by accident.
+if defined BIN_SRC if not exist "%BIN_SRC%\ot3.exe" (
+    echo [ERROR] BIN_SRC does not contain ot3.exe: %BIN_SRC%
+    exit /b 1
+)
+if not defined BIN_SRC if exist "%ROOT_DIR%\build\bin\Release\ot3.exe" (
     set "BIN_SRC=%ROOT_DIR%\build\bin\Release"
+) else if exist "%ROOT_DIR%\build\windows-release\bin\ot3.exe" (
+    set "BIN_SRC=%ROOT_DIR%\build\windows-release\bin"
 ) else if exist "%ROOT_DIR%\build\bin\ot3.exe" (
     set "BIN_SRC=%ROOT_DIR%\build\bin"
 )

@@ -17,6 +17,8 @@
 #include <QVariantMap>
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <memory>
 #include <stdexcept>
 #include <QUrl>
 #include <QDateTime>
@@ -66,21 +68,85 @@ static QJsonArray defaultPresets() {
 }
 
 FilterEngine::FilterEngine(QObject *parent) : QObject(parent) {
-  m_debounceTimer.setSingleShot(true);
-  m_debounceTimer.setInterval(35); // 35ms stabilization threshold for rapid scrubbing
-  connect(&m_debounceTimer, &QTimer::timeout, this, [this]() {
-    designInternal();
-  });
+  // Every spec edit invalidates results computed from an older spec
+  connect(this, &FilterEngine::specChanged, this, [this]() { ++m_specGen; });
+
+  // Throttle rather than debounce: while scrubbing, the curve keeps following
+  // (about one redesign per frame) instead of freezing until the pointer stops
+  m_throttleTimer.setSingleShot(true);
+  m_throttleTimer.setInterval(16);
+  connect(&m_throttleTimer, &QTimer::timeout, this, &FilterEngine::startAsyncDesign);
+
+  // One worker: runs never overlap, and only the newest pending spec is run
+  m_pool.setMaxThreadCount(1);
 
   // Initial design calculation on startup
   designInternal();
 }
 
-void FilterEngine::scheduleDesign() {
-  m_debounceTimer.start(); // Restarts 35ms single-shot timer during continuous scrubbing
+FilterEngine::~FilterEngine() {
+  // A running job posts its result back to this object; let it finish first
+  m_pool.waitForDone();
 }
 
+void FilterEngine::scheduleDesign() {
+  if (!m_throttleTimer.isActive())
+    m_throttleTimer.start();
+}
+
+FilterEngine::DesignOutcome FilterEngine::runDesign(const dsp::FilterSpec &spec, int points,
+                                                    double cutoff2, quint64 gen) {
+  DesignOutcome out;
+  out.gen = gen;
+  try {
+    out.coeff = dsp::designFilter(spec);
+    out.analysis = dsp::FilterAnalysis::compute(out.coeff, spec.sampleRate, points,
+                                                spec.cutoffFreq, cutoff2);
+  } catch (const std::exception &e) {
+    out.error = QString::fromStdString(e.what());
+  }
+  return out;
+}
+
+void FilterEngine::startAsyncDesign() {
+  if (m_jobRunning) {
+    m_jobPending = true;   // picked up when the running job finishes
+    return;
+  }
+  if (m_specGen <= m_publishedGen) return;   // already showing this spec
+  m_jobRunning = true;
+  m_jobPending = false;
+  const dsp::FilterSpec spec = m_spec;
+  const int points = m_analysisPoints;
+  const double cutoff2 = analysisCutoff2();
+  const quint64 gen = m_specGen;
+  m_pool.start([this, spec, points, cutoff2, gen]() {
+    auto outcome = std::make_shared<DesignOutcome>(runDesign(spec, points, cutoff2, gen));
+    QMetaObject::invokeMethod(this, [this, outcome]() {
+      finishAsyncDesign(std::move(*outcome));
+    }, Qt::QueuedConnection);
+  });
+}
+
+void FilterEngine::finishAsyncDesign(DesignOutcome &&outcome) {
+  m_jobRunning = false;
+  // Intermediate results are shown while a drag continues, but a run never
+  // replaces a newer one (e.g. a synchronous design() made meanwhile)
+  if (outcome.gen > m_publishedGen)
+    applyOutcome(std::move(outcome));
+  if (m_jobPending) {
+    m_jobPending = false;
+    startAsyncDesign();
+  }
+}
+
+// Enum ranges accepted from QML and preset files
+static constexpr int kLastType = static_cast<int>(dsp::FilterType::BandStop);
+static constexpr int kLastResponse = static_cast<int>(dsp::FilterResponse::FIR);
+static constexpr int kLastWindow = static_cast<int>(dsp::FirWindow::DolphChebyshev);
+
 void FilterEngine::setFilterType(int v) {
+  if (v < 0 || v > kLastType) return;
   auto t = static_cast<dsp::FilterType>(v);
   if (m_spec.type != t) {
     qDebug() << "[FilterEngine] setFilterType:" << v;
@@ -98,21 +164,74 @@ static int maxOrderFor(dsp::FilterResponse r) {
   }
 }
 
+// IIR and FIR orders live on different scales (4 vs 64), so each class keeps
+// its own last-used order across IIR <-> FIR switches.
+void FilterEngine::rememberOrder() {
+  (m_spec.isFir() ? m_firOrder : m_iirOrder) = m_spec.order;
+}
+
+int FilterEngine::orderFor(int response) const {
+  if (response < 0 || response > kLastResponse) return m_spec.order;
+  const auto r = static_cast<dsp::FilterResponse>(response);
+  const bool fir = r == dsp::FilterResponse::FIR;
+  const int order = fir == m_spec.isFir() ? m_spec.order : (fir ? m_firOrder : m_iirOrder);
+  return std::clamp(order, 1, maxOrderFor(r));
+}
+
+int FilterEngine::maxOrder(int response) const {
+  if (response < 0 || response > kLastResponse) return maxOrderFor(m_spec.response);
+  return maxOrderFor(static_cast<dsp::FilterResponse>(response));
+}
+
 void FilterEngine::setFilterResponse(int v) {
+  if (v < 0 || v > kLastResponse) return;
   auto r = static_cast<dsp::FilterResponse>(v);
   if (m_spec.response != r) {
     qDebug() << "[FilterEngine] setFilterResponse:" << v;
+    const int order = orderFor(v);
+    rememberOrder();
     m_spec.response = r;
-    m_spec.order = std::min(m_spec.order, maxOrderFor(r));
+    m_spec.order = order;
     emit specChanged();
     design(); // Discrete response change runs immediately
   }
+}
+
+void FilterEngine::applySpec(const QVariantMap &m) {
+  rememberOrder();
+  dsp::FilterSpec s = m_spec;
+  auto readInt = [&](const char *key, int last, int current) {
+    if (!m.contains(key)) return current;
+    const int v = m.value(key).toInt();
+    return (v >= 0 && v <= last) ? v : current;
+  };
+  auto readDouble = [&](const char *key, double current) {
+    bool ok = false;
+    const double v = m.value(key).toDouble(&ok);
+    return (m.contains(key) && ok && std::isfinite(v)) ? v : current;
+  };
+  s.type = static_cast<dsp::FilterType>(readInt("filterType", kLastType, static_cast<int>(s.type)));
+  s.response = static_cast<dsp::FilterResponse>(
+      readInt("filterResponse", kLastResponse, static_cast<int>(s.response)));
+  s.firWindow = static_cast<dsp::FirWindow>(readInt("firWindow", kLastWindow, static_cast<int>(s.firWindow)));
+  s.order = std::clamp(m.contains("order") ? m.value("order").toInt() : s.order, 1, maxOrderFor(s.response));
+  s.sampleRate = readDouble("sampleRate", s.sampleRate);
+  s.cutoffFreq = readDouble("cutoffFreq", s.cutoffFreq);
+  s.cutoffFreq2 = readDouble("cutoffFreq2", s.cutoffFreq2);
+  s.rippleDb = readDouble("rippleDb", s.rippleDb);
+  s.stopbandDb = readDouble("stopbandDb", s.stopbandDb);
+  s.firWindowParam = readDouble("firWindowParam", s.firWindowParam);
+  m_spec = s;
+  rememberOrder();
+  emit specChanged();
+  design(); // one design for the whole change set, no intermediate states
 }
 void FilterEngine::setOrder(int v) {
   v = std::clamp(v, 1, maxOrderFor(m_spec.response));
   if (m_spec.order != v) {
     qDebug() << "[FilterEngine] setOrder:" << v;
     m_spec.order = v;
+    rememberOrder();
     emit specChanged();
     design(); // Order change runs immediately
   }
@@ -162,6 +281,7 @@ void FilterEngine::setStopbandDb(double v) {
 }
 
 void FilterEngine::setFirWindow(int v) {
+  if (v < 0 || v > kLastWindow) return;
   auto w = static_cast<dsp::FirWindow>(v);
   if (m_spec.firWindow != w) {
     m_spec.firWindow = w;
@@ -233,23 +353,42 @@ void FilterEngine::setAnalysisPoints(int points) {
   points = std::clamp(points, 512, 16384);
   if (points != m_analysisPoints) {
     m_analysisPoints = points;
+    ++m_specGen;   // same spec, but the shown grid is now out of date
     scheduleDesign();
   }
 }
 
 void FilterEngine::design() {
-  if (m_debounceTimer.isActive()) {
-    m_debounceTimer.stop();
-  }
   designInternal();
 }
 
-QVariantMap FilterEngine::verifyDesign() {
-  auto analysis = dsp::FilterAnalysis::compute(
-      m_coeff, m_spec.sampleRate, 2048, m_spec.cutoffFreq, m_spec.cutoffFreq2);
-  auto ver = dsp::FilterAnalysis::verify(m_spec, m_coeff, analysis);
+// The second cutoff only exists for band designs; low/high-pass specs keep a
+// stale value that may sit below the first cutoff, so it must not reach the
+// analysis grid (which rejects unordered edges).
+double FilterEngine::analysisCutoff2() const {
+  const bool band = m_spec.type == dsp::FilterType::BandPass ||
+                    m_spec.type == dsp::FilterType::BandStop;
+  return band ? m_spec.cutoffFreq2 : -1.0;
+}
 
+QVariantMap FilterEngine::verifyDesign() {
   QVariantMap map;
+  if (!m_hasResults) {
+    map["passed"] = false;
+    map["summary"] = QString("No valid design to verify");
+    return map;
+  }
+  dsp::VerificationResult ver;
+  try {
+    auto analysis = dsp::FilterAnalysis::compute(
+        m_coeff, m_spec.sampleRate, 2048, m_spec.cutoffFreq, analysisCutoff2());
+    ver = dsp::FilterAnalysis::verify(m_spec, m_coeff, analysis);
+  } catch (const std::exception &e) {
+    map["passed"] = false;
+    map["summary"] = QString::fromStdString(e.what());
+    return map;
+  }
+
   map["passed"] = ver.passed;
   map["stage1Passed"] = ver.stage1Passed;
   map["stage2Passed"] = ver.stage2Passed;
@@ -277,48 +416,114 @@ QVariantMap FilterEngine::verifyDesign() {
 }
 
 void FilterEngine::designInternal() {
-  try {
-    m_coeff = dsp::designFilter(m_spec);
-    auto result = dsp::FilterAnalysis::compute(
-        m_coeff, m_spec.sampleRate, m_analysisPoints, m_spec.cutoffFreq, m_spec.cutoffFreq2);
-    m_hasResults = true;
-    publishResults(result);
-    emit resultsChanged();
-  } catch (const std::exception &e) {
+  // A synchronous run supersedes any queued live update
+  m_throttleTimer.stop();
+  m_jobPending = false;
+  applyOutcome(runDesign(m_spec, m_analysisPoints, analysisCutoff2(), m_specGen));
+}
+
+void FilterEngine::applyOutcome(DesignOutcome &&outcome) {
+  m_publishedGen = outcome.gen;
+  if (!outcome.error.isEmpty()) {
     m_hasResults = false;
-    qWarning() << "[FilterEngine] designInternal() failed:" << e.what();
-    emit errorOccurred(QString::fromStdString(e.what()));
+    qWarning() << "[FilterEngine] design failed:" << outcome.error;
+    emit resultsChanged();
+    // Live scrubbing through an invalid spec would otherwise repeat the same
+    // message every frame
+    if (outcome.error != m_lastError)
+      emit errorOccurred(outcome.error);
+    m_lastError = outcome.error;
+    return;
   }
+  m_lastError.clear();
+  m_coeff = std::move(outcome.coeff);
+  m_hasResults = true;
+  publishResults(outcome.analysis);   // emits resultsChanged
+}
+
+// Native float64 array as raw bytes (QML sees an ArrayBuffer)
+static QByteArray packDoubles(const std::vector<double> &values) {
+  QByteArray bytes(static_cast<qsizetype>(values.size() * sizeof(double)), Qt::Uninitialized);
+  if (!values.empty())
+    std::memcpy(bytes.data(), values.data(), bytes.size());
+  return bytes;
+}
+
+static const double *doublesOf(const QByteArray &bytes) {
+  return reinterpret_cast<const double *>(bytes.constData());
+}
+
+static qsizetype doubleCount(const QByteArray &bytes) {
+  return bytes.size() / static_cast<qsizetype>(sizeof(double));
+}
+
+// {x, y} point list for the legacy QVariantList properties; xs == nullptr
+// uses the sample index as x
+static QVariantList pointList(const QByteArray *xs, const QByteArray &ys) {
+  QVariantList list;
+  const qsizetype n = doubleCount(ys);
+  list.reserve(n);
+  const double *y = doublesOf(ys);
+  const double *x = xs ? doublesOf(*xs) : nullptr;
+  for (qsizetype i = 0; i < n; ++i) {
+    QVariantMap pt;
+    pt["x"] = x ? x[i] : static_cast<double>(i);
+    pt["y"] = y[i];
+    list.append(pt);
+  }
+  return list;
+}
+
+QVariantList FilterEngine::magnitudeData() const {
+  if (m_magnitudeList.isEmpty()) m_magnitudeList = pointList(&m_freqBuf, m_magBuf);
+  return m_magnitudeList;
+}
+QVariantList FilterEngine::phaseData() const {
+  if (m_phaseList.isEmpty()) m_phaseList = pointList(&m_freqBuf, m_phaseBuf);
+  return m_phaseList;
+}
+QVariantList FilterEngine::groupDelayData() const {
+  if (m_groupDelayList.isEmpty()) m_groupDelayList = pointList(&m_freqBuf, m_gdBuf);
+  return m_groupDelayList;
+}
+QVariantList FilterEngine::impulseData() const {
+  if (m_impulseList.isEmpty()) m_impulseList = pointList(nullptr, m_impulseBuf);
+  return m_impulseList;
+}
+QVariantList FilterEngine::stepData() const {
+  if (m_stepList.isEmpty()) m_stepList = pointList(nullptr, m_stepBuf);
+  return m_stepList;
 }
 
 void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
-  m_magnitudeData.clear();
-  m_phaseData.clear();
-  m_groupDelayData.clear();
-  m_impulseData.clear();
-  m_stepData.clear();
+  m_magnitudeList.clear();
+  m_phaseList.clear();
+  m_groupDelayList.clear();
+  m_impulseList.clear();
+  m_stepList.clear();
   m_poleZeroData.clear();
 
+  const size_t n = r.frequencyResponse.size();
+  std::vector<double> freq(n), mag(n), phase(n), gd(n);
   double maxMag = -1e9;
   double peakF = 0.0;
-
-  for (const auto &p : r.frequencyResponse) {
-    QVariantMap mag, ph, gd;
-    mag["x"] = p.frequency;
-    mag["y"] = p.magnitude;
-    ph["x"] = p.frequency;
-    ph["y"] = p.phase;
-    gd["x"] = p.frequency;
-    gd["y"] = p.groupDelay;
-    m_magnitudeData.append(mag);
-    m_phaseData.append(ph);
-    m_groupDelayData.append(gd);
-
+  for (size_t i = 0; i < n; ++i) {
+    const auto &p = r.frequencyResponse[i];
+    freq[i] = p.frequency;
+    mag[i] = p.magnitude;
+    phase[i] = p.phase;
+    gd[i] = p.groupDelay;
     if (p.magnitude > maxMag) {
       maxMag = p.magnitude;
       peakF = p.frequency;
     }
   }
+  m_freqBuf = packDoubles(freq);
+  m_magBuf = packDoubles(mag);
+  m_phaseBuf = packDoubles(phase);
+  m_gdBuf = packDoubles(gd);
+  m_impulseBuf = packDoubles(r.impulseResponse);
+  m_stepBuf = packDoubles(r.stepResponse);
 
   m_peakGainDb = (maxMag > -250.0) ? maxMag : 0.0;
   m_peakFreqHz = peakF;
@@ -327,22 +532,10 @@ void FilterEngine::publishResults(const dsp::AnalysisResult &r) {
   auto hDc = m_coeff.evaluate(0.0);
   m_steadyStateGain = hDc.real();
 
-  for (size_t i = 0; i < r.impulseResponse.size(); ++i) {
-    QVariantMap pt;
-    pt["x"] = static_cast<double>(i);
-    pt["y"] = r.impulseResponse[i];
-    m_impulseData.append(pt);
-  }
-
   double stepPeak = 0.0;
   int peakIdx = 0;
   for (size_t i = 0; i < r.stepResponse.size(); ++i) {
-    QVariantMap pt;
-    double y = r.stepResponse[i];
-    pt["x"] = static_cast<double>(i);
-    pt["y"] = y;
-    m_stepData.append(pt);
-
+    const double y = r.stepResponse[i];
     if (std::abs(y) > std::abs(stepPeak)) {
       stepPeak = y;
       peakIdx = static_cast<int>(i);
@@ -504,6 +697,8 @@ void FilterEngine::copyText(const QString &text) {
 
 void FilterEngine::reset() {
   m_spec = dsp::FilterSpec{};
+  m_iirOrder = m_spec.order;
+  m_firOrder = kDefaultFirOrder;
   emit specChanged();
   design();
 }
@@ -601,19 +796,20 @@ bool FilterEngine::applyPreset(const QString &name) {
   for (const auto &val : arr) {
     QJsonObject o = val.toObject();
     if (o["name"].toString() == name) {
-      m_spec.type = static_cast<dsp::FilterType>(o["type"].toInt());
-      m_spec.response = static_cast<dsp::FilterResponse>(o["response"].toInt());
-      m_spec.order = o["order"].toInt();
-      m_spec.cutoffFreq = o["cutoffFreq"].toDouble();
-      m_spec.cutoffFreq2 = o["cutoffFreq2"].toDouble();
-      m_spec.rippleDb = o["rippleDb"].toDouble();
-      m_spec.stopbandDb = o["stopbandDb"].toDouble();
-      m_spec.sampleRate = o["sampleRate"].toDouble();
-      m_spec.firWindow = static_cast<dsp::FirWindow>(
-          o["firWindow"].toInt(static_cast<int>(dsp::FirWindow::Hamming)));
-      m_spec.firWindowParam = o["firWindowParam"].toDouble(0.5);
-      emit specChanged();
-      design();
+      // applySpec validates every field, so a hand-edited or older preset
+      // file cannot push an out-of-range enum or order into the designer
+      QVariantMap spec;
+      spec["filterType"] = o["type"].toInt();
+      spec["filterResponse"] = o["response"].toInt();
+      spec["order"] = o["order"].toInt();
+      spec["cutoffFreq"] = o["cutoffFreq"].toDouble();
+      spec["cutoffFreq2"] = o["cutoffFreq2"].toDouble();
+      spec["rippleDb"] = o["rippleDb"].toDouble();
+      spec["stopbandDb"] = o["stopbandDb"].toDouble();
+      spec["sampleRate"] = o["sampleRate"].toDouble(48000.0);
+      spec["firWindow"] = o["firWindow"].toInt(static_cast<int>(dsp::FirWindow::Hamming));
+      spec["firWindowParam"] = o["firWindowParam"].toDouble(0.5);
+      applySpec(spec);
       return true;
     }
   }
@@ -808,26 +1004,19 @@ QVariantMap FilterEngine::evaluateResponseAt(double freqHz) const {
     res["phaseWrapped"] = wrappedP;
 
     // Continuous unwrapped phase interpolation from verified grid
-    if (!m_phaseData.isEmpty()) {
-        const int maxIdx = static_cast<int>(m_phaseData.size()) - 1;
-        int low = 0, high = maxIdx;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            double fMid = m_phaseData[mid].toMap()["x"].toDouble();
-            if (fMid < pt.frequency) low = mid + 1;
-            else high = mid - 1;
-        }
-        int idx1 = std::clamp(low - 1, 0, maxIdx);
-        int idx2 = std::clamp(low, 0, maxIdx);
+    const qsizetype count = std::min(doubleCount(m_freqBuf), doubleCount(m_phaseBuf));
+    if (count > 0) {
+        const double *freqs = doublesOf(m_freqBuf);
+        const double *phases = doublesOf(m_phaseBuf);
+        const qsizetype low = std::lower_bound(freqs, freqs + count, pt.frequency) - freqs;
+        const qsizetype idx1 = std::clamp<qsizetype>(low - 1, 0, count - 1);
+        const qsizetype idx2 = std::clamp<qsizetype>(low, 0, count - 1);
         if (idx1 == idx2) {
-            res["phaseUnwrapped"] = m_phaseData[idx1].toMap()["y"].toDouble();
+            res["phaseUnwrapped"] = phases[idx1];
         } else {
-            double f1 = m_phaseData[idx1].toMap()["x"].toDouble();
-            double f2 = m_phaseData[idx2].toMap()["x"].toDouble();
-            double p1 = m_phaseData[idx1].toMap()["y"].toDouble();
-            double p2 = m_phaseData[idx2].toMap()["y"].toDouble();
-            double t = (f2 > f1) ? (pt.frequency - f1) / (f2 - f1) : 0.0;
-            res["phaseUnwrapped"] = p1 + t * (p2 - p1);
+            const double f1 = freqs[idx1], f2 = freqs[idx2];
+            const double t = (f2 > f1) ? (pt.frequency - f1) / (f2 - f1) : 0.0;
+            res["phaseUnwrapped"] = phases[idx1] + t * (phases[idx2] - phases[idx1]);
         }
     } else {
         res["phaseUnwrapped"] = pt.phase;

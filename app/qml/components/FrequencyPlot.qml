@@ -15,14 +15,16 @@ Item {
     property double cutoffFreq: filterEngine.cutoffFreq
     property double cutoffFreq2: filterEngine.cutoffFreq2
     property bool   isBandFilter: filterEngine.filterType >= 2
-    property var    points: []
 
-    // High-performance typed array buffers for ultra-low latency plot math & culling
+    // Float64Array views over the engine's packed result buffers (no per-point objects)
     property var _cachedX: null
     property var _cachedY: null
     property int _cachedCount: 0
+    // Decimated screen-space path, reused between paints
     property var _screenX: null
     property var _screenY: null
+    // New results arrived while hidden; refreshed when shown again
+    property bool _dataDirty: false
 
     // DSP Frequency Settings
     property int  freqScale: 0        // 0=Logarithmic (Hz), 1=Linear (Hz), 2=Normalized (ω/π rad/s), 3=Normalized (f/fs)
@@ -265,37 +267,62 @@ Item {
     }
 
     function refreshPoints() {
-        if (displayMode === 0) {
-            points = filterEngine.magnitudeData
-        } else if (displayMode === 1) {
-            points = filterEngine.phaseData
-        } else {
-            points = filterEngine.groupDelayData
+        // Hidden plots (other pages, collapsed panes) skip the work until shown
+        if (!visible) {
+            _dataDirty = true
+            return
         }
-
-        const pts = root.points
-        const n = pts ? pts.length : 0
-        root._cachedCount = n
-        if (n > 0) {
-            if (!root._cachedX || root._cachedX.length < n) {
-                root._cachedX = new Float64Array(n)
-                root._cachedY = new Float64Array(n)
-            }
-            const cx = root._cachedX
-            const cy = root._cachedY
-            for (let i = 0; i < n; ++i) {
-                const p = pts[i]
-                cx[i] = p["x"]
-                cy[i] = p["y"]
-            }
-        }
+        _dataDirty = false
+        const ys = displayMode === 0 ? filterEngine.magnitudeBuffer
+                 : displayMode === 1 ? filterEngine.phaseBuffer
+                                     : filterEngine.groupDelayBuffer
+        // QByteArray arrives as an ArrayBuffer: wrap it, no element copying
+        const cx = new Float64Array(filterEngine.frequencyBuffer)
+        const cy = new Float64Array(ys)
+        root._cachedX = cx
+        root._cachedY = cy
+        root._cachedCount = Math.min(cx.length, cy.length)
         if (!isCustomView) autoScale()
     }
 
+    // Full redraw: grid + curve + overlay (data, view, size or style changed)
     function schedulePaint() {
         if (canvas.available) canvas.requestPaint()
         else paintRetry.restart()
+        scheduleOverlayPaint()
         if (crosshairCanvas.available) crosshairCanvas.requestPaint()
+    }
+
+    // Cutoff handles and guide lines only (spec edits, handle drags)
+    function scheduleOverlayPaint() {
+        if (overlayCanvas.available) overlayCanvas.requestPaint()
+    }
+
+    function valToCanvasY(v) {
+        return root.marginTop + ((root.viewYMax - v) / ((root.viewYMax - root.viewYMin) || 1)) * root.plotH
+    }
+
+    function formatFreqLabel(f) {
+        const fScale = root.freqScale
+        if (fScale === 0 || fScale === 1) {
+            if (f >= 1000) return (f / 1000).toFixed(f % 1000 === 0 ? 0 : 1) + "k"
+            return String(Math.round(f))
+        } else if (fScale === 2) {
+            const frac = f / (root.sampleRate / 2.0)
+            if (frac === 0) return "0"
+            if (Math.abs(frac - 1.0) < 0.01) return "π"
+            return frac.toFixed(2) + "π"
+        }
+        return String((f / root.sampleRate).toFixed(2))
+    }
+
+    function strokeDashedLine(ctx, x1, y1, x2, y2, dashLen, gapLen) {
+        ctx.setLineDash([dashLen, gapLen])
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+        ctx.setLineDash([])
     }
 
     function scheduleCrosshairPaint() {
@@ -507,15 +534,7 @@ Item {
             const vYMax = root.viewYMax
             const vYRange = (vYMax - vYMin) || 1
 
-            // Fast native line dash helper
-            function strokeDashedLine(x1, y1, x2, y2, dashLen, gapLen) {
-                ctx.setLineDash([dashLen, gapLen])
-                ctx.beginPath()
-                ctx.moveTo(x1, y1)
-                ctx.lineTo(x2, y2)
-                ctx.stroke()
-                ctx.setLineDash([])
-            }
+            const formatFreqLabel = root.formatFreqLabel
 
             // Coordinate mapping functions
             function freqToX(f) {
@@ -535,21 +554,6 @@ Item {
                 else if (base >= 3.5) niceBase = 5
                 else if (base >= 1.5) niceBase = 2
                 return niceBase * Math.pow(10, power)
-            }
-
-            function formatFreqLabel(f) {
-                if (fScale === 0 || fScale === 1) {
-                    if (f >= 1000) return (f / 1000).toFixed(f % 1000 === 0 ? 0 : 1) + "k"
-                    return String(Math.round(f))
-                } else if (fScale === 2) {
-                    const frac = f / nyquist
-                    if (frac === 0) return "0"
-                    if (Math.abs(frac - 1.0) < 0.01) return "π"
-                    return frac.toFixed(2) + "π"
-                } else {
-                    const frac = (f / root.sampleRate).toFixed(2)
-                    return String(frac)
-                }
             }
 
             // ── Grid & Axes ────────────────────────────────────────────────────────
@@ -630,7 +634,168 @@ Item {
                 }
             }
 
-            // ── DSP Reference Overlays (Tolerances & Cutoff) ──────────────────────
+            // ── Frequency Response Curve ──────────────────────────────────────────
+            ctx.save()
+            ctx.beginPath()
+            ctx.rect(mL, mT, pW, pH)
+            ctx.clip()
+
+            const count = root._cachedCount
+            const cachedX = root._cachedX
+            const cachedY = root._cachedY
+
+            if (count > 1 && cachedX && cachedY) {
+                // Viewport culling via binary search on the sorted frequency grid
+                let low = 0, high = count - 1
+                while (low <= high) {
+                    const mid = (low + high) >> 1
+                    if (cachedX[mid] < vXMin) low = mid + 1
+                    else high = mid - 1
+                }
+                const iStart = Math.max(0, low - 1)
+                low = 0; high = count - 1
+                while (low <= high) {
+                    const mid = (low + high) >> 1
+                    if (cachedX[mid] <= vXMax) low = mid + 1
+                    else high = mid - 1
+                }
+                const iEnd = Math.min(count - 1, low + 1)
+
+                const visibleCount = iEnd - iStart + 1
+                if (visibleCount > 1) {
+                    if (!root._screenX || root._screenX.length < visibleCount) {
+                        root._screenX = new Float32Array(visibleCount + 64)
+                        root._screenY = new Float32Array(visibleCount + 64)
+                    }
+                    const sX = root._screenX
+                    const sY = root._screenY
+
+                    const magLin = (mode === 0 && root.magScaleMode === 1)
+                    const phaseWrap = (mode === 1 && root.phaseWrapMode === 1)
+                    const yTop = mT, yBottom = mT + pH
+                    // Inline x mapping (no function call per point)
+                    const logX = fScale === 0
+                    const lMin = Math.log(Math.max(1e-4, vXMin)) / Math.LN10
+                    const lRange = (Math.log(Math.max(1, vXMax)) / Math.LN10 - lMin) || 1
+                    const xRange = (vXMax - vXMin) || 1
+
+                    // Per-pixel-column min/max decimation (M4): each column keeps its
+                    // first, lowest, highest and last point in sample order, so nulls,
+                    // peaks and phase-wrap jumps render exactly while the path holds
+                    // at most four points per pixel.
+                    let n = 0
+                    let col = NaN
+                    let fI = 0, fX = 0, fY = 0
+                    let loI = 0, loX = 0, loY = 0
+                    let hiI = 0, hiX = 0, hiY = 0
+                    let laI = 0, laX = 0, laY = 0
+                    function emit(x, y) { sX[n] = x; sY[n] = y; ++n }
+                    function flushColumn() {
+                        emit(fX, fY)
+                        const loFirst = loI < hiI
+                        const i1 = loFirst ? loI : hiI
+                        const i2 = loFirst ? hiI : loI
+                        if (i1 !== fI && i1 !== laI) emit(loFirst ? loX : hiX, loFirst ? loY : hiY)
+                        if (i2 !== fI && i2 !== laI && i2 !== i1) emit(loFirst ? hiX : loX, loFirst ? hiY : loY)
+                        if (laI !== fI) emit(laX, laY)
+                    }
+
+                    for (let i = iStart; i <= iEnd; ++i) {
+                        const rawX = cachedX[i]
+                        let yVal = cachedY[i]
+                        if (magLin) {
+                            yVal = Math.pow(10, yVal / 20.0)
+                        } else if (phaseWrap) {
+                            yVal = ((((yVal + 180) % 360) + 360) % 360) - 180
+                        }
+                        const x = logX
+                            ? mL + ((Math.log(Math.max(1e-4, rawX)) / Math.LN10 - lMin) / lRange) * pW
+                            : mL + ((rawX - vXMin) / xRange) * pW
+                        let y = mT + ((vYMax - yVal) / vYRange) * pH
+                        y = y < yTop ? yTop : (y > yBottom ? yBottom : y)
+
+                        const c = Math.floor(x)
+                        if (c !== col) {
+                            if (i !== iStart) flushColumn()
+                            col = c
+                            fI = loI = hiI = i; fX = loX = hiX = x; fY = loY = hiY = y
+                        } else if (y < loY) {
+                            loI = i; loX = x; loY = y
+                        } else if (y > hiY) {
+                            hiI = i; hiX = x; hiY = y
+                        }
+                        laI = i; laX = x; laY = y
+                    }
+                    flushColumn()
+
+                    if (n > 1) {
+                        // Gradient fill under the curve
+                        ctx.beginPath()
+                        ctx.moveTo(sX[0], sY[0])
+                        for (let k = 1; k < n; ++k) ctx.lineTo(sX[k], sY[k])
+                        ctx.lineTo(sX[n - 1], yBottom)
+                        ctx.lineTo(sX[0], yBottom)
+                        ctx.closePath()
+
+                        let r = 10, g = 132, b = 255
+                        if (mode === 1) { r = 255; g = 159; b = 10 }
+                        else if (mode === 2) { r = 48; g = 209; b = 88 }
+
+                        const grad = ctx.createLinearGradient(0, mT, 0, yBottom)
+                        grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${theme.isDark ? 0.35 : 0.45})`)
+                        grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.02)`)
+                        ctx.fillStyle = grad
+                        ctx.fill()
+
+                        // Stroke curve
+                        ctx.lineWidth = root.plotLineWidth
+                        ctx.strokeStyle = root.curveColor()
+                        ctx.lineJoin = "round"
+                        ctx.lineCap = "round"
+                        ctx.beginPath()
+                        ctx.moveTo(sX[0], sY[0])
+                        for (let k = 1; k < n; ++k) ctx.lineTo(sX[k], sY[k])
+                        ctx.stroke()
+                    }
+                }
+            }
+            ctx.restore()
+        }
+    }
+
+    // ── Overlay Canvas: DSP guides and cutoff handles ────────────────────────
+    // Repainted alone on spec edits and handle drags, so moving a cutoff never
+    // re-rasterizes the grid and curve underneath.
+    Canvas {
+        id: overlayCanvas
+        anchors.fill: parent
+        antialiasing: true
+        renderTarget: Canvas.Image
+        renderStrategy: Canvas.Cooperative
+        z: 2
+
+        onAvailableChanged: if (available) requestPaint()
+
+        onPaint: {
+            const ctx = getContext("2d")
+            if (!ctx) return
+            ctx.reset()
+            ctx.clearRect(0, 0, width, height)
+
+            const mL = root.marginLeft
+            const mT = root.marginTop
+            const pW = root.plotW
+            const pH = root.plotH
+            const nyquist = root.sampleRate / 2.0
+            const mode = root.displayMode
+            const fScale = root.freqScale
+            const formatFreqLabel = root.formatFreqLabel
+            const valToY = root.valToCanvasY
+            function freqToX(f) { return root.freqToCanvasX(f) - mL }
+            function strokeDashedLine(x1, y1, x2, y2, dashLen, gapLen) {
+                root.strokeDashedLine(ctx, x1, y1, x2, y2, dashLen, gapLen)
+            }
+
             ctx.save()
             ctx.beginPath()
             ctx.rect(mL, mT, pW, pH)
@@ -692,93 +857,6 @@ Item {
                         ctx.textBaseline = "bottom"
                         ctx.fillText("1/√2 ≈ 0.7071 (-3 dB)", mL + pW - 8, yHalf - 2)
                     }
-                }
-            }
-
-            // ── Frequency Response Curve (Ultra-Fast Culling & Typed Buffer Pass) ──
-            const count = root._cachedCount
-            const cachedX = root._cachedX
-            const cachedY = root._cachedY
-
-            if (count > 1 && cachedX && cachedY) {
-                // Viewport Culling via Binary Search
-                let iStart = 0, iEnd = count - 1
-                if (count > 2) {
-                    let low = 0, high = count - 1
-                    while (low <= high) {
-                        const mid = (low + high) >> 1
-                        if (cachedX[mid] < vXMin) low = mid + 1
-                        else high = mid - 1
-                    }
-                    iStart = Math.max(0, low - 1)
-
-                    low = 0; high = count - 1
-                    while (low <= high) {
-                        const mid = (low + high) >> 1
-                        if (cachedX[mid] <= vXMax) low = mid + 1
-                        else high = mid - 1
-                    }
-                    iEnd = Math.min(count - 1, low + 1)
-                }
-
-                const visibleCount = iEnd - iStart + 1
-                if (visibleCount > 1) {
-                    if (!root._screenX || root._screenX.length < visibleCount) {
-                        root._screenX = new Float32Array(visibleCount + 64)
-                        root._screenY = new Float32Array(visibleCount + 64)
-                    }
-                    const sX = root._screenX
-                    const sY = root._screenY
-
-                    const magLin = (mode === 0 && root.magScaleMode === 1)
-                    const phaseWrap = (mode === 1 && root.phaseWrapMode === 1)
-
-                    // Single-pass screen coordinate transform
-                    for (let idx = 0, i = iStart; i <= iEnd; ++i, ++idx) {
-                        const rawX = cachedX[i]
-                        const rawY = cachedY[i]
-                        let yVal = rawY
-                        if (magLin) {
-                            yVal = Math.pow(10, rawY / 20.0)
-                        } else if (phaseWrap) {
-                            yVal = ((((rawY + 180) % 360) + 360) % 360) - 180
-                        }
-                        sX[idx] = mL + freqToX(rawX)
-                        sY[idx] = Math.max(mT, Math.min(mT + pH, valToY(yVal)))
-                    }
-
-                    // Polished Adaptive Gradient Background Fill
-                    ctx.beginPath()
-                    ctx.moveTo(sX[0], sY[0])
-                    for (let idx = 1; idx < visibleCount; ++idx) {
-                        ctx.lineTo(sX[idx], sY[idx])
-                    }
-                    ctx.lineTo(sX[visibleCount - 1], mT + pH)
-                    ctx.lineTo(sX[0], mT + pH)
-                    ctx.closePath()
-
-                    let r = 10, g = 132, b = 255
-                    if (mode === 1) { r = 255; g = 159; b = 10 }
-                    else if (mode === 2) { r = 48; g = 209; b = 88 }
-
-                    const grad = ctx.createLinearGradient(0, mT, 0, mT + pH)
-                    grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${theme.isDark ? 0.35 : 0.45})`)
-                    grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.02)`)
-                    ctx.fillStyle = grad
-                    ctx.fill()
-
-                    // Stroke Curve
-                    ctx.lineWidth = root.plotLineWidth
-                    ctx.strokeStyle = root.curveColor()
-                    ctx.lineJoin = "round"
-                    ctx.lineCap = "round"
-
-                    ctx.beginPath()
-                    ctx.moveTo(sX[0], sY[0])
-                    for (let idx = 1; idx < visibleCount; ++idx) {
-                        ctx.lineTo(sX[idx], sY[idx])
-                    }
-                    ctx.stroke()
                 }
             }
 
@@ -1346,8 +1424,12 @@ Item {
 
     Connections {
         target: filterEngine
-        function onResultsChanged() { root.refreshPoints(); root.schedulePaint() }
-        function onSpecChanged() { root.schedulePaint() }
+        function onResultsChanged() {
+            root.refreshPoints()
+            if (root.visible) root.schedulePaint()
+        }
+        // Cutoffs and guide levels live on the overlay; the curve waits for results
+        function onSpecChanged() { if (root.visible) root.scheduleOverlayPaint() }
     }
     Connections {
         target: theme
@@ -1356,11 +1438,14 @@ Item {
 
     Component.onCompleted: { refreshPoints(); schedulePaint() }
 
-    onVisibleChanged:     { if (visible) schedulePaint() }
+    onVisibleChanged: {
+        if (!visible) return
+        if (_dataDirty) refreshPoints()
+        schedulePaint()
+    }
     onWidthChanged:       schedulePaint()
     onHeightChanged:      schedulePaint()
     onDisplayModeChanged: { refreshPoints(); schedulePaint() }
-    onPointsChanged:      schedulePaint()
 
     property bool draggingCutoff:  false
     property bool draggingCutoff2: false
@@ -1420,15 +1505,17 @@ Item {
         onPositionChanged: function(mouse) {
             if (root.draggingCutoff) {
                 const f = root.xToFreq(mouse.x)
-                if (f > 1 && f < root.sampleRate / 2.0) {
+                // Band designs keep fc1 below fc2 so the live redesign stays valid
+                const upper = root.isBandFilter ? filterEngine.cutoffFreq2 : root.sampleRate / 2.0
+                if (f > 1 && f < upper) {
                     filterEngine.cutoffFreq = Math.round(f * 10) / 10
-                    root.schedulePaint()
+                    root.scheduleOverlayPaint()
                 }
             } else if (root.draggingCutoff2) {
                 const f = root.xToFreq(mouse.x)
                 if (f > filterEngine.cutoffFreq && f < root.sampleRate / 2.0) {
                     filterEngine.cutoffFreq2 = Math.round(f * 10) / 10
-                    root.schedulePaint()
+                    root.scheduleOverlayPaint()
                 }
             } else if (root.isPanning) {
                 const dx = mouse.x - lastMouseX

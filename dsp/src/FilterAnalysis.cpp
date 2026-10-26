@@ -51,21 +51,23 @@ static Complex evaluateRegularized(const FilterCoefficients& coeff, double omega
     return HReg;
 }
 
-// FIR group delay: tau(w) = Re{ sum n h[n] z^-n / sum h[n] z^-n }
-static double firGroupDelay(const FilterCoefficients& coeff, double omega) {
-    auto ratioAt = [&](double radius) {
-        const Complex zInv = 1.0 / std::polar(radius, omega);
-        Complex num{}, numDeriv{};
-        Complex zPow{1.0, 0.0};
-        for (size_t n = 0; n < coeff.fir.size(); ++n) {
-            num += coeff.fir[n] * zPow;
-            numDeriv += static_cast<double>(n) * coeff.fir[n] * zPow;
-            zPow *= zInv;
-        }
-        return std::make_pair(num, numDeriv);
-    };
-    auto [num, numDeriv] = ratioAt(1.0);
-    if (std::abs(num) <= 1e-10) std::tie(num, numDeriv) = ratioAt(1.0 - 1e-4);
+// P = sum h[n] w^n and S = sum n h[n] w^n = w P'(w) in one Horner pass, w = 1/z
+static std::pair<Complex, Complex> firHorner(const std::vector<double>& h, const Complex& w) {
+    Complex p{}, dp{};
+    for (auto it = h.rbegin(); it != h.rend(); ++it) {
+        dp = dp * w + p;
+        p = p * w + *it;
+    }
+    return {p, w * dp};
+}
+
+// FIR group delay tau(w) = Re{ S / P }; also returns H(e^{jw}) from the same
+// pass so the analysis grid evaluates each frequency once.
+static double firGroupDelay(const FilterCoefficients& coeff, double omega, Complex* response = nullptr) {
+    auto [num, numDeriv] = firHorner(coeff.fir, std::polar(1.0, -omega));
+    if (response) *response = coeff.gain * num;
+    if (std::abs(num) <= 1e-10)
+        std::tie(num, numDeriv) = firHorner(coeff.fir, 1.0 / std::polar(1.0 - 1e-4, omega));
     if (std::abs(num) <= 1e-300) return 0.0;
     return (numDeriv / num).real();
 }
@@ -231,7 +233,20 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
         const Complex zInv = 1.0 / z;
         const Complex zInv2 = zInv * zInv;
 
-        const Complex H = coeff.evaluate(omega);
+        // Exact analytical group delay: \tau_g(\omega) = \sum \tau_{g,k}(\omega)
+        // Edge cases: zeros or poles on or very close to unit circle cause division by zero.
+        // We apply Poisson regularization (evaluating with r = 1 - 1e-4) when denominator < 1e-4.
+        Complex H;
+        double totalGd = 0.0;
+        if (coeff.isFir()) {
+            totalGd = firGroupDelay(coeff, omega, &H);   // H and delay in one pass
+        } else {
+            H = coeff.evaluate(omega);
+            totalGd = sosGroupDelay(coeff, zInv, zInv2);
+        }
+        if (!std::isfinite(totalGd))
+            totalGd = 0.0;
+
         const double mag = std::abs(H);
         double magDb = -300.0;
         if (mag > 1e-15) {
@@ -262,15 +277,6 @@ AnalysisResult FilterAnalysis::compute(const FilterCoefficients& coeff,
         prevRawPhase = rawPhase;
         const double phaseDeg = unwrappedPhase * 180.0 / PI;
 
-        // Exact analytical group delay: \tau_g(\omega) = \sum \tau_{g,k}(\omega)
-        // Edge cases: zeros or poles on or very close to unit circle cause division by zero.
-        // We apply Poisson regularization (evaluating with r = 1 - 1e-4) when denominator < 1e-4.
-        double totalGd = coeff.isFir() ? firGroupDelay(coeff, omega)
-                                       : sosGroupDelay(coeff, zInv, zInv2);
-
-        if (!std::isfinite(totalGd))
-            totalGd = 0.0;
-
         result.frequencyResponse[i] = { freq, magDb, phaseDeg, totalGd };
     }
 
@@ -294,7 +300,14 @@ AnalysisPoint FilterAnalysis::evaluatePoint(const FilterCoefficients& coeff,
     const Complex zInv = 1.0 / z;
     const Complex zInv2 = zInv * zInv;
 
-    const Complex H = coeff.evaluate(omega);
+    Complex H;
+    double totalGd = 0.0;
+    if (coeff.isFir()) {
+        totalGd = firGroupDelay(coeff, omega, &H);
+    } else {
+        H = coeff.evaluate(omega);
+        totalGd = sosGroupDelay(coeff, zInv, zInv2);
+    }
     const double mag = std::abs(H);
     double magDb = -300.0;
     if (mag > 1e-15) {
@@ -310,14 +323,9 @@ AnalysisPoint FilterAnalysis::evaluatePoint(const FilterCoefficients& coeff,
         phaseDeg = std::arg(evaluateRegularized(coeff, omega)) * 180.0 / PI;
     }
 
-    double totalGd = coeff.isFir() ? firGroupDelay(coeff, omega)
-                                   : sosGroupDelay(coeff, zInv, zInv2);
-
-    if (std::isnan(totalGd) || std::isinf(totalGd)) {
+    // Preserve finite group-delay peaks; artificial clipping distorts plots.
+    if (!std::isfinite(totalGd))
         totalGd = 0.0;
-    } else {
-        // Preserve finite group-delay peaks; artificial clipping distorts plots.
-    }
 
     return { clampedF, magDb, phaseDeg, totalGd };
 }

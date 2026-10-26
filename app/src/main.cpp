@@ -18,7 +18,7 @@
 
 int main(int argc, char* argv[]) {
 #ifdef Q_OS_WIN
-    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.2.5");
+    SetCurrentProcessExplicitAppUserModelID(L"Overtune.FilterDesigner.3.3.0");
 #endif
     // Avoid GTK theme crash on Ubuntu Wayland/GNOME
     qputenv("QT_QPA_PLATFORMTHEME", "generic");

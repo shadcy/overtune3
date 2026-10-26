@@ -407,8 +407,7 @@ Rectangle {
                         checkable: true
                         checked: filterEngine.filterResponse === 5
                         onTriggered: {
-                            filterEngine.filterResponse = 5
-                            if (filterEngine.order < 16) filterEngine.order = 64
+                            filterEngine.filterResponse = 5   // engine restores the last FIR order
                             filterEngine.design()
                             rootWindow.showNotification("Selected: FIR (Windowed Sinc)", false)
                         }

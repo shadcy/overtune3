@@ -99,6 +99,36 @@ void runDesignMatrix() {
     }
 }
 
+// Bessel responses from scipy.signal.bessel(n, Wn, btype, norm='mag', fs=48000,
+// output='sos') evaluated with sosfreqz. The -3 dB edge check alone cannot
+// catch wrong prototype poles because the cutoff scale is recomputed from them.
+void runBesselReference() {
+    struct Point { double hz, re, im; };
+    struct Case { int order, type; double f1, f2; Point pts[4]; };
+    static const Case cases[] = {
+        {3, 0, 1000.0, 2000.0, {{250.0, 0.88811695757461329, -0.4162959714178105}, {1000.0, -0.11647709323013833, -0.6974475512557603}, {3000.0, -0.079745713958519343, 0.036624064875967061}, {9000.0, -0.0008538159732207225, 0.0024467801182018849}}},
+        {6, 0, 1000.0, 2000.0, {{250.0, 0.76470499821456883, -0.61201830209544938}, {1000.0, -0.64024925982998471, -0.3001347785364975}, {3000.0, 0.024505222056244703, -0.012299347159980129}, {9000.0, -1.6872707223284842e-05, -1.6198538780725661e-05}}},
+        {10, 0, 1000.0, 2000.0, {{250.0, 0.61123110644897538, -0.76480294886202638}, {1000.0, -0.63690039040098223, 0.30717729848912034}, {3000.0, -0.012472706759676501, 0.012725158185634444}, {9000.0, -8.6657111743709207e-09, -1.4800270148303958e-07}}},
+        {10, 1, 5000.0, 2000.0, {{250.0, -9.1485087670348422e-11, 8.3449828785185465e-11}, {1000.0, 0.00011964951601097468, 1.2519039365338944e-05}, {3000.0, 0.34201179936545956, -0.05363514291610666}, {9000.0, -0.22968112142092401, 0.88645082602441094}}},
+        {5, 2, 900.0, 1100.0, {{250.0, 1.6778381923158742e-06, 4.8369351546377714e-06}, {1000.0, 0.99192426029215652, -0.12028817810391434}, {3000.0, 1.0971915928078828e-05, -2.2232076471137094e-05}, {9000.0, 4.2446142990320362e-09, -3.4401033649824796e-08}}},
+        {7, 3, 2000.0, 6000.0, {{250.0, 0.96618298205246878, -0.24826427672110501}, {1000.0, 0.44335361630689574, -0.8461837937307104}, {3000.0, -0.0028432306236184481, -0.0049149244944896153}, {9000.0, 0.1371638813802904, 0.91443360903497561}}},
+    };
+    for (const auto& c : cases) {
+        dsp::FilterSpec spec;
+        spec.response = dsp::FilterResponse::Bessel;
+        spec.type = static_cast<dsp::FilterType>(c.type);
+        spec.order = c.order;
+        spec.sampleRate = 48000.0;
+        spec.cutoffFreq = c.f1;
+        spec.cutoffFreq2 = c.f2;
+        const auto coeff = dsp::designFilter(spec);
+        for (const auto& p : c.pts) {
+            const dsp::Complex h = coeff.evaluate(2.0 * std::numbers::pi * p.hz / spec.sampleRate);
+            check(std::abs(h - dsp::Complex{p.re, p.im}) < 1e-9, "Bessel response matches the SciPy reference");
+        }
+    }
+}
+
 void runFirMatrix() {
     constexpr int windowCount = static_cast<int>(dsp::FirWindow::DolphChebyshev) + 1;
     for (int window = 0; window < windowCount; ++window) {
@@ -283,6 +313,7 @@ void runInvalidSpecChecks() {
 
 int main() {
     runDesignMatrix();
+    runBesselReference();
     runFirMatrix();
     runFileReaderChecks();
     runExporterChecks();
