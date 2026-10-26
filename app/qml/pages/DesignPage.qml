@@ -13,7 +13,32 @@ Item {
     clip: true
 
     readonly property var typeNames:     ["Low Pass", "High Pass", "Band Pass", "Band Stop"]
-    readonly property var responseNames: ["Butterworth", "Chebyshev I", "Chebyshev II", "Elliptic", "Bessel"]
+    readonly property var responseNames: ["Butterworth", "Chebyshev I", "Chebyshev II", "Elliptic", "Bessel", "FIR (Windowed Sinc)"]
+    readonly property var firWindowNames: filterEngine.firWindowNames()
+    // Typical first-sidelobe level and use, indexed like dsp::FirWindow
+    readonly property var firWindowHints: [
+        "Narrowest main lobe, -13 dB sidelobes",
+        "-31 dB sidelobes, good general purpose",
+        "-43 dB sidelobes, classic audio choice",
+        "-58 dB sidelobes, wider transition",
+        "Tunable: attenuation sets beta",
+        "Triangular, -27 dB sidelobes",
+        "-36 dB sidelobes, fast sidelobe decay",
+        "-92 dB sidelobes, wide transition",
+        "-93 dB sidelobes, smooth spectrum",
+        "-98 dB sidelobes, widest 4-term lobe",
+        "Flattest passband, very wide transition",
+        "Tunable: sigma trades lobe width vs. sidelobes",
+        "Tunable: alpha 0 = rectangular, 1 = Hann",
+        "Sinc window, -26 dB sidelobes",
+        "Sine window, -23 dB sidelobes",
+        "Equal sidelobes at the chosen attenuation"
+    ]
+    readonly property bool shownUsesParam: shownIsFir && (shownFirWindow === 11 || shownFirWindow === 12)
+    readonly property bool shownUsesAtten: shownIsFir && (shownFirWindow === 4 || shownFirWindow === 15)
+    readonly property int shownResponse: hasPendingChanges ? pendingResponse : filterEngine.filterResponse
+    readonly property int shownFirWindow: hasPendingChanges ? pendingFirWindow : filterEngine.firWindow
+    readonly property bool shownIsFir: shownResponse === 5
     readonly property bool isBand: filterEngine.filterType >= 2
     readonly property bool narrowLayout: width < 680
     readonly property int pageMargin: width < 700 ? 10 : 16
@@ -27,6 +52,8 @@ Item {
     property double pendingCutoff2: filterEngine.cutoffFreq2
     property double pendingRipple: filterEngine.rippleDb
     property double pendingStopband: filterEngine.stopbandDb
+    property int pendingFirWindow: filterEngine.firWindow
+    property double pendingFirWindowParam: filterEngine.firWindowParam
 
     function syncPendingWithEngine() {
         pendingType = filterEngine.filterType
@@ -37,6 +64,8 @@ Item {
         pendingCutoff2 = filterEngine.cutoffFreq2
         pendingRipple = filterEngine.rippleDb
         pendingStopband = filterEngine.stopbandDb
+        pendingFirWindow = filterEngine.firWindow
+        pendingFirWindowParam = filterEngine.firWindowParam
         hasPendingChanges = false
     }
 
@@ -49,6 +78,8 @@ Item {
         filterEngine.cutoffFreq2 = pendingCutoff2
         filterEngine.rippleDb = pendingRipple
         filterEngine.stopbandDb = pendingStopband
+        filterEngine.firWindow = pendingFirWindow
+        filterEngine.firWindowParam = pendingFirWindowParam
         filterEngine.design()
         hasPendingChanges = false
         if (freqPlot) {
@@ -290,6 +321,63 @@ Item {
                         currentIndex: root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse
                         onActivated: {
                             root.pendingResponse = currentIndex
+                            if (currentIndex === 5 && root.pendingOrder < 16)
+                                root.pendingOrder = 64   // usable FIR default
+                            else if (currentIndex !== 5)
+                                root.pendingOrder = Math.min(root.pendingOrder, currentIndex === 4 ? 10 : 16)
+                            root.hasPendingChanges = true
+                        }
+                    }
+                }
+
+                ParameterRow {
+                    width: parent.width
+                    visible: root.shownIsFir
+                    height: visible ? implicitHeight : 0
+                    label: "Window"
+                    StyledCombo {
+                        width: parent.width
+                        model: root.firWindowNames
+                        currentIndex: root.shownFirWindow
+                        onActivated: {
+                            root.pendingFirWindow = currentIndex
+                            // Gaussian needs sigma > 0; Tukey accepts 0..1
+                            if (currentIndex === 11 && root.pendingFirWindowParam < 0.05)
+                                root.pendingFirWindowParam = 0.4
+                            root.hasPendingChanges = true
+                        }
+                    }
+                }
+
+                Text {
+                    visible: root.shownIsFir
+                    height: visible ? implicitHeight : 0
+                    width: parent.width
+                    text: root.firWindowHints[root.shownFirWindow] || ""
+                    font.family: "Stack Sans Headline"
+                    font.pixelSize: 11
+                    color: theme.secondaryText
+                    wrapMode: Text.WordWrap
+                }
+
+                ParameterRow {
+                    width: parent.width
+                    visible: root.shownUsesParam
+                    height: visible ? implicitHeight : 0
+                    label: root.shownFirWindow === 11 ? "Sigma (\u03c3)" : "Alpha (\u03b1)"
+                    StyledSlider {
+                        width: parent.width
+                        from: root.shownFirWindow === 11 ? 0.05 : 0.0
+                        to: 1.0
+                        value: root.hasPendingChanges ? root.pendingFirWindowParam : filterEngine.firWindowParam
+                        stepSize: 0.01
+                        valueDecimals: 2
+                        onMoved: {
+                            root.pendingFirWindowParam = Math.round(value * 100) / 100
+                            root.hasPendingChanges = true
+                        }
+                        onManualValueEntered: function(val) {
+                            root.pendingFirWindowParam = Math.max(from, Math.min(1.0, Math.round(val * 100) / 100))
                             root.hasPendingChanges = true
                         }
                     }
@@ -304,7 +392,7 @@ Item {
                     StyledSlider {
                         width: parent.width
                         from: 1
-                        to: (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 4 ? 10 : 16
+                        to: root.shownResponse === 4 ? 10 : (root.shownIsFir ? 256 : 16)
                         value: root.hasPendingChanges ? root.pendingOrder : filterEngine.order
                         stepSize: 1
                         valueDecimals: 0
@@ -454,9 +542,9 @@ Item {
 
                 ParameterRow {
                     width: parent.width
-                    visible: (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 2 || (root.hasPendingChanges ? root.pendingResponse : filterEngine.filterResponse) === 3
+                    visible: root.shownResponse === 2 || root.shownResponse === 3 || root.shownUsesAtten
                     height: visible ? implicitHeight : 0
-                    label: "Stopband"
+                    label: root.shownIsFir ? (root.shownFirWindow === 15 ? "Sidelobe Atten." : "Kaiser Atten.") : "Stopband"
                     StyledSlider {
                         width: parent.width
                         from: 20
@@ -648,17 +736,25 @@ Item {
 
                         FlatRow {
                             lbl: "Response"
-                            val: filterEngine.filterResponseName()
+                            val: filterEngine.responseName
                         }
                         FlatRow {
                             lbl: "Topology"
-                            val: filterEngine.filterTypeName()
+                            val: filterEngine.typeName
                         }
                         FlatRow {
                             lbl: "Order"
-                            val: filterEngine.order + (filterEngine.order === 1 ? "st"
-                                 : filterEngine.order === 2 ? "nd"
-                                 : filterEngine.order === 3 ? "rd" : "th")
+                            val: filterEngine.orderLabel.replace(" order", "")
+                        }
+                        FlatRow {
+                            visible: filterEngine.isFir; height: visible ? 34 : 0
+                            lbl: "Taps / Window"
+                            val: filterEngine.tapCount + " \u00b7 " + filterEngine.windowLabel
+                        }
+                        FlatRow {
+                            visible: filterEngine.isFir; height: visible ? 34 : 0
+                            lbl: "Group Delay"
+                            val: ((filterEngine.tapCount - 1) / 2).toFixed(1) + " smp (linear phase)"
                         }
                         FlatRow {
                             lbl: "Sample Rate"
@@ -667,7 +763,7 @@ Item {
                                  : filterEngine.sampleRate + " Hz"
                         }
                         FlatRow {
-                            lbl: filterEngine.filterType >= 2 ? "Fc Low" : "Cutoff (\u22123 dB)"
+                            lbl: filterEngine.filterType >= 2 ? "Fc Low" : "Cutoff (" + filterEngine.edgeDb.toFixed(1).replace("-", "\u2212") + " dB)"
                             val: filterEngine.cutoffFreq >= 1000
                                  ? (filterEngine.cutoffFreq / 1000).toFixed(3) + " kHz"
                                  : filterEngine.cutoffFreq.toFixed(1) + " Hz"
@@ -711,9 +807,9 @@ Item {
                             val: filterEngine.rippleDb.toFixed(2) + " dB"
                         }
                         FlatRow {
-                            visible: filterEngine.filterResponse === 2 || filterEngine.filterResponse === 3
+                            visible: filterEngine.filterResponse === 2 || filterEngine.filterResponse === 3 || filterEngine.windowUsesAtten
                             height: visible ? 34 : 0
-                            lbl: "Stopband Atten."
+                            lbl: filterEngine.isFir ? (filterEngine.firWindow === 15 ? "Sidelobe Atten." : "Kaiser Atten.") : "Stopband Atten."
                             val: filterEngine.stopbandDb.toFixed(1) + " dB"
                         }
 
@@ -759,7 +855,7 @@ Item {
                             val: {
                                 if (!filterEngine.hasResults) return "\u2014"
                                 const m = filterEngine.stepMetrics
-                                return m && m.overshootPct !== undefined ? m.overshootPct.toFixed(2)+" %" : "\u2014"
+                                return m && m.overshootPercent !== undefined ? Number(m.overshootPercent).toFixed(2)+" %" : "\u2014"
                             }
                         }
                         FlatRow {
@@ -1005,9 +1101,9 @@ Item {
                 Text {
                     text: {
                         if (freqPlot.displayMode === 0)
-                            return "Cutoff: " + Number(filterEngine.cutoffFreq).toLocaleString(Qt.locale(), "f", 0) + " Hz  ·  -3.0 dB"
+                            return "Cutoff: " + Number(filterEngine.cutoffFreq).toLocaleString(Qt.locale(), "f", 0) + " Hz  ·  " + filterEngine.edgeDb.toFixed(1) + " dB"
                         else if (freqPlot.displayMode === 1)
-                            return "Order: " + filterEngine.order + "  ·  Unwrapped Phase"
+                            return "Order: " + filterEngine.orderLabel.replace(" order", "") + "  ·  Unwrapped Phase"
                         else
                             return "Fs: " + Number(filterEngine.sampleRate).toLocaleString(Qt.locale(), "f", 0) + " Hz  ·  Exact τg"
                     }

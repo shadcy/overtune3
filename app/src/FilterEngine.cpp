@@ -15,6 +15,8 @@
 #include <QJsonObject>
 #include <QStandardPaths>
 #include <QVariantMap>
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <QUrl>
 #include <QDateTime>
@@ -58,6 +60,8 @@ static QJsonArray defaultPresets() {
                         48000, "~/presets/subsonic/rumble-cut"));
   arr.append(makePreset("chebyshev2_stopband_10k", 0, 2, 4, 10000, 0, 1.0, 60.0,
                         48000, "~/presets/scientific/monotonic-passband"));
+  arr.append(makePreset("fir_linear_phase_lpf_4k", 0, 5, 64, 4000, 0, 1.0, 60.0,
+                        48000, "~/presets/fir/linear-phase-lowpass"));
   return arr;
 }
 
@@ -85,16 +89,27 @@ void FilterEngine::setFilterType(int v) {
     design(); // Discrete type change runs immediately
   }
 }
+// Highest order the DSP library accepts for a given response family
+static int maxOrderFor(dsp::FilterResponse r) {
+  switch (r) {
+    case dsp::FilterResponse::Bessel: return 10;
+    case dsp::FilterResponse::FIR:    return 256;
+    default:                          return 16;
+  }
+}
+
 void FilterEngine::setFilterResponse(int v) {
   auto r = static_cast<dsp::FilterResponse>(v);
   if (m_spec.response != r) {
     qDebug() << "[FilterEngine] setFilterResponse:" << v;
     m_spec.response = r;
+    m_spec.order = std::min(m_spec.order, maxOrderFor(r));
     emit specChanged();
     design(); // Discrete response change runs immediately
   }
 }
 void FilterEngine::setOrder(int v) {
+  v = std::clamp(v, 1, maxOrderFor(m_spec.response));
   if (m_spec.order != v) {
     qDebug() << "[FilterEngine] setOrder:" << v;
     m_spec.order = v;
@@ -106,6 +121,13 @@ void FilterEngine::setSampleRate(double v) {
   if (m_spec.sampleRate != v) {
     qDebug() << "[FilterEngine] setSampleRate:" << v;
     m_spec.sampleRate = v;
+    // Keep the band edges below the new Nyquist frequency so lowering the
+    // sample rate does not leave an undesignable spec behind
+    const double nyquist = v / 2.0;
+    if (m_spec.cutoffFreq2 >= nyquist) m_spec.cutoffFreq2 = std::floor(nyquist * 0.95);
+    if (m_spec.cutoffFreq >= nyquist) m_spec.cutoffFreq = std::floor(nyquist * 0.45);
+    if (m_spec.cutoffFreq2 <= m_spec.cutoffFreq)
+      m_spec.cutoffFreq2 = std::min(std::floor(nyquist * 0.95), m_spec.cutoffFreq * 2.0);
     emit specChanged();
     scheduleDesign();
   }
@@ -135,6 +157,82 @@ void FilterEngine::setStopbandDb(double v) {
   if (m_spec.stopbandDb != v) {
     m_spec.stopbandDb = v;
     emit specChanged();
+    scheduleDesign();
+  }
+}
+
+void FilterEngine::setFirWindow(int v) {
+  auto w = static_cast<dsp::FirWindow>(v);
+  if (m_spec.firWindow != w) {
+    m_spec.firWindow = w;
+    emit specChanged();
+    design(); // Discrete window change runs immediately
+  }
+}
+
+void FilterEngine::setFirWindowParam(double v) {
+  if (m_spec.firWindowParam != v) {
+    m_spec.firWindowParam = v;
+    emit specChanged();
+    scheduleDesign();
+  }
+}
+
+int FilterEngine::effectiveOrder() const {
+  // High-pass and band-stop FIR designs need an even order (odd tap count)
+  const bool needsEven = m_spec.type == dsp::FilterType::HighPass ||
+                         m_spec.type == dsp::FilterType::BandStop;
+  if (m_spec.isFir() && needsEven && m_spec.order % 2 != 0)
+    return m_spec.order + 1;
+  return m_spec.order;
+}
+
+double FilterEngine::edgeDb() const {
+  // Same edge targets the design verifier checks against
+  switch (m_spec.response) {
+    case dsp::FilterResponse::ChebyshevI:
+    case dsp::FilterResponse::Elliptic:    return -m_spec.rippleDb;
+    case dsp::FilterResponse::ChebyshevII: return -m_spec.stopbandDb;
+    case dsp::FilterResponse::FIR:         return -6.0206;
+    default:                               return -3.0103;
+  }
+}
+
+QString FilterEngine::orderLabel() const {
+  const int n = effectiveOrder();
+  const int lastTwo = n % 100;
+  const char *suffix = "th";
+  if (lastTwo < 11 || lastTwo > 13) {
+    switch (n % 10) {
+      case 1: suffix = "st"; break;
+      case 2: suffix = "nd"; break;
+      case 3: suffix = "rd"; break;
+      default: break;
+    }
+  }
+  return QString("%1%2 order").arg(n).arg(suffix);
+}
+
+QStringList FilterEngine::firWindowNames() const {
+  QStringList names;
+  dsp::FilterSpec probe;
+  for (int i = 0; i <= static_cast<int>(dsp::FirWindow::DolphChebyshev); ++i) {
+    probe.firWindow = static_cast<dsp::FirWindow>(i);
+    names << QString::fromStdString(probe.windowName());
+  }
+  return names;
+}
+
+QString FilterEngine::toLocalPath(const QString &urlOrPath) const {
+  if (urlOrPath.startsWith("file:", Qt::CaseInsensitive))
+    return QUrl(urlOrPath).toLocalFile();
+  return urlOrPath;
+}
+
+void FilterEngine::setAnalysisPoints(int points) {
+  points = std::clamp(points, 512, 16384);
+  if (points != m_analysisPoints) {
+    m_analysisPoints = points;
     scheduleDesign();
   }
 }
@@ -182,7 +280,7 @@ void FilterEngine::designInternal() {
   try {
     m_coeff = dsp::designFilter(m_spec);
     auto result = dsp::FilterAnalysis::compute(
-        m_coeff, m_spec.sampleRate, 3072, m_spec.cutoffFreq, m_spec.cutoffFreq2);
+        m_coeff, m_spec.sampleRate, m_analysisPoints, m_spec.cutoffFreq, m_spec.cutoffFreq2);
     m_hasResults = true;
     publishResults(result);
     emit resultsChanged();
@@ -365,7 +463,12 @@ QString FilterEngine::filterTypeName() const {
   return QString::fromStdString(m_spec.typeName());
 }
 QString FilterEngine::filterResponseName() const {
+  if (m_spec.isFir())
+    return QString("FIR %1").arg(QString::fromStdString(m_spec.windowLabel()));
   return QString::fromStdString(m_spec.responseName());
+}
+QString FilterEngine::firWindowName() const {
+  return QString::fromStdString(m_spec.windowName());
 }
 
 QVariantList FilterEngine::loadPresets() {
@@ -429,6 +532,8 @@ bool FilterEngine::savePreset(const QString &name) {
   p["rippleDb"] = m_spec.rippleDb;
   p["stopbandDb"] = m_spec.stopbandDb;
   p["sampleRate"] = m_spec.sampleRate;
+  p["firWindow"] = static_cast<int>(m_spec.firWindow);
+  p["firWindowParam"] = m_spec.firWindowParam;
   p["desc"] = QString("User Preset · %1 %2 · Fc %3 Hz")
                   .arg(filterTypeName())
                   .arg(filterResponseName())
@@ -504,6 +609,9 @@ bool FilterEngine::applyPreset(const QString &name) {
       m_spec.rippleDb = o["rippleDb"].toDouble();
       m_spec.stopbandDb = o["stopbandDb"].toDouble();
       m_spec.sampleRate = o["sampleRate"].toDouble();
+      m_spec.firWindow = static_cast<dsp::FirWindow>(
+          o["firWindow"].toInt(static_cast<int>(dsp::FirWindow::Hamming)));
+      m_spec.firWindowParam = o["firWindowParam"].toDouble(0.5);
       emit specChanged();
       design();
       return true;

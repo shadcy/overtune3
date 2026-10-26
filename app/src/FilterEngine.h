@@ -4,6 +4,7 @@
 #include "dsp/FilterSpec.h"
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -28,6 +29,21 @@ class FilterEngine : public QObject {
   Q_PROPERTY(double rippleDb READ rippleDb WRITE setRippleDb NOTIFY specChanged)
   Q_PROPERTY(
       double stopbandDb READ stopbandDb WRITE setStopbandDb NOTIFY specChanged)
+  Q_PROPERTY(int firWindow READ firWindow WRITE setFirWindow NOTIFY specChanged)
+  Q_PROPERTY(double firWindowParam READ firWindowParam WRITE setFirWindowParam
+                 NOTIFY specChanged)
+
+  // Display names as properties so QML bindings refresh when the spec changes
+  // (bindings do not track Q_INVOKABLE calls)
+  Q_PROPERTY(QString typeName READ filterTypeName NOTIFY specChanged)
+  Q_PROPERTY(QString responseName READ filterResponseName NOTIFY specChanged)
+  Q_PROPERTY(QString windowLabel READ firWindowLabel NOTIFY specChanged)
+  Q_PROPERTY(int effectiveOrder READ effectiveOrder NOTIFY specChanged)
+  Q_PROPERTY(QString orderLabel READ orderLabel NOTIFY specChanged)
+  Q_PROPERTY(bool windowUsesParam READ windowUsesParam NOTIFY specChanged)
+  Q_PROPERTY(bool windowUsesAtten READ windowUsesAtten NOTIFY specChanged)
+  // Magnitude at the cutoff edge for the current family (-3 dB, -ripple, ...)
+  Q_PROPERTY(double edgeDb READ edgeDb NOTIFY specChanged)
 
   // ── Analysis result properties ──────────────────────────────────────────
   Q_PROPERTY(
@@ -44,6 +60,9 @@ class FilterEngine : public QObject {
   Q_PROPERTY(double stabilityMargin READ stabilityMargin NOTIFY resultsChanged)
   Q_PROPERTY(QVariantMap stepMetrics READ stepMetrics NOTIFY resultsChanged)
   Q_PROPERTY(bool hasResults READ hasResults NOTIFY resultsChanged)
+  Q_PROPERTY(bool isFir READ isFir NOTIFY resultsChanged)
+  Q_PROPERTY(int sectionCount READ sectionCount NOTIFY resultsChanged)
+  Q_PROPERTY(int tapCount READ tapCount NOTIFY resultsChanged)
 
 public:
   explicit FilterEngine(QObject *parent = nullptr);
@@ -57,6 +76,14 @@ public:
   double cutoffFreq2() const { return m_spec.cutoffFreq2; }
   double rippleDb() const { return m_spec.rippleDb; }
   double stopbandDb() const { return m_spec.stopbandDb; }
+  int firWindow() const { return static_cast<int>(m_spec.firWindow); }
+  double firWindowParam() const { return m_spec.firWindowParam; }
+  int effectiveOrder() const;
+  double edgeDb() const;
+  QString orderLabel() const;
+  QString firWindowLabel() const { return QString::fromStdString(m_spec.windowLabel()); }
+  bool windowUsesParam() const { return m_spec.isFir() && m_spec.windowUsesParam(); }
+  bool windowUsesAtten() const { return m_spec.isFir() && m_spec.windowUsesAtten(); }
 
   QVariantList magnitudeData() const { return m_magnitudeData; }
   QVariantList phaseData() const { return m_phaseData; }
@@ -70,6 +97,9 @@ public:
   double stabilityMargin() const { return m_stabilityMargin; }
   QVariantMap stepMetrics() const { return m_stepMetrics; }
   bool hasResults() const { return m_hasResults; }
+  bool isFir() const { return m_coeff.isFir(); }
+  int sectionCount() const { return static_cast<int>(m_coeff.sos.size()); }
+  int tapCount() const { return static_cast<int>(m_coeff.fir.size()); }
   const dsp::FilterCoefficients& coefficients() const { return m_coeff; }
 
   // Property setters
@@ -81,6 +111,8 @@ public:
   void setCutoffFreq2(double v);
   void setRippleDb(double v);
   void setStopbandDb(double v);
+  void setFirWindow(int v);
+  void setFirWindowParam(double v);
 
   // QML-invokable methods
   Q_INVOKABLE void design();
@@ -88,9 +120,17 @@ public:
   Q_INVOKABLE QString exportCode(int format); // 0=C, 1=C++, 2=Python, 3=JSON
   Q_INVOKABLE QString filterTypeName() const;
   Q_INVOKABLE QString filterResponseName() const;
+  Q_INVOKABLE QString firWindowName() const;
+  Q_INVOKABLE QStringList firWindowNames() const;
+
+  // Converts a file-dialog URL (file:///C:/...) to a native path; plain paths pass through
+  Q_INVOKABLE QString toLocalPath(const QString &urlOrPath) const;
 
   // Reset filter parameters to defaults
   Q_INVOKABLE void reset();
+
+  // Base density of the frequency-analysis grid (Settings > Plot resolution)
+  void setAnalysisPoints(int points);
 
   // Clipboard utility
   Q_INVOKABLE void copyText(const QString &text);
@@ -137,6 +177,7 @@ private:
   void publishResults(const dsp::AnalysisResult &result);
 
   QTimer m_debounceTimer;
+  int m_analysisPoints{3072};
   dsp::FilterSpec m_spec;
   dsp::FilterCoefficients m_coeff;
   bool m_hasResults{false};

@@ -1,6 +1,7 @@
 #include "dsp/CodeExporter.h"
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 #include <ctime>
 
 namespace dsp {
@@ -12,14 +13,66 @@ static std::string timestamp() {
     return buf;
 }
 
+// Cutoff description; the second edge only applies to band designs
+static std::string cutoffText(const FilterSpec& spec) {
+    std::ostringstream ss;
+    ss << spec.cutoffFreq << " Hz";
+    if (spec.type == FilterType::BandPass || spec.type == FilterType::BandStop)
+        ss << " .. " << spec.cutoffFreq2 << " Hz";
+    if (spec.isFir()) ss << " (-6 dB)";
+    return ss.str();
+}
+
+static std::string structureText(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    if (coeff.isFir()) return "FIR, " + spec.windowLabel() + " window";
+    return spec.responseName();
+}
+
+static std::string orderText(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    std::ostringstream ss;
+    if (coeff.isFir())
+        ss << coeff.fir.size() - 1 << " (" << coeff.fir.size() << " taps, linear phase)";
+    else
+        ss << spec.order << " (" << coeff.sos.size() << " Second-Order Sections)";
+    return ss.str();
+}
+
+// Floating-point literal that stays a float in strictly typed languages (Rust)
+static std::string floatLiteral(double v) {
+    std::ostringstream ss;
+    ss << std::setprecision(17) << v;
+    std::string s = ss.str();
+    if (s.find_first_of(".eEn") == std::string::npos) s += ".0";
+    return s;
+}
+
+static bool allPolesStable(const FilterCoefficients& coeff) {
+    for (const auto& p : coeff.poles)
+        if (!(std::abs(p) < 1.0)) return false;
+    return true;
+}
+
 std::string CodeExporter::generate(const FilterCoefficients& coeff,
                                    const FilterSpec&         spec,
                                    ExportFormat              format) {
+    if (coeff.isFir()) {
+        switch (format) {
+            case ExportFormat::C:         return genFirC     (coeff, spec);
+            case ExportFormat::CppHeader: return genFirCpp   (coeff, spec);
+            case ExportFormat::Python:    return genFirPython(coeff, spec);
+            case ExportFormat::Json:      return genFirJson  (coeff, spec);
+            default: break;
+        }
+    }
     switch (format) {
         case ExportFormat::C:         return genC     (coeff, spec);
         case ExportFormat::CppHeader: return genCpp   (coeff, spec);
         case ExportFormat::Python:    return genPython(coeff, spec);
         case ExportFormat::Json:      return genJson  (coeff, spec);
+        case ExportFormat::Matlab:     return genMatlab    (coeff, spec);
+        case ExportFormat::Rust:       return genRust      (coeff, spec);
+        case ExportFormat::JavaScript: return genJavaScript(coeff, spec);
+        case ExportFormat::Csv:        return genCsv       (coeff, spec);
     }
     return {};
 }
@@ -34,8 +87,7 @@ std::string CodeExporter::genC(const FilterCoefficients& coeff, const FilterSpec
     ss << " *   Type:       " << spec.typeName() << " (" << spec.responseName() << ")\n";
     ss << " *   Order:      " << spec.order << " (" << coeff.sos.size() << " Second-Order Sections)\n";
     ss << " *   Fs:         " << spec.sampleRate << " Hz\n";
-    ss << " *   Cutoff:     " << spec.cutoffFreq << " Hz"
-       << (spec.cutoffFreq2 > 0 ? (" .. " + std::to_string(static_cast<int>(spec.cutoffFreq2)) + " Hz") : "") << "\n";
+    ss << " *   Cutoff:     " << cutoffText(spec) << "\n";
     ss << " *   Passband:   " << spec.rippleDb << " dB ripple\n";
     ss << " *   Stopband:   " << spec.stopbandDb << " dB attenuation\n";
     ss << " * ========================================================================= */\n\n";
@@ -145,8 +197,7 @@ std::string CodeExporter::genCpp(const FilterCoefficients& coeff, const FilterSp
     ss << "//   Type:       " << spec.typeName() << " (" << spec.responseName() << ")\n";
     ss << "//   Order:      " << spec.order << " (" << coeff.sos.size() << " Second-Order Sections)\n";
     ss << "//   Fs:         " << spec.sampleRate << " Hz\n";
-    ss << "//   Cutoff:     " << spec.cutoffFreq << " Hz"
-       << (spec.cutoffFreq2 > 0 ? (" .. " + std::to_string(static_cast<int>(spec.cutoffFreq2)) + " Hz") : "") << "\n";
+    ss << "//   Cutoff:     " << cutoffText(spec) << "\n";
     ss << "// =========================================================================\n\n";
     ss << "#pragma once\n\n";
     ss << "#include <array>\n";
@@ -156,7 +207,7 @@ std::string CodeExporter::genCpp(const FilterCoefficients& coeff, const FilterSp
     ss << "namespace overtune::filter {\n\n";
 
     ss << std::setprecision(17);
-    ss << "inline constexpr std::size_t num_sections = " << coeff.sos.size() << "UZ;\n";
+    ss << "inline constexpr std::size_t num_sections = " << coeff.sos.size() << ";\n";
     ss << "inline constexpr double gain = " << coeff.gain << ";\n\n";
 
     ss << "// SOS Biquads: each row represents { b0, b1, b2, a1, a2 }\n";
@@ -233,8 +284,7 @@ std::string CodeExporter::genPython(const FilterCoefficients& coeff, const Filte
     ss << "#   Type:       " << spec.typeName() << " (" << spec.responseName() << ")\n";
     ss << "#   Order:      " << spec.order << " (" << coeff.sos.size() << " Second-Order Sections)\n";
     ss << "#   Fs:         " << spec.sampleRate << " Hz\n";
-    ss << "#   Cutoff:     " << spec.cutoffFreq << " Hz"
-       << (spec.cutoffFreq2 > 0 ? (" .. " + std::to_string(static_cast<int>(spec.cutoffFreq2)) + " Hz") : "") << "\n";
+    ss << "#   Cutoff:     " << cutoffText(spec) << "\n";
     ss << "# =========================================================================\n\n";
     ss << "import numpy as np\n";
     ss << "from scipy import signal\n\n";
@@ -260,7 +310,7 @@ std::string CodeExporter::genPython(const FilterCoefficients& coeff, const Filte
 def process_zi(x: np.ndarray, zi: np.ndarray = None):
     """Streaming filter with state persistence for real-time chunked audio."""
     if zi is None:
-        zi = signal.sosfilt_zi(sos) * (x[0] if len(x) > 0 else 0.0)
+        zi = signal.sosfilt_zi(sos) * (x[0] * gain if len(x) > 0 else 0.0)
     y, zf = signal.sosfilt(sos, x * gain, zi=zi)
     return y, zf
 
@@ -310,7 +360,7 @@ std::string CodeExporter::genJson(const FilterCoefficients& coeff, const FilterS
     ss << "  },\n";
     ss << "  \"filterGain\": " << coeff.gain << ",\n";
     ss << "  \"numSections\": " << coeff.sos.size() << ",\n";
-    ss << "  \"isStable\": true,\n";
+    ss << "  \"isStable\": " << (allPolesStable(coeff) ? "true" : "false") << ",\n";
     ss << "  \"sections\": [\n";
     for (size_t i = 0; i < coeff.sos.size(); ++i) {
         const auto& s = coeff.sos[i];
@@ -322,6 +372,519 @@ std::string CodeExporter::genJson(const FilterCoefficients& coeff, const FilterS
     }
     ss << "  ]\n";
     ss << "}\n";
+    return ss.str();
+}
+
+// ── FIR exporters ────────────────────────────────────────────────────────────
+// The overall gain is folded into the exported taps.
+
+static void writeTapList(std::ostringstream& ss, const FilterCoefficients& coeff,
+                         const char* indent, int perLine) {
+    for (size_t i = 0; i < coeff.fir.size(); ++i) {
+        if (i % static_cast<size_t>(perLine) == 0) ss << indent;
+        ss << coeff.fir[i] * coeff.gain;
+        if (i + 1 < coeff.fir.size()) ss << ",";
+        ss << ((i + 1) % static_cast<size_t>(perLine) == 0 || i + 1 == coeff.fir.size() ? "\n" : " ");
+    }
+}
+
+std::string CodeExporter::genFirC(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    const size_t taps = coeff.fir.size();
+    std::ostringstream ss;
+    ss << "/* =========================================================================\n";
+    ss << " * Auto-generated by Overtune 3 Digital Filter Designer\n";
+    ss << " * Generated on: " << timestamp() << "\n";
+    ss << " * Target:       Embedded C (Direct-Form FIR, circular delay line)\n";
+    ss << " * Specification:\n";
+    ss << " *   Type:       " << spec.typeName() << " (FIR, " << spec.windowLabel() << " window)\n";
+    ss << " *   Order:      " << taps - 1 << " (" << taps << " taps, linear phase)\n";
+    ss << " *   Fs:         " << spec.sampleRate << " Hz\n";
+    ss << " *   Cutoff:     " << cutoffText(spec) << "\n";
+    ss << " *   Delay:      " << (taps - 1) / 2.0 << " samples\n";
+    ss << " * ========================================================================= */\n\n";
+    ss << "#ifndef OVERTUNE_FIR_FILTER_H\n";
+    ss << "#define OVERTUNE_FIR_FILTER_H\n\n";
+    ss << "#include <stddef.h>\n";
+    ss << "#include <string.h>\n\n";
+    ss << "#ifdef __cplusplus\nextern \"C\" {\n#endif\n\n";
+    ss << "/* Number of FIR taps */\n";
+    ss << "#define FIR_NUM_TAPS " << taps << "U\n\n";
+    ss << std::setprecision(17);
+    ss << "/* Impulse response h[n] */\n";
+    ss << "static const double FIR_TAPS[FIR_NUM_TAPS] = {\n";
+    writeTapList(ss, coeff, "    ", 4);
+    ss << "};\n\n";
+    ss << R"(/* Filter runtime instance */
+typedef struct {
+    double history[FIR_NUM_TAPS];
+    size_t pos;
+} FirInstance;
+
+/**
+ * @brief Initialize or clear the delay line.
+ */
+static inline void fir_init(FirInstance* inst) {
+    if (inst != NULL) {
+        memset(inst, 0, sizeof(FirInstance));
+    }
+}
+
+/**
+ * @brief Process a single input sample.
+ * @param inst Pointer to filter runtime instance.
+ * @param in   Raw input sample.
+ * @return Filtered output sample.
+ */
+static inline double fir_process_sample(FirInstance* inst, double in) {
+    double acc = 0.0;
+    size_t idx = inst->pos;
+    inst->history[idx] = in;
+    for (size_t k = 0; k < FIR_NUM_TAPS; ++k) {
+        acc += FIR_TAPS[k] * inst->history[idx];
+        idx = (idx == 0U) ? (FIR_NUM_TAPS - 1U) : (idx - 1U);
+    }
+    inst->pos = (inst->pos + 1U) % FIR_NUM_TAPS;
+    return acc;
+}
+
+/**
+ * @brief Process a block of samples (in-place processing supported).
+ */
+static inline void fir_process_block(FirInstance* inst, const double* in, double* out, size_t count) {
+    for (size_t n = 0; n < count; ++n) {
+        out[n] = fir_process_sample(inst, in[n]);
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OVERTUNE_FIR_FILTER_H */
+)";
+    return ss.str();
+}
+
+std::string CodeExporter::genFirCpp(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    const size_t taps = coeff.fir.size();
+    std::ostringstream ss;
+    ss << "// =========================================================================\n";
+    ss << "// Auto-generated by Overtune 3 Digital Filter Designer\n";
+    ss << "// Generated on: " << timestamp() << "\n";
+    ss << "// Target:       Modern C++20 Header-Only Direct-Form FIR\n";
+    ss << "// Specification:\n";
+    ss << "//   Type:       " << spec.typeName() << " (FIR, " << spec.windowLabel() << " window)\n";
+    ss << "//   Order:      " << taps - 1 << " (" << taps << " taps, linear phase)\n";
+    ss << "//   Fs:         " << spec.sampleRate << " Hz\n";
+    ss << "//   Cutoff:     " << cutoffText(spec) << "\n";
+    ss << "// =========================================================================\n\n";
+    ss << "#pragma once\n\n";
+    ss << "#include <array>\n";
+    ss << "#include <span>\n";
+    ss << "#include <cstddef>\n";
+    ss << "#include <algorithm>\n\n";
+    ss << "namespace overtune::fir {\n\n";
+    ss << std::setprecision(17);
+    ss << "inline constexpr std::size_t num_taps = " << taps << ";\n\n";
+    ss << "inline constexpr std::array<double, num_taps> taps = {\n";
+    writeTapList(ss, coeff, "    ", 4);
+    ss << "};\n\n";
+    ss << R"(/**
+ * @brief Zero-allocation direct-form FIR with a circular delay line.
+ */
+class Filter {
+public:
+    constexpr Filter() noexcept = default;
+
+    [[nodiscard]] constexpr double process(double in) noexcept {
+        history_[pos_] = in;
+        double acc = 0.0;
+        std::size_t idx = pos_;
+        for (std::size_t k = 0; k < num_taps; ++k) {
+            acc += taps[k] * history_[idx];
+            idx = (idx == 0) ? num_taps - 1 : idx - 1;
+        }
+        pos_ = (pos_ + 1) % num_taps;
+        return acc;
+    }
+
+    void process_block(std::span<const double> in, std::span<double> out) noexcept {
+        const std::size_t count = std::min(in.size(), out.size());
+        for (std::size_t n = 0; n < count; ++n) {
+            out[n] = process(in[n]);
+        }
+    }
+
+    constexpr void reset() noexcept {
+        history_.fill(0.0);
+        pos_ = 0;
+    }
+
+private:
+    std::array<double, num_taps> history_{};
+    std::size_t pos_{0};
+};
+
+} // namespace overtune::fir
+)";
+    return ss.str();
+}
+
+std::string CodeExporter::genFirPython(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    const size_t taps = coeff.fir.size();
+    std::ostringstream ss;
+    ss << "# =========================================================================\n";
+    ss << "# Auto-generated by Overtune 3 Digital Filter Designer\n";
+    ss << "# Generated on: " << timestamp() << "\n";
+    ss << "# Target:       Python 3 with NumPy & SciPy signal processing\n";
+    ss << "# Specification:\n";
+    ss << "#   Type:       " << spec.typeName() << " (FIR, " << spec.windowLabel() << " window)\n";
+    ss << "#   Order:      " << taps - 1 << " (" << taps << " taps, linear phase)\n";
+    ss << "#   Fs:         " << spec.sampleRate << " Hz\n";
+    ss << "#   Cutoff:     " << cutoffText(spec) << "\n";
+    ss << "# =========================================================================\n\n";
+    ss << "import numpy as np\n";
+    ss << "from scipy import signal\n\n";
+    ss << std::setprecision(17);
+    ss << "fs = " << spec.sampleRate << "\n\n";
+    ss << "# FIR impulse response h[n]\n";
+    ss << "taps = np.array([\n";
+    writeTapList(ss, coeff, "    ", 4);
+    ss << "], dtype=np.float64)\n\n";
+    ss << R"(def process(x: np.ndarray) -> np.ndarray:
+    """Filter input signal x with the FIR taps."""
+    return signal.lfilter(taps, [1.0], x)
+
+def process_zi(x: np.ndarray, zi: np.ndarray = None):
+    """Streaming filter with state persistence for real-time chunked audio."""
+    if zi is None:
+        zi = np.zeros(len(taps) - 1)
+    return signal.lfilter(taps, [1.0], x, zi=zi)
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
+    w, h = signal.freqz(taps, [1.0], worN=4096, fs=fs)
+    mag_db = 20 * np.log10(np.maximum(np.abs(h), 1e-15))
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
+    ax1.semilogx(w, mag_db, color='#3794FF', lw=1.8)
+    ax1.set_ylabel('Magnitude (dB)')
+    ax1.set_title('Overtune 3 Synthesized FIR Response')
+    ax1.grid(True, which='both', alpha=0.3)
+    ax1.set_ylim(-120, 10)
+
+    angles = np.unwrap(np.angle(h)) * 180 / np.pi
+    ax2.semilogx(w, angles, color='#30D158', lw=1.8)
+    ax2.set_xlabel('Frequency (Hz)')
+    ax2.set_ylabel('Phase (degrees)')
+    ax2.grid(True, which='both', alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+)";
+    return ss.str();
+}
+
+std::string CodeExporter::genFirJson(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    std::ostringstream ss;
+    ss << std::setprecision(17);
+    ss << "{\n";
+    ss << "  \"generator\": \"Overtune 3\",\n";
+    ss << "  \"schemaVersion\": \"3.0\",\n";
+    ss << "  \"timestamp\": \"" << timestamp() << "\",\n";
+    ss << "  \"structure\": \"FIR\",\n";
+    ss << "  \"spec\": {\n";
+    ss << "    \"type\": \""          << spec.typeName()     << "\",\n";
+    ss << "    \"response\": \""      << spec.responseName() << "\",\n";
+    ss << "    \"window\": \""        << spec.windowLabel()  << "\",\n";
+    ss << "    \"order\": "           << coeff.fir.size() - 1 << ",\n";
+    ss << "    \"sampleRate\": "      << spec.sampleRate     << ",\n";
+    ss << "    \"cutoffFreq\": "      << spec.cutoffFreq     << ",\n";
+    ss << "    \"cutoffFreq2\": "     << spec.cutoffFreq2    << ",\n";
+    ss << "    \"stopbandAttenDb\": " << spec.stopbandDb     << "\n";
+    ss << "  },\n";
+    ss << "  \"numTaps\": " << coeff.fir.size() << ",\n";
+    ss << "  \"groupDelaySamples\": " << (coeff.fir.size() - 1) / 2.0 << ",\n";
+    ss << "  \"isStable\": true,\n";
+    ss << "  \"taps\": [\n";
+    writeTapList(ss, coeff, "    ", 4);
+    ss << "  ]\n";
+    ss << "}\n";
+    return ss.str();
+}
+
+// ── MATLAB / Octave, Rust, WebAudio JavaScript and CSV exporters ─────────────
+// Each handles both structures: SOS cascades for IIR designs, taps for FIR.
+
+std::string CodeExporter::genMatlab(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    std::ostringstream ss;
+    ss << "% =========================================================================\n";
+    ss << "% Auto-generated by Overtune 3 Digital Filter Designer\n";
+    ss << "% Generated on: " << timestamp() << "\n";
+    ss << "% Target:       MATLAB / GNU Octave (core filter(), no toolbox required)\n";
+    ss << "% Specification:\n";
+    ss << "%   Type:       " << spec.typeName() << " (" << structureText(coeff, spec) << ")\n";
+    ss << "%   Order:      " << orderText(coeff, spec) << "\n";
+    ss << "%   Fs:         " << spec.sampleRate << " Hz\n";
+    ss << "%   Cutoff:     " << cutoffText(spec) << "\n";
+    ss << "% =========================================================================\n\n";
+    ss << std::setprecision(17);
+    ss << "fs = " << spec.sampleRate << ";\n\n";
+    if (coeff.isFir()) {
+        ss << "% FIR impulse response h[n] (linear phase, delay = " << (coeff.fir.size() - 1) / 2.0 << " samples)\n";
+        ss << "b = [ ...\n";
+        for (size_t i = 0; i < coeff.fir.size(); ++i)
+            ss << "    " << coeff.fir[i] * coeff.gain << " ...\n";
+        ss << "];\n\n";
+        ss << "x = randn(1, 4096);   % replace with your signal\n";
+        ss << "y = filter(b, 1, x);\n\n";
+        ss << "% With the Signal Processing Toolbox: freqz(b, 1, 4096, fs)\n";
+    } else {
+        ss << "g = " << coeff.gain << ";\n\n";
+        ss << "% Second-order sections, one row per biquad: [b0 b1 b2 a0 a1 a2]\n";
+        ss << "sos = [\n";
+        for (const auto& s : coeff.sos)
+            ss << "    " << s.b0 << " " << s.b1 << " " << s.b2 << " 1 " << s.a1 << " " << s.a2 << "\n";
+        ss << "];\n\n";
+        ss << "x = randn(1, 4096);   % replace with your signal\n";
+        ss << "y = g * x;\n";
+        ss << "for k = 1:size(sos, 1)\n";
+        ss << "    y = filter(sos(k, 1:3), sos(k, 4:6), y);\n";
+        ss << "end\n\n";
+        ss << "% With the Signal Processing Toolbox: y = g * sosfilt(sos, x); freqz(sos, 4096, fs)\n";
+    }
+    return ss.str();
+}
+
+std::string CodeExporter::genRust(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    std::ostringstream ss;
+    ss << "// =========================================================================\n";
+    ss << "// Auto-generated by Overtune 3 Digital Filter Designer\n";
+    ss << "// Generated on: " << timestamp() << "\n";
+    ss << "// Target:       Rust (no_std compatible, zero allocation)\n";
+    ss << "// Specification:\n";
+    ss << "//   Type:       " << spec.typeName() << " (" << structureText(coeff, spec) << ")\n";
+    ss << "//   Order:      " << orderText(coeff, spec) << "\n";
+    ss << "//   Fs:         " << spec.sampleRate << " Hz\n";
+    ss << "//   Cutoff:     " << cutoffText(spec) << "\n";
+    ss << "// =========================================================================\n\n";
+    if (coeff.isFir()) {
+        const size_t taps = coeff.fir.size();
+        ss << "pub const NUM_TAPS: usize = " << taps << ";\n\n";
+        ss << "/// Impulse response h[n]\n";
+        ss << "pub const TAPS: [f64; NUM_TAPS] = [\n";
+        for (size_t i = 0; i < taps; ++i)
+            ss << "    " << floatLiteral(coeff.fir[i] * coeff.gain) << ",\n";
+        ss << "];\n\n";
+        ss << R"(/// Direct-form FIR with a circular delay line.
+pub struct Filter {
+    history: [f64; NUM_TAPS],
+    pos: usize,
+}
+
+impl Filter {
+    pub const fn new() -> Self {
+        Self { history: [0.0; NUM_TAPS], pos: 0 }
+    }
+
+    pub fn process(&mut self, input: f64) -> f64 {
+        self.history[self.pos] = input;
+        let mut acc = 0.0;
+        let mut idx = self.pos;
+        for &tap in TAPS.iter() {
+            acc += tap * self.history[idx];
+            idx = if idx == 0 { NUM_TAPS - 1 } else { idx - 1 };
+        }
+        self.pos = (self.pos + 1) % NUM_TAPS;
+        acc
+    }
+
+    pub fn process_block(&mut self, input: &[f64], output: &mut [f64]) {
+        for (out, &x) in output.iter_mut().zip(input) {
+            *out = self.process(x);
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.history = [0.0; NUM_TAPS];
+        self.pos = 0;
+    }
+}
+
+impl Default for Filter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+)";
+    } else {
+        ss << "pub const NUM_SECTIONS: usize = " << coeff.sos.size() << ";\n";
+        ss << "pub const GAIN: f64 = " << floatLiteral(coeff.gain) << ";\n\n";
+        ss << "/// Second-order sections: [b0, b1, b2, a1, a2] (a0 = 1)\n";
+        ss << "pub const SOS: [[f64; 5]; NUM_SECTIONS] = [\n";
+        for (const auto& s : coeff.sos)
+            ss << "    [" << floatLiteral(s.b0) << ", " << floatLiteral(s.b1) << ", " << floatLiteral(s.b2)
+               << ", " << floatLiteral(s.a1) << ", " << floatLiteral(s.a2) << "],\n";
+        ss << "];\n\n";
+        ss << R"(/// Direct Form II Transposed biquad cascade.
+pub struct Filter {
+    state: [[f64; 2]; NUM_SECTIONS],
+}
+
+impl Filter {
+    pub const fn new() -> Self {
+        Self { state: [[0.0; 2]; NUM_SECTIONS] }
+    }
+
+    pub fn process(&mut self, input: f64) -> f64 {
+        let mut x = input * GAIN;
+        for (c, s) in SOS.iter().zip(self.state.iter_mut()) {
+            let y = c[0] * x + s[0];
+            s[0] = c[1] * x - c[3] * y + s[1];
+            s[1] = c[2] * x - c[4] * y;
+            x = y;
+        }
+        x
+    }
+
+    pub fn process_block(&mut self, input: &[f64], output: &mut [f64]) {
+        for (out, &x) in output.iter_mut().zip(input) {
+            *out = self.process(x);
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.state = [[0.0; 2]; NUM_SECTIONS];
+    }
+}
+
+impl Default for Filter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+)";
+    }
+    return ss.str();
+}
+
+std::string CodeExporter::genJavaScript(const FilterCoefficients& coeff, const FilterSpec& spec) {
+    std::ostringstream ss;
+    ss << "// =========================================================================\n";
+    ss << "// Auto-generated by Overtune 3 Digital Filter Designer\n";
+    ss << "// Generated on: " << timestamp() << "\n";
+    ss << "// Target:       Web Audio API (ES module) + plain JavaScript processor\n";
+    ss << "// Specification:\n";
+    ss << "//   Type:       " << spec.typeName() << " (" << structureText(coeff, spec) << ")\n";
+    ss << "//   Order:      " << orderText(coeff, spec) << "\n";
+    ss << "//   Fs:         " << spec.sampleRate << " Hz\n";
+    ss << "//   Cutoff:     " << cutoffText(spec) << "\n";
+    ss << "// Coefficients are only valid at the design sample rate.\n";
+    ss << "// =========================================================================\n\n";
+    ss << std::setprecision(17);
+    ss << "export const SAMPLE_RATE = " << spec.sampleRate << ";\n";
+    if (coeff.isFir()) {
+        ss << "export const TAPS = [\n";
+        for (size_t i = 0; i < coeff.fir.size(); ++i)
+            ss << "  " << coeff.fir[i] * coeff.gain << ",\n";
+        ss << "];\n\n";
+        ss << R"(/** Build a ConvolverNode holding the FIR taps. Connect source -> node -> destination. */
+export function createOvertuneFilter(ctx) {
+  if (ctx.sampleRate !== SAMPLE_RATE)
+    console.warn(`Overtune filter was designed for ${SAMPLE_RATE} Hz, context runs at ${ctx.sampleRate} Hz`);
+  const node = new ConvolverNode(ctx, { disableNormalization: true });
+  const buffer = ctx.createBuffer(1, TAPS.length, ctx.sampleRate);
+  buffer.copyToChannel(Float32Array.from(TAPS), 0);
+  node.buffer = buffer;
+  return { input: node, output: node };
+}
+
+/** Sample-by-sample FIR for offline processing. */
+export class OvertuneFilter {
+  constructor() { this.reset(); }
+  reset() { this.history = new Float64Array(TAPS.length); this.pos = 0; }
+  process(x) {
+    this.history[this.pos] = x;
+    let acc = 0;
+    let idx = this.pos;
+    for (let k = 0; k < TAPS.length; ++k) {
+      acc += TAPS[k] * this.history[idx];
+      idx = idx === 0 ? TAPS.length - 1 : idx - 1;
+    }
+    this.pos = (this.pos + 1) % TAPS.length;
+    return acc;
+  }
+  processBlock(input, output = new Float64Array(input.length)) {
+    for (let n = 0; n < input.length; ++n) output[n] = this.process(input[n]);
+    return output;
+  }
+}
+)";
+    } else {
+        ss << "export const GAIN = " << coeff.gain << ";\n";
+        ss << "// Second-order sections: [b0, b1, b2, a0, a1, a2]\n";
+        ss << "export const SOS = [\n";
+        for (const auto& s : coeff.sos)
+            ss << "  [" << s.b0 << ", " << s.b1 << ", " << s.b2 << ", 1, " << s.a1 << ", " << s.a2 << "],\n";
+        ss << "];\n\n";
+        ss << R"(/** Build a GainNode followed by one IIRFilterNode per biquad. */
+export function createOvertuneFilter(ctx) {
+  if (ctx.sampleRate !== SAMPLE_RATE)
+    console.warn(`Overtune filter was designed for ${SAMPLE_RATE} Hz, context runs at ${ctx.sampleRate} Hz`);
+  const input = new GainNode(ctx, { gain: GAIN });
+  let output = input;
+  for (const s of SOS) {
+    const section = new IIRFilterNode(ctx, { feedforward: s.slice(0, 3), feedback: s.slice(3) });
+    output.connect(section);
+    output = section;
+  }
+  return { input, output };
+}
+
+/** Sample-by-sample Direct Form II Transposed cascade for offline processing. */
+export class OvertuneFilter {
+  constructor() { this.reset(); }
+  reset() { this.state = SOS.map(() => [0, 0]); }
+  process(x) {
+    let v = x * GAIN;
+    SOS.forEach((c, i) => {
+      const s = this.state[i];
+      const y = c[0] * v + s[0];
+      s[0] = c[1] * v - c[4] * y + s[1];
+      s[1] = c[2] * v - c[5] * y;
+      v = y;
+    });
+    return v;
+  }
+  processBlock(input, output = new Float64Array(input.length)) {
+    for (let n = 0; n < input.length; ++n) output[n] = this.process(input[n]);
+    return output;
+  }
+}
+)";
+    }
+    return ss.str();
+}
+
+std::string CodeExporter::genCsv(const FilterCoefficients& coeff, const FilterSpec&) {
+    // Plain CSV with a header row only; the overall gain is folded into the
+    // first section so the file is self-contained.
+    std::ostringstream ss;
+    ss << std::setprecision(17);
+    if (coeff.isFir()) {
+        ss << "n,h\n";
+        for (size_t i = 0; i < coeff.fir.size(); ++i)
+            ss << i << "," << coeff.fir[i] * coeff.gain << "\n";
+    } else {
+        ss << "section,b0,b1,b2,a0,a1,a2\n";
+        for (size_t i = 0; i < coeff.sos.size(); ++i) {
+            const auto& s = coeff.sos[i];
+            const double g = i == 0 ? coeff.gain : 1.0;
+            ss << i + 1 << "," << s.b0 * g << "," << s.b1 * g << "," << s.b2 * g
+               << ",1," << s.a1 << "," << s.a2 << "\n";
+        }
+    }
     return ss.str();
 }
 
